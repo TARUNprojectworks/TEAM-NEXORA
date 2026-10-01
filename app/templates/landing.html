@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="landing">
+  <div class="index-card landing-card">
+    <p class="card-header">Nexora Recall</p>
+    <p class="card-text">Flashcards that show you the right card next, find your weak topics and plan your study for the day.</p>
+  </div>
+  <div class="actions">
+    <a class="button button-primary" href="{{ url_for('auth.signup') }}">Sign up</a>
+    <a class="button" href="{{ url_for('auth.login') }}">Log in</a>
+  </div>
+</section>
+{% endblock %}

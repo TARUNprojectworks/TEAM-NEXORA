@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Sign up · Nexora Recall{% endblock %}
+{% block content %}
+<section class="narrow">
+  <h1>Sign up</h1>
+  <form method="post" novalidate>
+    {{ form.hidden_tag() }}
+    {% for field in [form.name, form.email, form.password, form.confirm] %}
+      {% include "_form_field.html" %}
+    {% endfor %}
+    <button type="submit" class="button button-primary">Create account</button>
+  </form>
+  <p>Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a></p>
+</section>
+{% endblock %}

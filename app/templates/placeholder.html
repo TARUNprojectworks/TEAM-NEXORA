@@ -1,0 +1,9 @@
+{# Temporary page for routes that later phases build. Delete when unused. #}
+{% extends "base.html" %}
+{% block title %}{{ title }} · Nexora Recall{% endblock %}
+{% block content %}
+<section class="narrow">
+  <h1>{{ title }}</h1>
+  <p>This page isn't built yet. Go back to <a href="{{ url_for('planner.home') }}">Home</a>.</p>
+</section>
+{% endblock %}

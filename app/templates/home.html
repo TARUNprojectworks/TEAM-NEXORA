@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Home · Nexora Recall{% endblock %}
+{% block content %}
+<section class="home">
+  <div class="home-top">
+    <h1>Hi {{ user.name }}</h1>
+    <p class="stats">
+      <span>Streak: {{ user.streak }} {{ "day" if user.streak == 1 else "days" }}</span>
+      <span>XP: {{ user.xp }}</span>
+    </p>
+  </div>
+
+  {# Phase 4 adds Today's plan, "Welcome back" and the weak spot box here. #}
+  <section class="plan-box" aria-labelledby="plan-heading">
+    <h2 id="plan-heading">Today's plan</h2>
+    <p>No cards due yet. Add a ready deck or make your own to get a plan.</p>
+  </section>
+
+  <div class="choices">
+    <a class="choice" href="{{ url_for('decks.ready_decks') }}">
+      <span class="choice-title">Explore Ready Decks</span>
+      <span class="choice-text">Semester, placement and competitive exam decks.</span>
+    </a>
+    <a class="choice" href="{{ url_for('decks.create_my_own') }}">
+      <span class="choice-title">Create My Own</span>
+      <span class="choice-text">Type cards, paste notes or upload a photo of your notes.</span>
+    </a>
+  </div>
+</section>
+{% endblock %}

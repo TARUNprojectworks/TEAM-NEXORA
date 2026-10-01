@@ -1,0 +1,8 @@
+{# One labelled form field with its errors. Include it inside {% for field in [...] %}. #}
+<div class="field">
+  {{ field.label }}
+  {{ field(**({"aria-invalid": "true", "aria-describedby": field.id ~ "-error"} if field.errors else {})) }}
+  {% if field.errors %}
+    <p class="field-error" id="{{ field.id }}-error">{{ field.errors | join(" ") }}</p>
+  {% endif %}
+</div>

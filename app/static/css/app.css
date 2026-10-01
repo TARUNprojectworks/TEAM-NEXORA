@@ -1,0 +1,257 @@
+/* Nexora Recall: the look of real index cards on a study desk.
+   Owner: frontend look. One accent only (highlighter yellow); green only for
+   "Know it" and mastered. No gradient fills, no glass, no all-caps labels. */
+
+:root {
+  --desk: #DDE5EA;
+  --paper: #FFFFFF;
+  --ink: #1C2A39;
+  --ink-soft: #4A5A6B;
+  --rule-blue: #C9DDF0;
+  --margin-red: #E07A7A;
+  --highlight: #FFE45C;
+  --know-green: #2E8B57;
+  --error: #A33A2A;
+  --line: #B9C6D0;
+  --focus: #1C2A39;
+
+  --font-ui: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-card: "Source Serif 4", Georgia, "Times New Roman", serif;
+
+  --radius: 4px;
+  --paper-shadow: 0 1px 2px rgba(28, 42, 57, 0.18), 0 4px 10px rgba(28, 42, 57, 0.08);
+  --rule-gap: 28px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { font-size: 100%; }
+
+body {
+  margin: 0;
+  background: var(--desk);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  line-height: 1.5;
+}
+
+h1, h2, h3 { line-height: 1.25; margin: 0 0 0.5em; }
+h1 { font-size: 1.75rem; }
+h2 { font-size: 1.25rem; }
+
+a { color: var(--ink); text-underline-offset: 2px; }
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  background: var(--paper);
+  padding: 8px 12px;
+}
+.skip-link:focus { left: 16px; top: 8px; z-index: 10; }
+
+/* ---------- Header ---------- */
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.brand { font-weight: 700; font-size: 1.125rem; text-decoration: none; }
+
+.site-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; }
+.site-nav a { text-decoration: none; padding: 4px 0; }
+.site-nav a:hover { text-decoration: underline; }
+
+.inline-form { display: inline; margin: 0; }
+
+.link-button {
+  background: none;
+  border: 0;
+  padding: 4px 0;
+  font: inherit;
+  color: var(--ink);
+  cursor: pointer;
+}
+.link-button:hover { text-decoration: underline; }
+
+/* ---------- Page ---------- */
+
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.narrow { max-width: 440px; margin: 0 auto; }
+
+.flash {
+  padding: 10px 14px;
+  margin: 0 0 16px;
+  background: var(--paper);
+  border-left: 4px solid var(--ink-soft);
+  border-radius: var(--radius);
+}
+.flash-error { border-left-color: var(--error); }
+
+/* ---------- Buttons ---------- */
+
+.button {
+  display: inline-block;
+  padding: 10px 18px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+.button:hover { background: #F2F5F7; }
+
+.button-primary { background: var(--ink); color: var(--paper); }
+.button-primary:hover { background: #2C3E52; }
+
+.button-know { border-color: var(--know-green); background: var(--know-green); color: var(--paper); }
+
+.actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+
+/* ---------- Forms ---------- */
+
+.field { margin-bottom: 16px; }
+.field label { display: block; font-weight: 700; margin-bottom: 4px; }
+
+.field input[type="text"],
+.field input[type="email"],
+.field input[type="password"],
+.field input[type="date"],
+.field select,
+.field textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--ink-soft);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+
+.field input[aria-invalid="true"] { border-color: var(--error); }
+.field-error { color: var(--error); margin: 4px 0 0; }
+
+.field-check { display: flex; align-items: center; gap: 8px; }
+.field-check label { display: inline; margin: 0; font-weight: 400; }
+
+/* ---------- The index card ---------- */
+
+/* A ruled index card: header strip, one red line, then light-blue rules.
+   The rules are drawn with a repeating pattern, not a colour fade. */
+.index-card {
+  position: relative;
+  background-color: var(--paper);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(var(--rule-gap) - 1px),
+    var(--rule-blue) calc(var(--rule-gap) - 1px),
+    var(--rule-blue) var(--rule-gap)
+  );
+  background-position: 0 56px;
+  background-size: 100% calc(100% - 56px);
+  background-repeat: no-repeat;
+  border-radius: 2px;
+  box-shadow: var(--paper-shadow);
+  padding: 0 24px 24px;
+  font-family: var(--font-card);
+}
+
+.index-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 55px;
+  border-top: 2px solid var(--margin-red);
+}
+
+.index-card .card-header {
+  height: 56px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  font-family: var(--font-ui);
+  color: var(--ink-soft);
+}
+
+.index-card .card-text {
+  margin: 0;
+  padding-top: 6px;
+  font-size: 1.25rem;
+  line-height: var(--rule-gap);
+}
+
+/* A highlighter mark for weak spots and misconceptions. */
+.highlight { background: var(--highlight); padding: 0 3px; }
+
+/* ---------- Landing ---------- */
+
+.landing { max-width: 560px; margin: 32px auto 0; }
+.landing-card { min-height: 220px; transform: rotate(-1deg); }
+
+/* ---------- Home ---------- */
+
+.home-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 24px;
+}
+
+.stats { display: flex; gap: 16px; margin: 0; color: var(--ink-soft); }
+
+.plan-box {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin: 16px 0 24px;
+}
+
+.choices { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.choice {
+  display: block;
+  padding: 20px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--paper);
+  text-decoration: none;
+}
+.choice:hover { background: #F2F5F7; }
+.choice-title { display: block; font-size: 1.25rem; font-weight: 700; margin-bottom: 4px; }
+.choice-text { color: var(--ink-soft); }
+
+@media (max-width: 600px) {
+  .choices { grid-template-columns: 1fr; }
+  h1 { font-size: 1.5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  .landing-card { transform: none; }
+}
