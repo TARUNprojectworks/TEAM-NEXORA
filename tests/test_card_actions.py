@@ -115,12 +115,12 @@ def test_hidden_card_moves_out_of_the_list(app, riya_client, riya):
 
     page = riya_client.get(f"/decks/{deck_id}").get_data(as_text=True)
     assert "Show hidden cards (1)" in page
-    assert "Q0" not in page
+    assert '<p class="card-front">Q0</p>' not in page  # not "Q0": it can turn up inside the CSRF token
     assert "2 cards · 1 hidden" in " ".join(page.split())
 
     page = riya_client.get(f"/decks/{deck_id}?show_hidden=1").get_data(as_text=True)
     assert "Hidden cards (1)" in page
-    assert "Q0" in page
+    assert '<p class="card-front">Q0</p>' in page
     assert "Show this card again" in page
 
 
