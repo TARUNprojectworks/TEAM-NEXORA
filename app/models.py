@@ -4,12 +4,12 @@ Times are stored as naive UTC datetimes (SQLite has no time zones).
 Dates such as next_due, exam_date and last_study_date are Asia/Kolkata dates.
 """
 
-from datetime import datetime, timezone
+from datetime import datetime, time, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import event
+from sqlalchemy import event, func
 from sqlalchemy.engine import Engine
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -153,12 +153,47 @@ class Review(db.Model):
     reviewed_at = db.Column(db.DateTime, nullable=False, default=utc_now)
 
 
-def hidden_card_ids(user_id, deck_id):
-    """Ids of the cards in this deck that the student has hidden."""
+def hidden_card_ids(user_id, deck_id=None):
+    """Ids of the cards the student has hidden, in one deck or (deck_id=None) in all."""
     rows = db.session.query(Progress.card_id).join(Card, Card.id == Progress.card_id).filter(
-        Progress.user_id == user_id, Progress.hidden.is_(True), Card.deck_id == deck_id,
+        Progress.user_id == user_id, Progress.hidden.is_(True),
     )
+    if deck_id is not None:
+        rows = rows.filter(Card.deck_id == deck_id)
     return {card_id for (card_id,) in rows}
+
+
+def local_day_start_utc(day):
+    """Midnight at the start of `day` in India, as a UTC time (how we store times)."""
+    start = datetime.combine(day, time.min, tzinfo=ZoneInfo(Config.APP_TIMEZONE))
+    return start.astimezone(timezone.utc).replace(tzinfo=None)
+
+
+def local_date_of(utc_time):
+    """The Indian date of a stored UTC time."""
+    return utc_time.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(Config.APP_TIMEZONE)).date()
+
+
+def card_ids_reviewed_on(user_id, day):
+    """Cards the student answered on this Indian date, in any study style."""
+    rows = db.session.query(Review.card_id).filter(
+        Review.user_id == user_id,
+        Review.reviewed_at >= local_day_start_utc(day),
+        Review.reviewed_at < local_day_start_utc(day + timedelta(days=1)),
+    ).distinct()
+    return {card_id for (card_id,) in rows}
+
+
+def new_cards_started_today(user_id, today):
+    """Cards whose first ever Smart Study answer was today.
+
+    Smart Study and the planner share this, so the 10-a-day limit for new
+    cards holds across every session in a day.
+    """
+    first_answers = db.session.query(Review.card_id).filter(
+        Review.user_id == user_id, Review.style == "smart",
+    ).group_by(Review.card_id).having(func.min(Review.reviewed_at) >= local_day_start_utc(today))
+    return first_answers.count()
 
 
 def create_weak_spot_deck(user):
