@@ -243,8 +243,153 @@ a { color: var(--ink); text-underline-offset: 2px; }
 .choice-title { display: block; font-size: 1.25rem; font-weight: 700; margin-bottom: 4px; }
 .choice-text { color: var(--ink-soft); }
 
+/* ---------- Shared bits for list pages ---------- */
+
+.page-top, .section-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-bottom: 16px;
+}
+.section-top h2 { margin: 0; }
+
+.actions-inline { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+.empty { color: var(--ink-soft); padding: 16px 0; }
+
+.button-small { padding: 4px 12px; font-size: 0.9375rem; }
+.button-danger { border-color: var(--error); color: var(--error); }
+.button-danger:hover { background: #FBEDEA; }
+
+.field-hint { margin: 0 0 6px; color: var(--ink-soft); font-size: 0.9375rem; }
+
+fieldset.field { border: 0; padding: 0; margin: 0 0 16px; }
+fieldset.field legend { font-weight: 700; margin-bottom: 4px; padding: 0; }
+
+.options { display: flex; flex-wrap: wrap; gap: 8px 24px; }
+.options-stacked { flex-direction: column; gap: 6px; }
+.option { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.option input { width: 18px; height: 18px; margin: 0; }
+
+/* ---------- Badges ---------- */
+
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border: 1px solid var(--ink-soft);
+  border-radius: var(--radius);
+  background: var(--paper);
+  font-size: 0.9375rem;
+  white-space: nowrap;
+}
+.badge-exam { border: 2px solid var(--ink); font-weight: 700; }
+.badge-passed { border-style: dashed; text-decoration: underline; }
+
+/* ---------- Folders and deck lists ---------- */
+
+.folder-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 4px;
+  margin: 16px 0 0;
+  border-bottom: 2px solid var(--ink);
+}
+
+/* Folder tabs look like the tabs on a paper file folder. */
+.folder-tab {
+  padding: 10px 16px 8px;
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  border-radius: 6px 6px 0 0;
+  background: #EEF2F5;
+  text-decoration: none;
+  font-weight: 700;
+}
+.folder-tab .count { display: block; font-weight: 400; font-size: 0.875rem; color: var(--ink-soft); }
+.folder-tab[aria-current="page"] { background: var(--paper); border-color: var(--ink); border-width: 2px; margin-bottom: -2px; }
+
+.deck-list, .card-list { list-style: none; margin: 0; padding: 0; }
+
+.deck-list {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-top: 0;
+}
+.page-top + .deck-list { border-top: 1px solid var(--line); }
+
+.deck-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--line);
+}
+.deck-row:first-child { border-top: 0; }
+
+.deck-info { display: flex; flex-direction: column; gap: 2px; }
+.deck-title { font-size: 1.125rem; font-weight: 700; }
+.deck-meta { color: var(--ink-soft); margin: 0; }
+.deck-note { color: var(--ink-soft); font-size: 0.9375rem; }
+
+/* ---------- Deck page ---------- */
+
+.deck-section { margin: 32px 0 0; }
+
+/* The card box: five slots side by side, like dividers in a real box. */
+.shelf-box {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  border: 2px solid var(--ink);
+  border-top-width: 6px;
+  background: var(--paper);
+  max-width: 520px;
+}
+.shelf-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 4px;
+  border-left: 1px solid var(--line);
+}
+.shelf-slot:first-child { border-left: 0; }
+.shelf-count { font-size: 1.5rem; font-weight: 700; }
+.shelf-name { font-size: 0.875rem; color: var(--ink-soft); }
+.shelf-slot-learned .shelf-count { color: var(--know-green); }
+
+.exam-form { max-width: 440px; }
+.remove-form { margin-top: 16px; }
+.remove-form .link-button { text-decoration: underline; }
+
+.card-list { border-top: 1px solid var(--line); }
+
+.card-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.card-sides { flex: 1 1 320px; min-width: 0; }
+.card-front { margin: 0; font-family: var(--font-card); font-size: 1.125rem; font-weight: 600; overflow-wrap: anywhere; }
+.card-back { margin: 4px 0 0; font-family: var(--font-card); overflow-wrap: anywhere; }
+.card-meta { margin: 6px 0 0; font-size: 0.875rem; color: var(--ink-soft); }
+.card-actions { display: flex; gap: 8px; align-items: flex-start; }
+
+/* ---------- Card form ---------- */
+
+.tip { margin: 0 0 16px; padding-left: 10px; border-left: 3px solid var(--rule-blue); }
+.long-warning { margin: -8px 0 16px; padding: 6px 10px; background: var(--paper); border-left: 3px solid var(--ink-soft); }
+.field textarea { min-height: 96px; resize: vertical; font-family: var(--font-card); }
+
 @media (max-width: 600px) {
   .choices { grid-template-columns: 1fr; }
+  .folder-tab { padding: 8px 10px 6px; }
+  .shelf-count { font-size: 1.25rem; }
   h1 { font-size: 1.5rem; }
 }
 

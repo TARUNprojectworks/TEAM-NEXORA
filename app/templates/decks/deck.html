@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}{{ deck.title }} · Nexora Recall{% endblock %}
+{% block content %}
+<div class="page-top">
+  <div>
+    <h1>{{ deck.title }}</h1>
+    <p class="deck-meta">
+      {{ cards | length }} {{ "card" if cards | length == 1 else "cards" }}
+      {% if deck.is_ready %} · Ready deck, read-only{% endif %}
+      {% if badge %}
+        {% set text, kind = badge %}
+        · <span class="badge badge-{{ kind }}">{{ text }}</span>
+      {% endif %}
+    </p>
+  </div>
+  <div class="actions-inline">
+    {% if can_edit and not deck.is_weak_spot %}
+      <a class="button" href="{{ url_for('decks.edit_deck', deck_id=deck.id) }}">Rename</a>
+      <form method="post" action="{{ url_for('decks.delete_deck', deck_id=deck.id) }}" class="inline-form"
+            data-confirm="Delete this deck and all {{ cards | length }} cards? This can't be undone.">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="button button-danger">Delete deck</button>
+      </form>
+    {% endif %}
+    {% if deck.is_ready and not user_deck %}
+      <a class="button button-primary" href="{{ url_for('decks.add_ready_deck', deck_id=deck.id) }}">Add to my decks</a>
+    {% endif %}
+  </div>
+</div>
+
+{% if deck.is_weak_spot %}
+  <p class="deck-note">The Weak Spot Fixer adds practice cards for your weakest topic here. You can add your own too.</p>
+{% endif %}
+
+{% if user_deck %}
+  <section class="deck-section" aria-labelledby="shelves-heading">
+    <h2 id="shelves-heading">Your card box</h2>
+    <p class="field-hint">Cards move up a shelf when you know them for sure. Shelf 5 means learned.</p>
+    <div class="shelf-box">
+      {% for count in shelves %}
+        <div class="shelf-slot{% if loop.index == 5 %} shelf-slot-learned{% endif %}">
+          <span class="shelf-count">{{ count }}</span>
+          <span class="shelf-name">Shelf {{ loop.index }}</span>
+        </div>
+      {% endfor %}
+    </div>
+    <p class="deck-meta">Not studied yet: {{ not_studied }}</p>
+  </section>
+
+  <section class="deck-section" id="exam" aria-labelledby="exam-heading">
+    <h2 id="exam-heading">Exam setting</h2>
+    <form method="post" action="{{ url_for('decks.update_exam', deck_id=deck.id) }}" novalidate class="exam-form">
+      {{ exam_form.hidden_tag() }}
+      {% with form = exam_form %}
+        {% include "decks/_exam_fields.html" %}
+      {% endwith %}
+      <button type="submit" class="button">Save exam setting</button>
+    </form>
+    {% if deck.is_ready %}
+      <form method="post" action="{{ url_for('decks.remove_ready_deck', deck_id=deck.id) }}" class="remove-form"
+            data-confirm="Remove this deck from your list? Your progress is kept if you add it again.">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="link-button">Remove from my decks</button>
+      </form>
+    {% endif %}
+  </section>
+{% endif %}
+
+<section class="deck-section" aria-labelledby="cards-heading">
+  <div class="section-top">
+    <h2 id="cards-heading">Cards</h2>
+    {% if can_edit %}
+      <div class="actions-inline">
+        <a class="button button-primary" href="{{ url_for('decks.new_card', deck_id=deck.id) }}">Add card</a>
+        <a class="button" href="{{ url_for('decks.card_maker', deck_id=deck.id) }}">AI Card Maker</a>
+      </div>
+    {% endif %}
+  </div>
+
+  {% if not cards %}
+    <p class="empty">
+      {% if can_edit %}No cards yet. Add one or paste your notes.{% else %}This deck has no cards yet.{% endif %}
+    </p>
+  {% else %}
+    <ul class="card-list">
+      {% for card in cards %}
+        <li class="card-row" id="card-{{ card.id }}">
+          <div class="card-sides">
+            <p class="card-front">{{ card.question }}</p>
+            <p class="card-back">{{ card.answer }}</p>
+            <p class="card-meta">{{ card.topic }} · {{ card.importance | capitalize }} importance</p>
+          </div>
+          {% if can_edit %}
+            <div class="card-actions">
+              <a class="button button-small" href="{{ url_for('decks.edit_card', deck_id=deck.id, card_id=card.id) }}">Edit</a>
+              <form method="post" action="{{ url_for('decks.delete_card', deck_id=deck.id, card_id=card.id) }}"
+                    class="inline-form" data-confirm="Delete this card? This can't be undone.">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="button button-small button-danger">Delete</button>
+              </form>
+            </div>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Ready decks · Nexora Recall{% endblock %}
+{% block content %}
+<h1>Ready decks</h1>
+<p>Decks we prepared for you. Pick a folder, then add a deck to start studying it.</p>
+
+<nav class="folder-tabs" aria-label="Folders">
+  {% for key, label in folders.items() %}
+    <a class="folder-tab" href="{{ url_for('decks.ready_decks', folder=key) }}"
+       {% if key == folder %}aria-current="page"{% endif %}>
+      {{ label }} <span class="count">{{ folder_counts.get(key, 0) }} {{ "deck" if folder_counts.get(key, 0) == 1 else "decks" }}</span>
+    </a>
+  {% endfor %}
+</nav>
+
+{% if not folder %}
+  <p class="empty">Choose a folder above to see its decks.</p>
+{% elif not decks %}
+  <p class="empty">No decks in this folder yet. Try another folder.</p>
+{% else %}
+  <ul class="deck-list">
+    {% for deck in decks %}
+      <li class="deck-row">
+        <div class="deck-info">
+          <a class="deck-title" href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">{{ deck.title }}</a>
+          <span class="deck-meta">{{ card_counts.get(deck.id, 0) }} cards</span>
+        </div>
+        <div class="deck-actions">
+          {% if deck.id in added_ids %}
+            <span class="badge badge-normal">In my decks</span>
+          {% else %}
+            <a class="button" href="{{ url_for('decks.add_ready_deck', deck_id=deck.id) }}">Add to my decks</a>
+          {% endif %}
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+{% endblock %}

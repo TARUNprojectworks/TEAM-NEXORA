@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}My decks · Nexora Recall{% endblock %}
+{% block content %}
+<div class="page-top">
+  <h1>My decks</h1>
+  <div class="actions-inline">
+    <a class="button button-primary" href="{{ url_for('decks.create_my_own') }}">Create my own</a>
+    <a class="button" href="{{ url_for('decks.ready_decks') }}">Explore ready decks</a>
+  </div>
+</div>
+
+<ul class="deck-list">
+  {% for item in items %}
+    {% set deck = item.deck %}
+    <li class="deck-row">
+      <div class="deck-info">
+        <a class="deck-title" href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">{{ deck.title }}</a>
+        <span class="deck-meta">
+          {{ item.card_count }} {{ "card" if item.card_count == 1 else "cards" }}
+          · {{ folders.get(deck.folder, "My own") }}
+        </span>
+        {% if deck.is_weak_spot %}
+          <span class="deck-note">Practice cards for your weak topics are added here.</span>
+        {% endif %}
+      </div>
+      <div class="deck-actions">
+        {% set text, kind = item.badge %}
+        {% if kind == "passed" %}
+          <a class="badge badge-passed" href="{{ url_for('decks.deck_page', deck_id=deck.id) }}#exam">{{ text }}</a>
+        {% else %}
+          <span class="badge badge-{{ kind }}">{{ text }}</span>
+        {% endif %}
+      </div>
+    </li>
+  {% endfor %}
+</ul>
+
+{% if items | length <= 1 %}
+  <p class="empty">You haven't added any decks yet. Explore ready decks or create your own.</p>
+{% endif %}
+{% endblock %}

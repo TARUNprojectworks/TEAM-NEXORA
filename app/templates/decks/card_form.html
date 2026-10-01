@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{{ "Edit card" if card else "Add a card" }} · Nexora Recall{% endblock %}
+{% block content %}
+<section class="narrow card-form-page">
+  <p class="deck-meta"><a href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">{{ deck.title }}</a></p>
+  <h1>{{ "Edit card" if card else "Add a card" }}</h1>
+  <p class="tip">Keep one idea per card.</p>
+
+  <form method="post" novalidate id="card-form"
+        data-long-front="{{ long_front }}" data-long-back="{{ long_back }}">
+    {{ form.hidden_tag() }}
+    {% for field in [form.question, form.answer] %}
+      {% include "_form_field.html" %}
+    {% endfor %}
+    <p class="long-warning" id="long-warning" role="status" hidden>This card looks long. Split it into two?</p>
+
+    <div class="field">
+      {{ form.topic.label }}
+      <p class="field-hint" id="topic-hint">{{ form.topic.description }}</p>
+      {{ form.topic(list="topic-list", autocomplete="off", **{"aria-describedby": "topic-hint"}) }}
+      <datalist id="topic-list">
+        {% for topic in topics %}<option value="{{ topic }}">{% endfor %}
+      </datalist>
+      {% if form.topic.errors %}<p class="field-error">{{ form.topic.errors | join(" ") }}</p>{% endif %}
+    </div>
+
+    {% for field in [form.importance] %}
+      {% include "_form_field.html" %}
+    {% endfor %}
+
+    <div class="actions">
+      {% if card %}
+        <button type="submit" class="button button-primary">Save changes</button>
+      {% else %}
+        <button type="submit" name="save_next" value="1" class="button button-primary">Save &amp; add next</button>
+        <button type="submit" class="button">Save</button>
+      {% endif %}
+      <a class="button" href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">{{ "Cancel" if card else "Done" }}</a>
+    </div>
+  </form>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/cardform.js') }}"></script>
+{% endblock %}

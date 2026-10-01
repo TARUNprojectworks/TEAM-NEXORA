@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Create my own · Nexora Recall{% endblock %}
+{% block content %}
+<section class="narrow">
+  <h1>Create my own deck</h1>
+  <form method="post" novalidate>
+    {{ form.hidden_tag() }}
+    {% for field in [form.title] %}
+      {% include "_form_field.html" %}
+    {% endfor %}
+
+    <fieldset class="field">
+      <legend>{{ form.method.label.text }}</legend>
+      <div class="options options-stacked">
+        {% for option in form.method %}
+          <label class="option">{{ option() }} {{ option.label.text }}</label>
+        {% endfor %}
+      </div>
+    </fieldset>
+
+    {% include "decks/_exam_fields.html" %}
+
+    <div class="actions">
+      <button type="submit" class="button button-primary">Create deck</button>
+      <a class="button" href="{{ url_for('decks.my_decks') }}">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}
