@@ -123,7 +123,8 @@ class Card(db.Model):
 
 
 class Progress(db.Model):
-    """Where one card sits for one student. Created the first time they see it."""
+    """Where one card sits for one student. Created the first time they answer it,
+    or when they hide it."""
 
     __tablename__ = "progress"
 
@@ -134,6 +135,9 @@ class Progress(db.Model):
     wrong_count = db.Column(db.Integer, nullable=False, default=0)
     misconception_count = db.Column(db.Integer, nullable=False, default=0)
     last_seen = db.Column(db.DateTime)
+    # A student can hide a card from a shared ready deck (they can't delete it).
+    # Hidden cards are left out of study, the planner and mastery.
+    hidden = db.Column(db.Boolean, nullable=False, default=False)
 
 
 class Review(db.Model):
@@ -147,6 +151,14 @@ class Review(db.Model):
     confident = db.Column(db.Boolean, nullable=False)
     style = db.Column(db.String(10), nullable=False, default="smart")  # smart | free
     reviewed_at = db.Column(db.DateTime, nullable=False, default=utc_now)
+
+
+def hidden_card_ids(user_id, deck_id):
+    """Ids of the cards in this deck that the student has hidden."""
+    rows = db.session.query(Progress.card_id).join(Card, Card.id == Progress.card_id).filter(
+        Progress.user_id == user_id, Progress.hidden.is_(True), Card.deck_id == deck_id,
+    )
+    return {card_id for (card_id,) in rows}
 
 
 def create_weak_spot_deck(user):
