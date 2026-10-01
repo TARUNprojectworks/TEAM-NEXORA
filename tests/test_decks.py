@@ -212,7 +212,7 @@ def test_create_page_offers_type_cards_first(riya_client):
 def test_ready_deck_page_is_read_only(riya_client, ready_deck):
     deck_id, _ = ready_deck
     page = riya_client.get(f"/decks/{deck_id}").get_data(as_text=True)
-    assert "Q0" in page
+    assert '<p class="card-front">Q0</p>' in page
     assert "Add card" not in page
     assert "/edit" not in page
 
