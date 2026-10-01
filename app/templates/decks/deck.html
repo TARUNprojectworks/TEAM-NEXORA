@@ -28,6 +28,13 @@
   </div>
 </div>
 
+{% if user_deck and cards %}
+  <div class="study-buttons">
+    <a class="button button-primary" href="{{ url_for('study.start', deck_id=deck.id, style='smart') }}">Smart Study</a>
+    <a class="button" href="{{ url_for('study.start', deck_id=deck.id, style='free') }}">Free Practice</a>
+  </div>
+{% endif %}
+
 {% if deck.is_weak_spot %}
   <p class="deck-note">The Weak Spot Fixer adds practice cards for your weakest topic here. You can add your own too.</p>
 {% endif %}

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Study {{ deck.title }} · Nexora Recall{% endblock %}
+{% block content %}
+<section class="study">
+  <div class="study-top">
+    <div>
+      <p class="deck-meta">
+        <a href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">{{ deck.title }}</a>
+        {% set text, kind = badge %} · <span class="badge badge-{{ kind }}">{{ text }}</span>
+      </p>
+      <nav class="style-switch" aria-label="Study style">
+        <a href="{{ url_for('study.start', deck_id=deck.id, style='smart') }}"
+           {% if style == 'smart' %}aria-current="page"{% endif %}>Smart Study</a>
+        <a href="{{ url_for('study.start', deck_id=deck.id, style='free') }}"
+           {% if style == 'free' %}aria-current="page"{% endif %}>Free Practice</a>
+      </nav>
+    </div>
+    <div class="actions-inline">
+      {% if style == 'free' %}
+        <form method="post" action="{{ url_for('study.shuffle') }}" class="inline-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="button">Shuffle</button>
+        </form>
+      {% endif %}
+      <a class="button" href="{{ url_for('study.summary') }}">End session</a>
+    </div>
+  </div>
+
+  <div class="session-progress">
+    <div class="progress-track" role="progressbar" aria-label="Session progress"
+         aria-valuemin="0" aria-valuemax="{{ progress.done + progress.left }}" aria-valuenow="{{ progress.done }}">
+      <div class="progress-fill" style="width: {{ progress.percent }}%"></div>
+    </div>
+    <p class="progress-text">{{ progress.done }} done · {{ progress.left }} {{ "card" if progress.left == 1 else "cards" }} left</p>
+  </div>
+
+  {% if coming_back %}
+    <p class="coming-back">You marked this one "Review again". Here it is once more.</p>
+  {% endif %}
+
+  <div class="flip-card" id="study-card">
+    <div class="flip-inner">
+      <div class="index-card card-face card-face-front" id="card-front">
+        <p class="card-header">{{ card.topic }}</p>
+        <p class="card-text">{{ card.question }}</p>
+      </div>
+      <div class="index-card card-face card-face-back" id="card-back" aria-hidden="true">
+        <p class="card-header">Answer</p>
+        <p class="card-text">{{ card.answer }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="flip-row">
+    <button type="button" class="button" id="flip-button" aria-controls="study-card">Flip card</button>
+    <span class="key-hint">Space</span>
+  </div>
+
+  <form method="post" action="{{ url_for('study.answer') }}" class="answer-form" id="answer-form" hidden>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="card_id" value="{{ card.id }}">
+
+    <fieldset class="confidence">
+      <legend>How sure were you?</legend>
+      <label class="pill"><input type="radio" name="confident" value="sure"> Sure <span class="key-hint">S</span></label>
+      <label class="pill"><input type="radio" name="confident" value="unsure"> Unsure <span class="key-hint">U</span></label>
+    </fieldset>
+
+    <div class="answer-buttons">
+      <button type="submit" name="knew_it" value="1" class="button button-know" id="know-button" disabled>
+        Know it <span class="key-hint">1</span>
+      </button>
+      <button type="submit" name="knew_it" value="0" class="button" id="again-button" disabled>
+        Review again <span class="key-hint">2</span>
+      </button>
+    </div>
+    <p class="field-hint" id="confidence-hint">Pick Sure or Unsure first.</p>
+  </form>
+
+  {# Phase 5 adds the "Explain this card" button here. #}
+
+  <noscript><p class="flash flash-error">Turn on JavaScript to flip cards.</p></noscript>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/flip.js') }}"></script>
+<script src="{{ url_for('static', filename='js/study.js') }}"></script>
+{% endblock %}
