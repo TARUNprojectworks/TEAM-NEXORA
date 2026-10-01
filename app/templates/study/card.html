@@ -1,9 +1,12 @@
 {% extends "base.html" %}
-{% block title %}Study {{ deck.title }} · Nexora Recall{% endblock %}
+{% block title %}Study {{ deck.title if deck else "today's plan" }} · Nexora Recall{% endblock %}
 {% block content %}
 <section class="study">
   <div class="study-top">
     <div>
+      {% if not deck %}
+        <p class="deck-meta"><a href="{{ url_for('planner.home') }}">Today's plan</a> · {{ card.deck.title }}</p>
+      {% else %}
       <p class="deck-meta">
         <a href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">{{ deck.title }}</a>
         {% set text, kind = badge %} · <span class="badge badge-{{ kind }}">{{ text }}</span>
@@ -14,6 +17,7 @@
         <a href="{{ url_for('study.start', deck_id=deck.id, style='free') }}"
            {% if style == 'free' %}aria-current="page"{% endif %}>Free Practice</a>
       </nav>
+      {% endif %}
     </div>
     <div class="actions-inline">
       {% if style == 'free' %}

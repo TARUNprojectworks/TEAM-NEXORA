@@ -3,10 +3,17 @@
 {% block content %}
 <section class="summary">
   <h1>Session summary</h1>
-  {% if deck %}<p class="deck-meta">{{ deck.title }} · {{ "Smart Study" if style == "smart" else "Free Practice" }}</p>{% endif %}
+  {% if is_plan %}
+    <p class="deck-meta">Today's plan</p>
+  {% elif deck %}
+    <p class="deck-meta">{{ deck.title }} · {{ "Smart Study" if style == "smart" else "Free Practice" }}</p>
+  {% endif %}
+  {% if stats.plan_finished %}
+    <p class="plan-done">You finished today's plan. That's 10 bonus XP, included below.</p>
+  {% endif %}
 
   {% if stats.studied == 0 %}
-    {% if style == "smart" %}
+    {% if style == "smart" and not is_plan %}
       <p class="empty">Nothing is due in this deck right now. Try Free Practice, or come back tomorrow.</p>
     {% else %}
       <p class="empty">You didn't answer any cards this time.</p>
@@ -34,7 +41,7 @@
       {% endif %}
       <a class="button" href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">Back to deck</a>
     {% endif %}
-    <a class="button" href="{{ url_for('planner.home') }}">Home</a>
+    <a class="button{{ ' button-primary' if is_plan }}" href="{{ url_for('planner.home') }}">Home</a>
   </div>
 </section>
 {% endblock %}

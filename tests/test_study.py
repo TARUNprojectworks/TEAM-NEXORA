@@ -319,7 +319,7 @@ def test_summary_counts_the_session(app, riya_client, riya):
     answer(riya_client, knew_it=True, sure=True)    # moves up, +2 XP
     answer(riya_client, knew_it=True, sure=False)   # stays, +2 XP
     answer(riya_client, knew_it=True, sure=True)    # the missed card again: moves up, +2 XP
-    assert session_stats(riya_client) == {"studied": 4, "moved_up": 2, "xp": 7, "misconceptions": 1}
+    assert session_stats(riya_client) == {"studied": 4, "moved_up": 2, "xp": 7, "misconceptions": 1, "plan_finished": False}
 
     page = riya_client.get("/study/summary").get_data(as_text=True)
     for text in ["Cards studied", "Moved up a shelf", "XP earned", "Misconceptions found", 'id="weak-spot"']:
