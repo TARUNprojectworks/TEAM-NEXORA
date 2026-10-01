@@ -1,0 +1,404 @@
+{% extends "base.html" %}
+{% block title %}{{ deck.title }} · Study Session · Nexora Recall{% endblock %}
+
+{% block content %}
+<div class="study-session-container">
+
+  {# ---------- Study Topbar ---------- #}
+  <div class="study-topbar">
+    <div class="topbar-left">
+      <a href="{{ url_for('decks.ready_decks') }}" class="btn-back">
+        <span aria-hidden="true">←</span> Back to Decks
+      </a>
+      <div class="study-deck-info">
+        <h1 class="study-deck-title">{{ deck.title }}</h1>
+        <span class="study-topic-badge" id="card-topic">General</span>
+      </div>
+    </div>
+
+    <div class="topbar-center">
+      <div class="progress-info">
+        <span class="card-counter">
+          Card <strong id="current-card-num">1</strong> of <span id="total-card-count">{{ total_cards }}</span>
+        </span>
+        <span class="progress-percentage" id="progress-percentage-label">0%</span>
+      </div>
+      <div class="study-progress-track">
+        <div class="study-progress-bar" id="study-progress-fill" style="width: 0%;"></div>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <div class="streak-pill" title="Daily Study Streak">
+        🔥 <span id="streak-val">{{ user.streak or 0 }}</span>
+      </div>
+      <div class="xp-pill" title="Your XP">
+        ⚡ <span id="xp-val">{{ user.xp or 0 }}</span> XP
+      </div>
+      <a href="{{ url_for('decks.ready_decks') }}" class="btn-exit" title="Exit Study Session">
+        Exit
+      </a>
+    </div>
+  </div>
+
+  {# ---------- Active Flashcard Area (ONLY ONE CARD RENDERED) ---------- #}
+  <div class="flashcard-stage" id="flashcard-stage">
+
+    <div class="card-flipper" id="card-flipper">
+      <div class="flashcard-surface" id="flashcard-surface">
+
+        {# Front Face: Question Only #}
+        <div class="card-face card-face--front" id="card-front">
+          <div class="face-header">
+            <span class="face-tag tag-question">QUESTION</span>
+            <span class="importance-indicator" id="card-importance" title="Card Importance">Medium</span>
+          </div>
+
+          <div class="face-body">
+            <p class="question-text" id="question-text">Loading question...</p>
+          </div>
+
+          <div class="face-footer">
+            <button type="button" class="btn-show-answer" id="btn-show-answer" onclick="flipCard()">
+              Show Answer
+              <span class="key-hint">Space</span>
+            </button>
+          </div>
+        </div>
+
+        {# Back Face: Answer + Confidence Response Buttons #}
+        <div class="card-face card-face--back" id="card-back" style="display: none;">
+          <div class="face-header">
+            <span class="face-tag tag-answer">ANSWER</span>
+            <span class="source-tag" id="card-source"></span>
+          </div>
+
+          <div class="face-body">
+            <p class="answer-text" id="answer-text">Loading answer...</p>
+            <div class="source-line-box" id="source-line-box" style="display: none;">
+              <small id="source-line-text"></small>
+            </div>
+          </div>
+
+          <div class="face-footer face-footer--ratings">
+            <div class="rating-prompt">How well did you know this?</div>
+            <div class="rating-btn-group">
+              <button type="button" class="btn-rating btn-rating-again" onclick="rateCard('again')">
+                <span class="rating-icon">✕</span>
+                <span class="rating-label">Again</span>
+                <span class="key-hint">1</span>
+              </button>
+
+              <button type="button" class="btn-rating btn-rating-hard" onclick="rateCard('hard')">
+                <span class="rating-label">Hard</span>
+                <span class="key-hint">2</span>
+              </button>
+
+              <button type="button" class="btn-rating btn-rating-good" onclick="rateCard('good')">
+                <span class="rating-icon">✓</span>
+                <span class="rating-label">Good</span>
+                <span class="key-hint">3</span>
+              </button>
+
+              <button type="button" class="btn-rating btn-rating-easy" onclick="rateCard('easy')">
+                <span class="rating-icon">⚡</span>
+                <span class="rating-label">Easy</span>
+                <span class="key-hint">4</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    {# Navigation Controls below the card #}
+    <div class="study-nav-controls">
+      <button type="button" class="nav-btn" id="btn-prev" onclick="prevCard()" disabled>
+        ← Previous
+      </button>
+
+      <span class="shortcut-tip">
+        Tips: <kbd>Space</kbd> Flip &nbsp;•&nbsp; <kbd>1-4</kbd> Rate &nbsp;•&nbsp; <kbd>←</kbd><kbd>→</kbd> Navigate
+      </span>
+
+      <button type="button" class="nav-btn" id="btn-next" onclick="nextCard()">
+        Next →
+      </button>
+    </div>
+
+  </div>
+
+  {# ---------- Deck Completion Screen (Hidden until finished) ---------- #}
+  <div class="completion-stage" id="completion-stage" style="display: none;">
+    <div class="completion-card">
+      <div class="completion-icon">🎉</div>
+      <h2 class="completion-title">Deck Completed!</h2>
+      <p class="completion-subtitle">{{ deck.title }}</p>
+
+      <div class="completion-stats-grid">
+        <div class="stat-box">
+          <span class="stat-number" id="stat-completed-count">{{ total_cards }} / {{ total_cards }}</span>
+          <span class="stat-label">Cards Completed</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-number stat-accuracy" id="stat-accuracy">100%</span>
+          <span class="stat-label">Accuracy</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-number stat-correct" id="stat-correct">0</span>
+          <span class="stat-label">Correct</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-number stat-incorrect" id="stat-incorrect">0</span>
+          <span class="stat-label">Needs Practice</span>
+        </div>
+      </div>
+
+      <div class="ratings-breakdown" id="ratings-breakdown">
+        <!-- Injected dynamically -->
+      </div>
+
+      <div class="completion-actions">
+        <button type="button" class="btn btn-outline" id="btn-review-difficult" onclick="reviewDifficult()" style="display: none;">
+          🔄 Review Difficult Cards (<span id="difficult-count">0</span>)
+        </button>
+
+        <button type="button" class="btn btn-secondary" id="btn-fresh-questions" onclick="generateFreshQuestions()">
+          ✨ Generate Fresh Questions
+        </button>
+
+        <a href="{{ url_for('decks.ready_decks') }}" class="btn btn-primary">
+          Back to My Decks
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Data passed from backend
+  const CARDS = {{ cards_json | safe }};
+  const DECK_ID = {{ deck.id }};
+  const CSRF_TOKEN = "{{ csrf_token() }}";
+
+  let currentIndex = 0;
+  let isAnswerRevealed = false;
+  let ratingsRecorded = {}; // cardId -> 'again'|'hard'|'good'|'easy'
+
+  // Initialize UI
+  document.addEventListener('DOMContentLoaded', function() {
+    if (!CARDS || CARDS.length === 0) {
+      document.getElementById('question-text').textContent = "No flashcards found in this deck.";
+      return;
+    }
+    renderCard(currentIndex);
+    setupKeyboardListeners();
+  });
+
+  function renderCard(idx) {
+    if (idx < 0 || idx >= CARDS.length) return;
+
+    const card = CARDS[idx];
+    isAnswerRevealed = false;
+
+    // Reset card side
+    document.getElementById('card-back').style.display = 'none';
+    document.getElementById('card-front').style.display = 'flex';
+    document.getElementById('flashcard-surface').classList.remove('is-flipped');
+
+    // Populate front
+    document.getElementById('question-text').textContent = card.question;
+    document.getElementById('card-topic').textContent = card.topic || 'General';
+    document.getElementById('card-importance').textContent = (card.importance || 'medium').toUpperCase();
+
+    // Populate back
+    document.getElementById('answer-text').textContent = card.answer;
+    if (card.source_line) {
+      document.getElementById('source-line-box').style.display = 'block';
+      document.getElementById('source-line-text').textContent = "Ref: " + card.source_line;
+    } else {
+      document.getElementById('source-line-box').style.display = 'none';
+    }
+
+    // Update Header Counter and Progress
+    document.getElementById('current-card-num').textContent = (idx + 1);
+    document.getElementById('total-card-count').textContent = CARDS.length;
+
+    const percent = Math.round(((idx) / CARDS.length) * 100);
+    document.getElementById('study-progress-fill').style.width = percent + '%';
+    document.getElementById('progress-percentage-label').textContent = percent + '%';
+
+    // Update Nav buttons
+    document.getElementById('btn-prev').disabled = (idx === 0);
+    document.getElementById('btn-next').disabled = (idx === CARDS.length - 1);
+  }
+
+  function flipCard() {
+    if (isAnswerRevealed) return;
+    isAnswerRevealed = true;
+
+    const front = document.getElementById('card-front');
+    const back = document.getElementById('card-back');
+    const surface = document.getElementById('flashcard-surface');
+
+    surface.classList.add('is-flipped');
+    front.style.display = 'none';
+    back.style.display = 'flex';
+  }
+
+  function rateCard(rating) {
+    const card = CARDS[currentIndex];
+    ratingsRecorded[card.id] = rating;
+
+    // Send rating to backend via fetch
+    fetch(`/study/${DECK_ID}/review`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': CSRF_TOKEN
+      },
+      body: JSON.stringify({
+        card_id: card.id,
+        rating: rating
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.xp) document.getElementById('xp-val').textContent = data.xp;
+      if (data.streak) document.getElementById('streak-val').textContent = data.streak;
+    })
+    .catch(err => console.error("Error saving review:", err));
+
+    // Automatically advance to next card
+    if (currentIndex < CARDS.length - 1) {
+      currentIndex++;
+      renderCard(currentIndex);
+    } else {
+      // Completed all cards!
+      finishSession();
+    }
+  }
+
+  function prevCard() {
+    if (currentIndex > 0) {
+      currentIndex--;
+      renderCard(currentIndex);
+    }
+  }
+
+  function nextCard() {
+    if (currentIndex < CARDS.length - 1) {
+      currentIndex++;
+      renderCard(currentIndex);
+    } else {
+      finishSession();
+    }
+  }
+
+  function finishSession() {
+    document.getElementById('flashcard-stage').style.display = 'none';
+    document.getElementById('completion-stage').style.display = 'flex';
+
+    // Calculate accuracy
+    let correct = 0;
+    let incorrect = 0;
+    let breakdown = { again: 0, hard: 0, good: 0, easy: 0 };
+
+    Object.values(ratingsRecorded).forEach(r => {
+      if (breakdown[r] !== undefined) breakdown[r]++;
+      if (r === 'good' || r === 'easy') correct++;
+      else incorrect++;
+    });
+
+    const totalRated = Object.keys(ratingsRecorded).length || CARDS.length;
+    const accuracy = totalRated > 0 ? Math.round((correct / totalRated) * 100) : 100;
+
+    document.getElementById('stat-completed-count').textContent = `${CARDS.length} / ${CARDS.length}`;
+    document.getElementById('stat-accuracy').textContent = `${accuracy}%`;
+    document.getElementById('stat-correct').textContent = correct;
+    document.getElementById('stat-incorrect').textContent = incorrect;
+
+    // Show breakdown
+    document.getElementById('ratings-breakdown').innerHTML = `
+      <div class="breakdown-item"><span class="badge-dot dot-again"></span> Again: <strong>${breakdown.again}</strong></div>
+      <div class="breakdown-item"><span class="badge-dot dot-hard"></span> Hard: <strong>${breakdown.hard}</strong></div>
+      <div class="breakdown-item"><span class="badge-dot dot-good"></span> Good: <strong>${breakdown.good}</strong></div>
+      <div class="breakdown-item"><span class="badge-dot dot-easy"></span> Easy: <strong>${breakdown.easy}</strong></div>
+    `;
+
+    // Show review difficult button if there are any again/hard ratings
+    const difficultCount = breakdown.again + breakdown.hard;
+    if (difficultCount > 0) {
+      document.getElementById('difficult-count').textContent = difficultCount;
+      document.getElementById('btn-review-difficult').style.display = 'inline-flex';
+    }
+
+    // Set 100% on progress bar
+    document.getElementById('study-progress-fill').style.width = '100%';
+    document.getElementById('progress-percentage-label').textContent = '100%';
+  }
+
+  function reviewDifficult() {
+    window.location.href = `/study/${DECK_ID}?filter=difficult`;
+  }
+
+  function generateFreshQuestions() {
+    const btn = document.getElementById('btn-fresh-questions');
+    btn.disabled = true;
+    btn.textContent = "✨ Generating Fresh Questions...";
+
+    fetch(`/study/${DECK_ID}/generate-fresh`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': CSRF_TOKEN
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        alert(`🎉 ${data.message}`);
+        window.location.href = `/study/${DECK_ID}`;
+      } else {
+        alert("Failed to generate questions. Please try again.");
+        btn.disabled = false;
+        btn.textContent = "✨ Generate Fresh Questions";
+      }
+    })
+    .catch(err => {
+      alert("Error generating questions.");
+      btn.disabled = false;
+      btn.textContent = "✨ Generate Fresh Questions";
+    });
+  }
+
+  function setupKeyboardListeners() {
+    document.addEventListener('keydown', function(e) {
+      // Don't trigger if user is in an input field
+      if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (!isAnswerRevealed) {
+          flipCard();
+        }
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        prevCard();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        nextCard();
+      } else if (isAnswerRevealed) {
+        if (e.key === '1') rateCard('again');
+        else if (e.key === '2') rateCard('hard');
+        else if (e.key === '3') rateCard('good');
+        else if (e.key === '4') rateCard('easy');
+      }
+    });
+  }
+</script>
+{% endblock %}

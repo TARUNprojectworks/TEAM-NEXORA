@@ -1,0 +1,181 @@
+{
+  "folder": "placement",
+  "title": "DBMS — SQL & Database Concepts",
+  "cards": [
+    {
+      "question": "What are the ACID properties of a transaction?",
+      "answer": "Atomicity: all or nothing. Consistency: DB moves from one valid state to another. Isolation: concurrent transactions don't interfere. Durability: committed transactions survive failures.",
+      "topic": "Transactions",
+      "importance": "high",
+      "source_line": "DBMS — ACID Properties"
+    },
+    {
+      "question": "What is the difference between INNER JOIN, LEFT JOIN, and RIGHT JOIN?",
+      "answer": "INNER JOIN: returns rows where there is a match in both tables. LEFT JOIN: returns all rows from the left table + matched rows from the right (NULLs for no match). RIGHT JOIN: opposite of LEFT JOIN.",
+      "topic": "SQL",
+      "importance": "high",
+      "source_line": "SQL — Joins"
+    },
+    {
+      "question": "What are the normal forms in DBMS?",
+      "answer": "1NF: atomic values, no repeating groups. 2NF: 1NF + no partial dependency on composite key. 3NF: 2NF + no transitive dependency. BCNF: every determinant is a candidate key. Higher = less redundancy.",
+      "topic": "Normalisation",
+      "importance": "high",
+      "source_line": "DBMS — Normalisation"
+    },
+    {
+      "question": "What is the difference between primary key and foreign key?",
+      "answer": "Primary key: uniquely identifies each row in a table; cannot be NULL. Foreign key: a field in one table that references the primary key of another table; enforces referential integrity.",
+      "topic": "Keys",
+      "importance": "high",
+      "source_line": "DBMS — Keys"
+    },
+    {
+      "question": "What is an index in a database?",
+      "answer": "An index is a data structure (usually B-tree or hash) that speeds up data retrieval without scanning the full table. Clustered index: data rows are stored in index order (one per table). Non-clustered: separate structure with pointers.",
+      "topic": "Indexing",
+      "importance": "high",
+      "source_line": "DBMS — Indexing"
+    },
+    {
+      "question": "What is the difference between DELETE, TRUNCATE and DROP?",
+      "answer": "DELETE: removes specific rows (WHERE clause), can be rolled back, triggers fire. TRUNCATE: removes all rows, faster, cannot be rolled back (DDL), no triggers. DROP: removes the entire table structure and data permanently.",
+      "topic": "SQL",
+      "importance": "high",
+      "source_line": "SQL — DELETE vs TRUNCATE vs DROP"
+    },
+    {
+      "question": "What are aggregate functions in SQL?",
+      "answer": "COUNT(), SUM(), AVG(), MIN(), MAX(). Used with GROUP BY. HAVING filters groups (like WHERE for aggregates). Example: SELECT dept, AVG(salary) FROM employees GROUP BY dept HAVING AVG(salary) > 50000.",
+      "topic": "SQL",
+      "importance": "high",
+      "source_line": "SQL — Aggregate Functions"
+    },
+    {
+      "question": "What is a deadlock in DBMS?",
+      "answer": "A deadlock occurs when two or more transactions are waiting for each other to release locks, forming a cycle — none can proceed. Detected using wait-for graphs. Prevention: ordering resources, timeouts, wound-wait/wait-die schemes.",
+      "topic": "Concurrency",
+      "importance": "high",
+      "source_line": "DBMS — Deadlock"
+    },
+    {
+      "question": "What is the difference between WHERE and HAVING in SQL?",
+      "answer": "WHERE filters rows before grouping (works on individual rows, cannot use aggregate functions). HAVING filters groups after GROUP BY (can use aggregate functions). WHERE is processed first.",
+      "topic": "SQL",
+      "importance": "high",
+      "source_line": "SQL — WHERE vs HAVING"
+    },
+    {
+      "question": "What is a view in SQL?",
+      "answer": "A view is a virtual table based on the result of a SELECT query. Stored as a named query, not actual data. Advantages: simplify complex queries, restrict access, provide data abstraction. Updatable views have restrictions.",
+      "topic": "SQL",
+      "importance": "medium",
+      "source_line": "SQL — Views"
+    },
+    {
+      "question": "What is the difference between SQL and NoSQL databases?",
+      "answer": "SQL: relational, table-based, fixed schema, ACID compliant (e.g., MySQL, PostgreSQL). NoSQL: non-relational, flexible schema, horizontal scaling, eventual consistency (e.g., MongoDB, Redis, Cassandra). Choose based on use case.",
+      "topic": "Database Types",
+      "importance": "high",
+      "source_line": "DBMS — SQL vs NoSQL"
+    },
+    {
+      "question": "What is a stored procedure?",
+      "answer": "A stored procedure is a precompiled set of SQL statements stored in the database and executed by calling its name. Advantages: performance (precompiled), reusability, security (restrict direct table access). Supports parameters and control flow.",
+      "topic": "SQL",
+      "importance": "medium",
+      "source_line": "SQL — Stored Procedures"
+    },
+    {
+      "question": "What is a subquery? Give an example.",
+      "answer": "A subquery is a query nested inside another query. Example: SELECT name FROM employees WHERE salary > (SELECT AVG(salary) FROM employees). Can be correlated (references outer query) or non-correlated (independent).",
+      "topic": "SQL",
+      "importance": "medium",
+      "source_line": "SQL — Subqueries"
+    },
+    {
+      "question": "What is referential integrity?",
+      "answer": "Referential integrity ensures that foreign key values in a table always refer to an existing primary key value in the referenced table. Enforced with FOREIGN KEY constraints. ON DELETE CASCADE / SET NULL handle deletions.",
+      "topic": "Keys",
+      "importance": "medium",
+      "source_line": "DBMS — Referential Integrity"
+    },
+    {
+      "question": "What is the difference between UNION and UNION ALL?",
+      "answer": "UNION: combines results of two SELECT statements and removes duplicate rows. UNION ALL: combines results without removing duplicates (faster). Both require the same number of columns and compatible data types.",
+      "topic": "SQL",
+      "importance": "medium",
+      "source_line": "SQL — UNION vs UNION ALL"
+    },
+    {
+      "question": "What are isolation levels in DBMS?",
+      "answer": "READ UNCOMMITTED: can read dirty data. READ COMMITTED: only reads committed data. REPEATABLE READ: same query returns same data within transaction. SERIALIZABLE: highest isolation, transactions appear sequential. Higher isolation = fewer anomalies but lower concurrency.",
+      "topic": "Transactions",
+      "importance": "medium",
+      "source_line": "DBMS — Isolation Levels"
+    },
+    {
+      "question": "What is the difference between clustered and non-clustered index?",
+      "answer": "Clustered index: physically reorders table data according to the key (one per table, usually PK). Non-clustered index: a separate structure with a pointer to actual data rows (multiple allowed per table). Clustered = faster for range queries.",
+      "topic": "Indexing",
+      "importance": "medium",
+      "source_line": "DBMS — Clustered vs Non-clustered Index"
+    },
+    {
+      "question": "What is a trigger in SQL?",
+      "answer": "A trigger is a stored procedure that automatically executes in response to DML events (INSERT, UPDATE, DELETE) on a table. BEFORE or AFTER triggers. Used for audit logging, enforcing business rules, maintaining derived data.",
+      "topic": "SQL",
+      "importance": "medium",
+      "source_line": "SQL — Triggers"
+    },
+    {
+      "question": "What is the CAP theorem?",
+      "answer": "In a distributed system, you can only guarantee two of three: Consistency (all nodes see the same data), Availability (every request gets a response), Partition Tolerance (system works despite network partitions). Most NoSQL databases choose AP or CP.",
+      "topic": "Database Types",
+      "importance": "medium",
+      "source_line": "DBMS — CAP Theorem"
+    },
+    {
+      "question": "What is the ER model?",
+      "answer": "Entity-Relationship model: a conceptual data model. Entities (tables), Attributes (columns), Relationships (associations). Cardinality: one-to-one, one-to-many, many-to-many. ER diagrams are the blueprint before database design.",
+      "topic": "Database Design",
+      "importance": "medium",
+      "source_line": "DBMS — ER Model"
+    },
+    {
+      "question": "What is a window function in SQL?",
+      "answer": "Window functions perform calculations across rows related to the current row without collapsing rows (unlike GROUP BY). Examples: ROW_NUMBER(), RANK(), DENSE_RANK(), LAG(), LEAD(), SUM() OVER (PARTITION BY...). Very common in placement interviews.",
+      "topic": "SQL",
+      "importance": "high",
+      "source_line": "SQL — Window Functions"
+    },
+    {
+      "question": "What is database sharding?",
+      "answer": "Sharding is horizontal partitioning — splitting a database table across multiple machines (shards) based on a shard key. Each shard holds a subset of data. Improves performance and scalability but adds complexity (cross-shard queries, rebalancing).",
+      "topic": "Database Types",
+      "importance": "low",
+      "source_line": "DBMS — Sharding"
+    },
+    {
+      "question": "What is the difference between CHAR and VARCHAR?",
+      "answer": "CHAR(n): fixed-length string; always uses n bytes (padded with spaces). VARCHAR(n): variable-length string; uses only as many bytes as needed + 1-2 bytes for length. Use CHAR for fixed-length data (e.g., country codes), VARCHAR otherwise.",
+      "topic": "SQL",
+      "importance": "medium",
+      "source_line": "SQL — CHAR vs VARCHAR"
+    },
+    {
+      "question": "What is a composite key?",
+      "answer": "A composite key is a primary key made up of two or more columns together uniquely identifying a row. Example: (student_id, course_id) in an enrollment table. Partial dependency on a composite key violates 2NF.",
+      "topic": "Keys",
+      "importance": "medium",
+      "source_line": "DBMS — Composite Key"
+    },
+    {
+      "question": "What is the ORDER OF execution of a SQL query?",
+      "answer": "FROM → JOIN → WHERE → GROUP BY → HAVING → SELECT → DISTINCT → ORDER BY → LIMIT. Understanding this order helps debug queries — you can't use column aliases defined in SELECT in a WHERE clause.",
+      "topic": "SQL",
+      "importance": "high",
+      "source_line": "SQL — Query Execution Order"
+    }
+  ]
+}

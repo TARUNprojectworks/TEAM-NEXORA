@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% block title %}{{ deck.title }} · Ready Decks · Nexora Recall{% endblock %}
+
+{% block content %}
+<section class="deck-detail-page">
+
+  {# ---------- Breadcrumb ---------- #}
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="{{ url_for('decks.ready_decks') }}">Ready Decks</a>
+    <span aria-hidden="true"> › </span>
+    <span>{{ folder_info.icon }} {{ folder_info.label }}</span>
+    <span aria-hidden="true"> › </span>
+    <span class="breadcrumb-current">{{ deck.title }}</span>
+  </nav>
+
+  {# ---------- Deck Header ---------- #}
+  <div class="deck-detail-header">
+    <div>
+      <h1 class="deck-detail-title">{{ deck.title }}</h1>
+      <p class="deck-detail-meta">
+        <span class="badge badge-folder">{{ folder_info.icon }} {{ folder_info.label }}</span>
+        <span class="deck-detail-count">
+          {{ cards | length }} card{{ 's' if cards | length != 1 else '' }}
+        </span>
+        <span class="deck-detail-topics">
+          {{ topics | length }} topic{{ 's' if topics | length != 1 else '' }}
+        </span>
+      </p>
+    </div>
+
+    <div class="deck-detail-actions">
+      {% if already_added %}
+        <span class="badge badge-added badge-lg">✓ In your decks</span>
+      {% else %}
+        <form method="post" action="{{ url_for('decks.add_ready_deck', deck_id=deck.id) }}"
+              id="detail-add-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="mode" value="normal" id="detail-mode">
+          <input type="hidden" name="exam_date" value="" id="detail-exam-date">
+          <button type="button" class="btn btn-primary"
+                  onclick="openDetailModal()">
+            + Add to my decks
+          </button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ---------- Topics ---------- #}
+  <div class="topic-pills" role="navigation" aria-label="Topics">
+    {% for topic in topics %}
+      <a class="topic-pill" href="#topic-{{ loop.index }}">{{ topic }}</a>
+    {% endfor %}
+  </div>
+
+  {# ---------- Cards by Topic ---------- #}
+  <div class="card-topics-list">
+    {% for topic, topic_cards in topics.items() %}
+      <div class="topic-group" id="topic-{{ loop.index }}">
+        <h2 class="topic-group-title">
+          {{ topic }}
+          <span class="topic-count">{{ topic_cards | length }}</span>
+        </h2>
+
+        <div class="flashcard-list">
+          {% for card in topic_cards %}
+            <div class="flashcard-preview" id="card-{{ card.id }}">
+              <div class="flashcard-preview-header">
+                <span class="importance-dot importance-{{ card.importance }}"
+                      title="{{ card.importance | title }} importance"></span>
+                <button class="flip-btn" aria-expanded="false"
+                        aria-controls="answer-{{ card.id }}"
+                        onclick="toggleAnswer(this, 'answer-{{ card.id }}')">
+                  Show answer
+                </button>
+              </div>
+
+              <p class="flashcard-question">{{ card.question }}</p>
+
+              <div class="flashcard-answer" id="answer-{{ card.id }}" hidden>
+                <hr class="answer-divider">
+                <p class="flashcard-answer-text">{{ card.answer }}</p>
+                {% if card.source_line %}
+                  <p class="flashcard-source">📖 {{ card.source_line }}</p>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  {# ---------- Bottom CTA ---------- #}
+  {% if not already_added %}
+    <div class="bottom-cta">
+      <p>Looks good? Add this deck to start your spaced-repetition journey.</p>
+      <button type="button" class="btn btn-primary btn-lg" onclick="openDetailModal()">
+        + Add to my decks
+      </button>
+    </div>
+  {% endif %}
+
+</section>
+
+{# ---------- Add Deck Modal ---------- #}
+<div class="modal-overlay" id="detail-add-modal" role="dialog" aria-modal="true"
+     aria-labelledby="detail-modal-title" hidden>
+  <div class="modal">
+    <h2 class="modal-title" id="detail-modal-title">Add "{{ deck.title }}"</h2>
+
+    <div class="modal-field">
+      <label class="field-label">Study mode</label>
+      <div class="radio-group">
+        <label class="radio-option">
+          <input type="radio" name="detail-modal-mode" value="normal" checked>
+          <span>
+            <strong>Normal</strong>
+            <small>Spaced repetition — no deadline</small>
+          </span>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="detail-modal-mode" value="exam">
+          <span>
+            <strong>Exam mode</strong>
+            <small>Accelerated review towards your exam date</small>
+          </span>
+        </label>
+      </div>
+    </div>
+
+    <div class="modal-field" id="detail-exam-date-field" hidden>
+      <label class="field-label" for="detail-modal-exam-date">Exam date</label>
+      <input type="date" class="field-input" id="detail-modal-exam-date"
+             placeholder="YYYY-MM-DD">
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" onclick="closeDetailModal()">Cancel</button>
+      <button type="button" class="btn btn-primary" onclick="confirmDetailAdd()">Add deck</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function toggleAnswer(btn, answerId) {
+    var answer = document.getElementById(answerId);
+    var expanded = btn.getAttribute('aria-expanded') === 'true';
+    answer.hidden = expanded;
+    btn.setAttribute('aria-expanded', String(!expanded));
+    btn.textContent = expanded ? 'Show answer' : 'Hide answer';
+  }
+
+  function openDetailModal() {
+    document.getElementById('detail-add-modal').hidden = false;
+    document.body.classList.add('modal-open');
+  }
+
+  function closeDetailModal() {
+    document.getElementById('detail-add-modal').hidden = true;
+    document.body.classList.remove('modal-open');
+  }
+
+  function confirmDetailAdd() {
+    var mode = document.querySelector('input[name="detail-modal-mode"]:checked').value;
+    var examDate = document.getElementById('detail-modal-exam-date').value;
+    document.getElementById('detail-mode').value = mode;
+    document.getElementById('detail-exam-date').value = examDate;
+    document.getElementById('detail-add-form').submit();
+    closeDetailModal();
+  }
+
+  document.querySelectorAll('input[name="detail-modal-mode"]').forEach(function(r) {
+    r.addEventListener('change', function() {
+      document.getElementById('detail-exam-date-field').hidden = (this.value !== 'exam');
+    });
+  });
+
+  document.getElementById('detail-add-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeDetailModal();
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeDetailModal();
+  });
+</script>
+{% endblock %}

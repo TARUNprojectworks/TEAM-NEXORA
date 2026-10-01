@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}My Decks · Nexora Recall{% endblock %}
+
+{% block content %}
+<section class="my-decks-page">
+
+  <div class="page-header">
+    <h1>My Decks</h1>
+    <div class="page-header-actions">
+      <a class="btn btn-ghost" href="{{ url_for('decks.ready_decks') }}">+ Browse Ready Decks</a>
+      <a class="btn btn-primary" href="{{ url_for('decks.create_my_own') }}">+ Create My Own</a>
+    </div>
+  </div>
+
+  {% if not user_decks %}
+    <div class="empty-state">
+      <span class="empty-icon">📭</span>
+      <h2>No decks yet</h2>
+      <p>Add a ready deck or create your own to get started.</p>
+      <a class="btn btn-primary" href="{{ url_for('decks.ready_decks') }}">Explore Ready Decks</a>
+    </div>
+
+  {% else %}
+    <div class="deck-grid">
+      {% for ud in user_decks %}
+        {% set deck = ud.deck %}
+        {% set meta = folder_meta.get(deck.folder, {"label": deck.folder|title, "icon": "📖"}) %}
+        {% set count = card_counts.get(deck.id, 0) %}
+
+        <div class="deck-card {% if ud.mode == 'exam' %}deck-card--exam{% endif %}">
+          <div class="deck-card-body">
+            <div class="deck-card-folder">{{ meta.icon }} {{ meta.label }}</div>
+            <h3 class="deck-card-title">{{ deck.title }}</h3>
+            <p class="deck-card-meta">{{ count }} card{{ 's' if count != 1 else '' }}</p>
+
+            {% if ud.mode == 'exam' %}
+              <p class="deck-card-exam-badge">
+                🎯 Exam mode
+                {% if ud.exam_date %}
+                  · {{ ud.exam_date.strftime('%d %b %Y') }}
+                  {% set days_left = (ud.exam_date - today).days %}
+                  {% if days_left == 0 %}
+                    <span class="exam-urgent">(today!)</span>
+                  {% elif days_left > 0 %}
+                    <span class="exam-countdown">({{ days_left }} day{{ 's' if days_left != 1 else '' }} left)</span>
+                  {% else %}
+                    <span class="exam-past">(exam passed)</span>
+                  {% endif %}
+                {% endif %}
+              </p>
+            {% endif %}
+          </div>
+
+          <div class="deck-card-footer">
+            {% if deck.is_ready %}
+              <a class="btn btn-sm btn-ghost" href="{{ url_for('decks.ready_deck_detail', deck_id=deck.id) }}">
+                Preview
+              </a>
+            {% endif %}
+            <a class="btn btn-sm btn-primary" href="{{ url_for('study.study_deck', deck_id=deck.id) }}">
+              Study
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+</section>
+{% endblock %}

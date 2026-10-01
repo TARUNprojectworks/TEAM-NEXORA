@@ -1,0 +1,181 @@
+{
+  "folder": "placement",
+  "title": "OS — Processes, Memory & Scheduling",
+  "cards": [
+    {
+      "question": "What is the difference between a process and a thread?",
+      "answer": "Process: independent program in execution with its own memory space. Thread: lightweight unit of execution within a process, shares memory with other threads of the same process. Threads = faster to create/switch; processes = better isolation.",
+      "topic": "Processes",
+      "importance": "high",
+      "source_line": "OS — Process vs Thread"
+    },
+    {
+      "question": "What are the states of a process?",
+      "answer": "New → Ready → Running → (Waiting/Blocked) → Terminated. The scheduler moves processes between Ready and Running. I/O or events move them to Waiting. CPU can only run one process at a time (per core).",
+      "topic": "Processes",
+      "importance": "high",
+      "source_line": "OS — Process States"
+    },
+    {
+      "question": "What is a deadlock and what are its four necessary conditions?",
+      "answer": "Deadlock: processes wait indefinitely for resources held by each other. Four conditions (Coffman): 1) Mutual Exclusion 2) Hold and Wait 3) No Preemption 4) Circular Wait. All four must hold simultaneously for deadlock.",
+      "topic": "Synchronisation",
+      "importance": "high",
+      "source_line": "OS — Deadlock"
+    },
+    {
+      "question": "What is virtual memory?",
+      "answer": "Virtual memory extends physical RAM by using disk space (swap space/page file). Each process gets its own virtual address space. The OS maps virtual addresses to physical addresses using page tables. Allows running more programs than RAM fits.",
+      "topic": "Memory",
+      "importance": "high",
+      "source_line": "OS — Virtual Memory"
+    },
+    {
+      "question": "What is the difference between paging and segmentation?",
+      "answer": "Paging: divides memory into fixed-size pages (no external fragmentation, has internal). Segmentation: divides into variable-size segments based on logical units (no internal fragmentation, has external). Segmented paging combines both.",
+      "topic": "Memory",
+      "importance": "high",
+      "source_line": "OS — Paging vs Segmentation"
+    },
+    {
+      "question": "What are the CPU scheduling algorithms?",
+      "answer": "FCFS: non-preemptive, simple, convoy effect. SJF: shortest job first, optimal average waiting time, starvation. Round Robin: time quantum, preemptive, fair. Priority Scheduling: can cause starvation (aging fixes it). MLFQ: multi-level feedback queue.",
+      "topic": "Scheduling",
+      "importance": "high",
+      "source_line": "OS — CPU Scheduling"
+    },
+    {
+      "question": "What is a semaphore?",
+      "answer": "A semaphore is an integer variable used for process synchronisation. Binary semaphore (0/1): like a mutex. Counting semaphore: allows N threads. Operations: wait()/P() (decrement, block if <0) and signal()/V() (increment, wake up). Solves critical section problem.",
+      "topic": "Synchronisation",
+      "importance": "high",
+      "source_line": "OS — Semaphore"
+    },
+    {
+      "question": "What is the difference between multiprogramming, multitasking, and multiprocessing?",
+      "answer": "Multiprogramming: multiple programs loaded in memory; CPU switches when one blocks. Multitasking: CPU switches rapidly between processes (preemptive, time-sharing). Multiprocessing: multiple CPUs/cores run processes truly simultaneously.",
+      "topic": "Processes",
+      "importance": "high",
+      "source_line": "OS — Multiprogramming vs Multitasking"
+    },
+    {
+      "question": "What is a page fault?",
+      "answer": "A page fault occurs when a process accesses a virtual page not currently in physical memory. The OS handles it: finds the page on disk, loads it into RAM (possibly evicting another page), updates page table, resumes process. Costly operation.",
+      "topic": "Memory",
+      "importance": "high",
+      "source_line": "OS — Page Fault"
+    },
+    {
+      "question": "What is the banker's algorithm?",
+      "answer": "The banker's algorithm is a deadlock avoidance algorithm. Before granting a resource, it simulates the allocation and checks if the system remains in a safe state (a state where all processes can finish in some order).",
+      "topic": "Synchronisation",
+      "importance": "medium",
+      "source_line": "OS — Banker's Algorithm"
+    },
+    {
+      "question": "What is the critical section problem?",
+      "answer": "The critical section is a code segment accessing shared resources. Requirements for solution: 1) Mutual Exclusion (only one process inside at a time) 2) Progress (no unnecessary blocking) 3) Bounded Waiting (no starvation). Peterson's solution, semaphores, and mutexes solve it.",
+      "topic": "Synchronisation",
+      "importance": "high",
+      "source_line": "OS — Critical Section"
+    },
+    {
+      "question": "What is demand paging?",
+      "answer": "Demand paging loads pages into memory only when accessed (on demand), not all at once. Reduces startup time and memory usage. Uses page fault mechanism. Modified pages are written to swap before eviction.",
+      "topic": "Memory",
+      "importance": "medium",
+      "source_line": "OS — Demand Paging"
+    },
+    {
+      "question": "What are page replacement algorithms?",
+      "answer": "When memory is full and a new page must be loaded: FIFO (oldest page out; Belady's anomaly), LRU (least recently used; optimal approximation), Optimal (replace the page used furthest in future; theoretical best), Clock (approximate LRU).",
+      "topic": "Memory",
+      "importance": "medium",
+      "source_line": "OS — Page Replacement"
+    },
+    {
+      "question": "What is a mutex vs a semaphore?",
+      "answer": "Mutex (mutual exclusion lock): ownership-based, only the thread that locked it can unlock it. Binary semaphore: signal/wait can be called by different threads. Mutex is for mutual exclusion; semaphore for signalling between threads.",
+      "topic": "Synchronisation",
+      "importance": "medium",
+      "source_line": "OS — Mutex vs Semaphore"
+    },
+    {
+      "question": "What is thrashing in an OS?",
+      "answer": "Thrashing occurs when a system spends more time handling page faults than executing processes — too many processes competing for too little memory. Solution: reduce degree of multiprogramming, use working set model.",
+      "topic": "Memory",
+      "importance": "medium",
+      "source_line": "OS — Thrashing"
+    },
+    {
+      "question": "What is the difference between internal and external fragmentation?",
+      "answer": "Internal fragmentation: allocated memory block is larger than requested; wasted space inside allocation. Occurs in paging. External fragmentation: free memory is scattered in small unusable pieces; wasted space outside allocations. Occurs in segmentation. Compaction fixes external fragmentation.",
+      "topic": "Memory",
+      "importance": "medium",
+      "source_line": "OS — Fragmentation"
+    },
+    {
+      "question": "What is context switching?",
+      "answer": "Context switching is the process of saving the state (context: registers, PC, stack) of the currently running process and loading the saved state of a new process. It is necessary for multitasking but is overhead — purely computational cost.",
+      "topic": "Processes",
+      "importance": "medium",
+      "source_line": "OS — Context Switching"
+    },
+    {
+      "question": "What is the difference between kernel-level and user-level threads?",
+      "answer": "User-level threads: managed by a threading library, fast to create/switch, but one block blocks all threads of the process. Kernel-level threads: managed by OS, true parallelism on multi-core, but slower to create/switch. Most modern systems use hybrid (many-to-many model).",
+      "topic": "Processes",
+      "importance": "medium",
+      "source_line": "OS — User vs Kernel Threads"
+    },
+    {
+      "question": "What is Round Robin scheduling?",
+      "answer": "Round Robin assigns a fixed time quantum (e.g., 10ms) to each process in a cyclic order. Preemptive — process is preempted when quantum expires and moved to the end of the queue. Best for time-sharing systems. Larger quantum → FCFS; smaller → high context switch overhead.",
+      "topic": "Scheduling",
+      "importance": "medium",
+      "source_line": "OS — Round Robin"
+    },
+    {
+      "question": "What is an interrupt?",
+      "answer": "An interrupt is a signal to the processor that an event needs immediate attention. Hardware interrupts: from devices (keyboard, timer). Software interrupts: system calls (trap). The OS saves the current state, runs the interrupt handler (ISR), then resumes.",
+      "topic": "Processes",
+      "importance": "medium",
+      "source_line": "OS — Interrupts"
+    },
+    {
+      "question": "What is IPC (Inter-Process Communication)?",
+      "answer": "IPC mechanisms allow processes to communicate and synchronise: Pipes (unidirectional), Message queues (structured), Shared memory (fastest, needs synchronisation), Sockets (network or local), Signals (notifications). Shared memory is fastest; pipes simplest.",
+      "topic": "Processes",
+      "importance": "medium",
+      "source_line": "OS — IPC"
+    },
+    {
+      "question": "What is the difference between preemptive and non-preemptive scheduling?",
+      "answer": "Preemptive: OS can forcibly remove CPU from a running process (e.g., Round Robin, SRTF). Non-preemptive: process runs until it finishes or blocks (e.g., FCFS, SJF). Preemptive is better for responsiveness; non-preemptive is simpler.",
+      "topic": "Scheduling",
+      "importance": "medium",
+      "source_line": "OS — Preemptive vs Non-preemptive"
+    },
+    {
+      "question": "What is a system call?",
+      "answer": "A system call is the interface between a user-space process and the OS kernel. When a program needs a privileged operation (file I/O, memory allocation, creating processes), it makes a system call, switching from user mode to kernel mode.",
+      "topic": "Processes",
+      "importance": "high",
+      "source_line": "OS — System Calls"
+    },
+    {
+      "question": "What is the Translation Lookaside Buffer (TLB)?",
+      "answer": "TLB is a small, fast hardware cache that stores recent virtual-to-physical address translations. On each memory access, the TLB is checked first (TLB hit = fast). On a TLB miss, the page table must be walked (slow). TLB entries are flushed on context switch.",
+      "topic": "Memory",
+      "importance": "medium",
+      "source_line": "OS — TLB"
+    },
+    {
+      "question": "What are the file system allocation methods?",
+      "answer": "Contiguous: fast sequential access, external fragmentation. Linked: no external fragmentation, no random access, pointer overhead. Indexed: random access, index block overhead. Most OS use indexed allocation (e.g., Unix inodes) or extent-based systems.",
+      "topic": "File Systems",
+      "importance": "low",
+      "source_line": "OS — File Allocation Methods"
+    }
+  ]
+}

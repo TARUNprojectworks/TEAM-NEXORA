@@ -1,0 +1,181 @@
+{
+  "folder": "competitive",
+  "title": "Aptitude — Quant & Reasoning",
+  "cards": [
+    {
+      "question": "A train 150m long passes a pole in 15 seconds. What is the speed of the train in km/h?",
+      "answer": "Speed = distance/time = 150/15 = 10 m/s. Convert: 10 × 18/5 = 36 km/h.",
+      "topic": "Speed & Distance",
+      "importance": "high",
+      "source_line": "Aptitude — Trains"
+    },
+    {
+      "question": "What is the formula for simple interest and compound interest?",
+      "answer": "Simple Interest: SI = PRT/100. Compound Interest: A = P(1 + R/100)ⁿ; CI = A - P. Where P = Principal, R = Rate%, T/n = Time. CI > SI for the same P, R, T (n > 1 year).",
+      "topic": "Interest",
+      "importance": "high",
+      "source_line": "Aptitude — SI and CI"
+    },
+    {
+      "question": "If A can do a work in 10 days and B in 15 days, how many days do they take together?",
+      "answer": "A's rate = 1/10, B's rate = 1/15. Together: 1/10 + 1/15 = 3/30 + 2/30 = 5/30 = 1/6. Time = 6 days.",
+      "topic": "Work & Time",
+      "importance": "high",
+      "source_line": "Aptitude — Work and Time"
+    },
+    {
+      "question": "What is the HCF and LCM relationship?",
+      "answer": "HCF × LCM = Product of two numbers. HCF (GCD) is the largest number dividing both. LCM is the smallest number divisible by both. Example: HCF(12,18)=6, LCM(12,18)=36; 6×36=216=12×18. ✓",
+      "topic": "Number System",
+      "importance": "high",
+      "source_line": "Aptitude — HCF and LCM"
+    },
+    {
+      "question": "A shopkeeper gives 20% discount on MRP and still gains 25%. If MRP is ₹500, what is the cost price?",
+      "answer": "Selling price = 500 × 0.80 = ₹400. Gain = 25%, so CP = SP/1.25 = 400/1.25 = ₹320.",
+      "topic": "Profit & Loss",
+      "importance": "high",
+      "source_line": "Aptitude — Profit and Loss"
+    },
+    {
+      "question": "In how many ways can the letters of MISSISSIPPI be arranged?",
+      "answer": "Total letters = 11. Repeats: M=1, I=4, S=4, P=2. Arrangements = 11! / (1! × 4! × 4! × 2!) = 39,916,800 / (1×24×24×2) = 34,650.",
+      "topic": "Permutation & Combination",
+      "importance": "high",
+      "source_line": "Aptitude — Permutation"
+    },
+    {
+      "question": "A pipe fills a tank in 6 hours. Another pipe empties it in 8 hours. If both open together, in how long is the tank filled?",
+      "answer": "Net fill rate = 1/6 - 1/8 = 4/24 - 3/24 = 1/24. Time = 24 hours. Ensure the filling pipe has higher rate, otherwise tank never fills.",
+      "topic": "Pipes & Cisterns",
+      "importance": "high",
+      "source_line": "Aptitude — Pipes and Cisterns"
+    },
+    {
+      "question": "If the ratio of A:B = 3:5 and B:C = 2:3, find A:B:C.",
+      "answer": "Make B common: A:B = 3:5 and B:C = 2:3. Scale to LCM(5,2)=10: A:B = 6:10, B:C = 10:15. So A:B:C = 6:10:15.",
+      "topic": "Ratio & Proportion",
+      "importance": "high",
+      "source_line": "Aptitude — Ratio and Proportion"
+    },
+    {
+      "question": "What is the probability of getting at least one head in 3 coin tosses?",
+      "answer": "P(at least one head) = 1 - P(no heads) = 1 - P(all tails) = 1 - (1/2)³ = 1 - 1/8 = 7/8.",
+      "topic": "Probability",
+      "importance": "high",
+      "source_line": "Aptitude — Probability"
+    },
+    {
+      "question": "The average of 5 numbers is 24. If one number is removed the average becomes 21. What is the removed number?",
+      "answer": "Sum of 5 numbers = 5 × 24 = 120. Sum of 4 numbers = 4 × 21 = 84. Removed number = 120 - 84 = 36.",
+      "topic": "Averages",
+      "importance": "high",
+      "source_line": "Aptitude — Averages"
+    },
+    {
+      "question": "A number when divided by 6 gives remainder 5. What is the remainder when its square is divided by 6?",
+      "answer": "Number = 6k+5. Square = (6k+5)² = 36k² + 60k + 25 = 6(6k²+10k+4) + 1. Remainder = 1.",
+      "topic": "Number System",
+      "importance": "medium",
+      "source_line": "Aptitude — Remainders"
+    },
+    {
+      "question": "Two cars start from the same point in opposite directions at 60 km/h and 40 km/h. After how many hours are they 300 km apart?",
+      "answer": "Relative speed (opposite directions) = 60 + 40 = 100 km/h. Time = 300/100 = 3 hours.",
+      "topic": "Speed & Distance",
+      "importance": "medium",
+      "source_line": "Aptitude — Relative Speed"
+    },
+    {
+      "question": "What is the percentage increase from 80 to 100?",
+      "answer": "Percentage increase = (New - Old)/Old × 100 = (100-80)/80 × 100 = 20/80 × 100 = 25%. Remember: percentage change is always calculated with respect to the original/old value.",
+      "topic": "Percentages",
+      "importance": "high",
+      "source_line": "Aptitude — Percentages"
+    },
+    {
+      "question": "A bag has 3 red and 4 blue balls. Two balls are drawn at random. What is the probability both are red?",
+      "answer": "P(both red) = C(3,2)/C(7,2) = 3/(21) = 1/7.",
+      "topic": "Probability",
+      "importance": "medium",
+      "source_line": "Aptitude — Probability without replacement"
+    },
+    {
+      "question": "What are the divisibility rules for 3, 4, 8, and 11?",
+      "answer": "÷3: sum of digits divisible by 3. ÷4: last two digits divisible by 4. ÷8: last three digits divisible by 8. ÷11: alternating sum of digits (from right) divisible by 11. Example: 1331 → 1-3+3-1=0, divisible by 11.",
+      "topic": "Number System",
+      "importance": "medium",
+      "source_line": "Aptitude — Divisibility Rules"
+    },
+    {
+      "question": "X is 40% more than Y. Y is what % less than X?",
+      "answer": "X = 1.4Y. Y is less than X by (X-Y)/X × 100 = (0.4Y)/(1.4Y) × 100 = 2/7 × 100 ≈ 28.57%.",
+      "topic": "Percentages",
+      "importance": "medium",
+      "source_line": "Aptitude — Percentage relationship"
+    },
+    {
+      "question": "A sum triples in 10 years at SI. What is the rate of interest?",
+      "answer": "If P triples, SI = 2P. SI = PRT/100 → 2P = P × R × 10/100 → 200 = 10R → R = 20% per annum.",
+      "topic": "Interest",
+      "importance": "medium",
+      "source_line": "Aptitude — SI rate problems"
+    },
+    {
+      "question": "In a class of 40 students, 25 play cricket, 20 play football, 10 play both. How many play neither?",
+      "answer": "Using set theory: n(C∪F) = n(C) + n(F) - n(C∩F) = 25 + 20 - 10 = 35. Students playing neither = 40 - 35 = 5.",
+      "topic": "Set Theory",
+      "importance": "medium",
+      "source_line": "Aptitude — Sets"
+    },
+    {
+      "question": "A ladder 10m long leans against a wall. Its foot is 6m from the wall. What height does it reach?",
+      "answer": "Using Pythagoras: height² + 6² = 10² → height² = 100 - 36 = 64 → height = 8m.",
+      "topic": "Geometry",
+      "importance": "medium",
+      "source_line": "Aptitude — Pythagoras"
+    },
+    {
+      "question": "The sum of first n natural numbers is?",
+      "answer": "Sum = n(n+1)/2. Sum of squares: n(n+1)(2n+1)/6. Sum of cubes: [n(n+1)/2]². Example: Sum of first 10 = 10×11/2 = 55.",
+      "topic": "Number System",
+      "importance": "high",
+      "source_line": "Aptitude — Series formulas"
+    },
+    {
+      "question": "If 6 men can do a job in 10 days, how many men can do the same job in 4 days?",
+      "answer": "Using M₁D₁ = M₂D₂ (work formula): 6 × 10 = M₂ × 4 → M₂ = 60/4 = 15 men.",
+      "topic": "Work & Time",
+      "importance": "medium",
+      "source_line": "Aptitude — Men and Days"
+    },
+    {
+      "question": "What is the area and perimeter of a circle of radius r?",
+      "answer": "Area = πr². Circumference (perimeter) = 2πr. For a sector of angle θ (degrees): Area = (θ/360)πr²; Arc length = (θ/360)2πr.",
+      "topic": "Geometry",
+      "importance": "high",
+      "source_line": "Aptitude — Circle"
+    },
+    {
+      "question": "Complete the series: 2, 6, 12, 20, 30, ?",
+      "answer": "The differences are 4, 6, 8, 10, 12 (increasing by 2). Next term = 30 + 12 = 42. Pattern: n(n+1) → 1×2, 2×3, 3×4, 4×5, 5×6, 6×7 = 42.",
+      "topic": "Series",
+      "importance": "medium",
+      "source_line": "Aptitude — Number Series"
+    },
+    {
+      "question": "What is the value of (1 + 1/n)ⁿ as n → ∞?",
+      "answer": "The value approaches Euler's number e ≈ 2.71828. This is the definition of e and appears frequently in compound interest, probability, and growth/decay problems.",
+      "topic": "Number System",
+      "importance": "low",
+      "source_line": "Aptitude — Euler's number"
+    },
+    {
+      "question": "How many zeroes are at the end of 100! (100 factorial)?",
+      "answer": "Count factors of 5 in 100!: ⌊100/5⌋ + ⌊100/25⌋ = 20 + 4 = 24. (Factors of 2 are always more than 5, so count 5s). Answer: 24 trailing zeroes.",
+      "topic": "Number System",
+      "importance": "medium",
+      "source_line": "Aptitude — Trailing zeroes in factorial"
+    }
+  ]
+}

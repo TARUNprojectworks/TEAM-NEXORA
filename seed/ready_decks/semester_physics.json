@@ -1,0 +1,181 @@
+{
+  "folder": "semester",
+  "title": "Physics — Mechanics & Waves",
+  "cards": [
+    {
+      "question": "State Newton's Second Law of Motion.",
+      "answer": "F = ma. The net force acting on an object equals its mass multiplied by its acceleration. The direction of acceleration is the same as the direction of the net force.",
+      "topic": "Mechanics",
+      "importance": "high",
+      "source_line": "Newton's Laws — Second Law"
+    },
+    {
+      "question": "What is the difference between speed and velocity?",
+      "answer": "Speed is a scalar quantity (magnitude only, e.g., 60 km/h). Velocity is a vector quantity (magnitude + direction, e.g., 60 km/h north). Average speed = total distance / time; average velocity = displacement / time.",
+      "topic": "Kinematics",
+      "importance": "high",
+      "source_line": "Kinematics — Speed vs Velocity"
+    },
+    {
+      "question": "What is the law of conservation of energy?",
+      "answer": "Energy cannot be created or destroyed, only converted from one form to another. The total energy of an isolated system remains constant.",
+      "topic": "Energy",
+      "importance": "high",
+      "source_line": "Thermodynamics — Conservation of Energy"
+    },
+    {
+      "question": "What is the difference between kinetic and potential energy?",
+      "answer": "Kinetic energy (KE = ½mv²) is energy of motion. Potential energy (PE = mgh for gravitational) is stored energy due to position or configuration.",
+      "topic": "Energy",
+      "importance": "high",
+      "source_line": "Energy — KE and PE"
+    },
+    {
+      "question": "What is Ohm's Law?",
+      "answer": "V = IR. The voltage (V) across a conductor equals the current (I) through it multiplied by its resistance (R), provided temperature and other conditions remain constant.",
+      "topic": "Electricity",
+      "importance": "high",
+      "source_line": "Electricity — Ohm's Law"
+    },
+    {
+      "question": "What is the principle of superposition of waves?",
+      "answer": "When two or more waves meet at a point, the resultant displacement equals the vector sum of the individual displacements. This leads to constructive interference (same phase) and destructive interference (opposite phase).",
+      "topic": "Waves",
+      "importance": "high",
+      "source_line": "Waves — Superposition"
+    },
+    {
+      "question": "What is simple harmonic motion (SHM)?",
+      "answer": "SHM is periodic motion where the restoring force is proportional to and directed opposite to the displacement from equilibrium (F = -kx). Examples: spring-mass system, simple pendulum (small angles).",
+      "topic": "Oscillations",
+      "importance": "high",
+      "source_line": "Oscillations — SHM"
+    },
+    {
+      "question": "What is the first law of thermodynamics?",
+      "answer": "ΔU = Q - W. The change in internal energy of a system equals the heat added to the system minus the work done by the system. Energy is conserved in thermodynamic processes.",
+      "topic": "Thermodynamics",
+      "importance": "high",
+      "source_line": "Thermodynamics — First Law"
+    },
+    {
+      "question": "What is Coulomb's Law?",
+      "answer": "F = k·q₁q₂/r². The electrostatic force between two point charges is proportional to the product of the charges and inversely proportional to the square of the distance between them.",
+      "topic": "Electrostatics",
+      "importance": "high",
+      "source_line": "Electrostatics — Coulomb's Law"
+    },
+    {
+      "question": "What is the relationship between frequency, wavelength and wave speed?",
+      "answer": "v = fλ. Wave speed (v) equals frequency (f) multiplied by wavelength (λ). For light in vacuum, v = c ≈ 3 × 10⁸ m/s.",
+      "topic": "Waves",
+      "importance": "high",
+      "source_line": "Waves — Wave equation"
+    },
+    {
+      "question": "What is the work-energy theorem?",
+      "answer": "The net work done on an object equals its change in kinetic energy: W_net = ΔKE = ½mv² - ½mv₀². Work is positive when force and displacement are in the same direction.",
+      "topic": "Mechanics",
+      "importance": "high",
+      "source_line": "Mechanics — Work-energy theorem"
+    },
+    {
+      "question": "What is the difference between elastic and inelastic collisions?",
+      "answer": "Elastic collision: both momentum and kinetic energy are conserved. Inelastic collision: momentum is conserved but kinetic energy is not (some is lost to heat/deformation). Perfectly inelastic: objects stick together.",
+      "topic": "Mechanics",
+      "importance": "medium",
+      "source_line": "Mechanics — Collisions"
+    },
+    {
+      "question": "What is refraction of light?",
+      "answer": "Refraction is the bending of light as it passes from one medium to another of different optical density (refractive index). Snell's Law: n₁ sin θ₁ = n₂ sin θ₂.",
+      "topic": "Optics",
+      "importance": "medium",
+      "source_line": "Optics — Refraction"
+    },
+    {
+      "question": "What is gravitational potential energy?",
+      "answer": "GPE = mgh, where m = mass, g = acceleration due to gravity (≈9.8 m/s²), h = height above reference point. It represents stored energy due to position in a gravitational field.",
+      "topic": "Energy",
+      "importance": "medium",
+      "source_line": "Mechanics — Gravitational PE"
+    },
+    {
+      "question": "What are the equations of uniform acceleration (SUVAT)?",
+      "answer": "v = u + at; s = ut + ½at²; v² = u² + 2as; s = (u+v)/2 × t. Where s = displacement, u = initial velocity, v = final velocity, a = acceleration, t = time.",
+      "topic": "Kinematics",
+      "importance": "high",
+      "source_line": "Kinematics — SUVAT equations"
+    },
+    {
+      "question": "What is the difference between series and parallel circuits?",
+      "answer": "Series: same current flows through all components; total resistance = R₁+R₂+... Parallel: same voltage across all components; 1/R_total = 1/R₁+1/R₂+... Parallel circuits are used in household wiring.",
+      "topic": "Electricity",
+      "importance": "medium",
+      "source_line": "Electricity — Series and Parallel"
+    },
+    {
+      "question": "What is the Doppler effect?",
+      "answer": "The Doppler effect is the change in observed frequency of a wave when the source or observer moves relative to each other. Moving towards each other: higher frequency. Moving apart: lower frequency.",
+      "topic": "Waves",
+      "importance": "medium",
+      "source_line": "Waves — Doppler Effect"
+    },
+    {
+      "question": "State Newton's Third Law of Motion.",
+      "answer": "For every action, there is an equal and opposite reaction. When object A exerts a force on object B, object B exerts an equal and opposite force on object A simultaneously.",
+      "topic": "Mechanics",
+      "importance": "high",
+      "source_line": "Newton's Laws — Third Law"
+    },
+    {
+      "question": "What is power in physics?",
+      "answer": "Power is the rate of doing work or energy transfer: P = W/t = Fv. Unit: Watt (W) = Joule/second. 1 horsepower ≈ 746 W.",
+      "topic": "Energy",
+      "importance": "medium",
+      "source_line": "Mechanics — Power"
+    },
+    {
+      "question": "What is the photoelectric effect?",
+      "answer": "When light of sufficient frequency hits a metal surface, electrons are ejected. Einstein explained it by treating light as photons: E = hf. No electrons are emitted below the threshold frequency, regardless of intensity.",
+      "topic": "Modern Physics",
+      "importance": "medium",
+      "source_line": "Modern Physics — Photoelectric Effect"
+    },
+    {
+      "question": "What is Faraday's Law of electromagnetic induction?",
+      "answer": "An EMF is induced in a conductor whenever the magnetic flux through it changes. EMF = -dΦ/dt (Faraday's law). The negative sign reflects Lenz's law (induced EMF opposes the change causing it).",
+      "topic": "Electromagnetism",
+      "importance": "medium",
+      "source_line": "Electromagnetism — Faraday's Law"
+    },
+    {
+      "question": "What is the difference between transverse and longitudinal waves?",
+      "answer": "Transverse waves: particle displacement is perpendicular to wave propagation (e.g., light, water waves). Longitudinal waves: particle displacement is parallel to propagation (e.g., sound, P-waves).",
+      "topic": "Waves",
+      "importance": "medium",
+      "source_line": "Waves — Types of waves"
+    },
+    {
+      "question": "What is the de Broglie hypothesis?",
+      "answer": "Matter has wave-like properties. The de Broglie wavelength λ = h/p = h/mv, where h is Planck's constant and p is momentum. This was confirmed by electron diffraction experiments.",
+      "topic": "Modern Physics",
+      "importance": "low",
+      "source_line": "Modern Physics — Wave-particle duality"
+    },
+    {
+      "question": "What is the second law of thermodynamics?",
+      "answer": "Entropy of an isolated system never decreases; natural processes are irreversible and move towards greater disorder. Heat naturally flows from hot to cold, never the reverse without work being done.",
+      "topic": "Thermodynamics",
+      "importance": "medium",
+      "source_line": "Thermodynamics — Second Law"
+    },
+    {
+      "question": "What is the moment (torque) of a force?",
+      "answer": "Torque (τ) = r × F (or τ = rF sinθ). It is the tendency of a force to cause rotation about a pivot. SI unit: Newton-metre (N·m). The principle of moments: for equilibrium, sum of clockwise moments = sum of anticlockwise moments.",
+      "topic": "Mechanics",
+      "importance": "medium",
+      "source_line": "Mechanics — Torque"
+    }
+  ]
+}

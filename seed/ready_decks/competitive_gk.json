@@ -1,0 +1,181 @@
+{
+  "folder": "competitive",
+  "title": "GK — Science, Tech & Current Affairs",
+  "cards": [
+    {
+      "question": "What is India's first indigenously built aircraft carrier?",
+      "answer": "INS Vikrant (IAC-1) — commissioned in September 2022. Built at Cochin Shipyard Limited. Displaces about 45,000 tonnes and can carry MiG-29K fighter jets and various helicopters.",
+      "topic": "Defence & National Affairs",
+      "importance": "high",
+      "source_line": "GK — India Current Affairs"
+    },
+    {
+      "question": "What is artificial intelligence and which Indian law regulates AI currently?",
+      "answer": "AI is the simulation of human intelligence processes by machines, especially computer systems (learning, reasoning, self-correction). India does not have a dedicated AI law yet; the Digital Personal Data Protection Act (DPDPA) 2023 indirectly impacts AI via data privacy provisions.",
+      "topic": "Technology",
+      "importance": "high",
+      "source_line": "GK — AI and Indian Law"
+    },
+    {
+      "question": "What is the full form and purpose of ISRO?",
+      "answer": "Indian Space Research Organisation (est. 1969, HQ Bengaluru). Responsible for India's space programme. Notable achievements: Chandrayaan missions (Moon), Mangalyaan (Mars Orbiter Mission — first Asian country to succeed), Aditya-L1 (Sun observation, 2023).",
+      "topic": "Science & Technology",
+      "importance": "high",
+      "source_line": "GK — ISRO"
+    },
+    {
+      "question": "What is the G20 and which country holds the 2024 G20 presidency?",
+      "answer": "G20 (Group of Twenty) is an international forum of the world's major economies. India held the G20 presidency in 2023 (Summit in New Delhi). Brazil held the 2024 G20 presidency (Summit in Rio de Janeiro, November 2024).",
+      "topic": "International Affairs",
+      "importance": "high",
+      "source_line": "GK — G20"
+    },
+    {
+      "question": "What is the difference between renewable and non-renewable energy? Give Indian examples.",
+      "answer": "Renewable: naturally replenished (solar, wind, hydro, biomass). India is the 4th largest renewable energy country. Target: 500 GW by 2030. Non-renewable: finite resources (coal, oil, natural gas). India is the 2nd largest coal producer/consumer globally.",
+      "topic": "Environment & Energy",
+      "importance": "high",
+      "source_line": "GK — Energy"
+    },
+    {
+      "question": "What is the UPI (Unified Payments Interface)?",
+      "answer": "UPI is a real-time payment system developed by NPCI (National Payments Corporation of India) launched in 2016. It allows instant bank-to-bank money transfers via mobile. India processed over 100 billion UPI transactions in FY2023-24, making it the world's largest real-time payments system.",
+      "topic": "Technology",
+      "importance": "high",
+      "source_line": "GK — UPI and Fintech"
+    },
+    {
+      "question": "Who is the father of the Indian Constitution?",
+      "answer": "Dr. B. R. Ambedkar — chairman of the Drafting Committee. The Indian Constitution was adopted on November 26, 1949 (Constitution Day) and came into force on January 26, 1950 (Republic Day). It is the longest written constitution in the world.",
+      "topic": "Polity",
+      "importance": "high",
+      "source_line": "GK — Indian Constitution"
+    },
+    {
+      "question": "What is cloud computing and name the major cloud providers?",
+      "answer": "Cloud computing delivers computing services (servers, storage, databases, networking, software) over the internet on a pay-as-you-go basis. Major providers: AWS (Amazon), Microsoft Azure, Google Cloud Platform (GCP), IBM Cloud, Oracle Cloud. Key models: IaaS, PaaS, SaaS.",
+      "topic": "Technology",
+      "importance": "high",
+      "source_line": "GK — Cloud Computing"
+    },
+    {
+      "question": "What is the SDG (Sustainable Development Goals) and how many are there?",
+      "answer": "The UN's 17 Sustainable Development Goals (2015–2030) are a universal call to action: no poverty, zero hunger, good health, quality education, gender equality, clean water, affordable energy, decent work, innovation, reduced inequalities, sustainable cities, climate action, etc.",
+      "topic": "International Affairs",
+      "importance": "medium",
+      "source_line": "GK — UN SDGs"
+    },
+    {
+      "question": "What is blockchain technology?",
+      "answer": "A blockchain is a distributed, decentralised, immutable ledger of transactions across a network of computers. Each 'block' contains data + a hash of the previous block, making tampering evident. Used in: cryptocurrencies (Bitcoin), smart contracts, supply chain, NFTs.",
+      "topic": "Technology",
+      "importance": "medium",
+      "source_line": "GK — Blockchain"
+    },
+    {
+      "question": "What is the India Stack?",
+      "answer": "India Stack is the collection of open APIs that enable digital infrastructure in India: Aadhaar (identity), eKYC, eSign, DigiLocker (documents), UPI (payments), GSTN, and Account Aggregator. It powers India's digital public infrastructure model.",
+      "topic": "Technology",
+      "importance": "medium",
+      "source_line": "GK — India Stack"
+    },
+    {
+      "question": "What is the Paris Agreement and India's climate commitments?",
+      "answer": "The Paris Agreement (2015) is a UN treaty to limit global warming to 1.5-2°C. India's NDC commitments: reduce GDP emissions intensity by 45% by 2030, achieve 50% non-fossil electricity capacity by 2030, and reach net zero by 2070.",
+      "topic": "Environment & Energy",
+      "importance": "medium",
+      "source_line": "GK — Paris Agreement"
+    },
+    {
+      "question": "Who invented the World Wide Web (WWW)?",
+      "answer": "Sir Tim Berners-Lee invented the WWW in 1989 while at CERN. He proposed a hypertext system to share information among researchers. The first website (info.cern.ch) went live in 1991. Note: WWW ≠ Internet (the internet is the infrastructure; WWW is a service on it).",
+      "topic": "Technology",
+      "importance": "medium",
+      "source_line": "GK — History of Computing"
+    },
+    {
+      "question": "What is the NITI Aayog and how is it different from the Planning Commission?",
+      "answer": "NITI Aayog (National Institution for Transforming India, est. 2015) replaced the Planning Commission. Differences: NITI Aayog is a think tank/advisory body (no fund allocation powers), promotes cooperative federalism (states as partners), bottom-up approach vs top-down five-year plans.",
+      "topic": "Polity",
+      "importance": "medium",
+      "source_line": "GK — NITI Aayog"
+    },
+    {
+      "question": "What is the difference between RAM and ROM?",
+      "answer": "RAM (Random Access Memory): volatile, temporary storage used during program execution — data lost when power is off. ROM (Read-Only Memory): non-volatile, permanent storage with firmware. Modern: DRAM (main RAM), SRAM (cache), Flash/EEPROM (non-volatile programmable).",
+      "topic": "Technology",
+      "importance": "medium",
+      "source_line": "GK — Computer Hardware"
+    },
+    {
+      "question": "What is the Goods and Services Tax (GST) in India?",
+      "answer": "GST (launched July 2017) is a comprehensive, multi-stage, destination-based indirect tax that replaced multiple central and state taxes. Structure: CGST + SGST (intra-state), IGST (inter-state). GST Council sets rates. Five slabs: 0%, 5%, 12%, 18%, 28%.",
+      "topic": "Economy",
+      "importance": "medium",
+      "source_line": "GK — GST"
+    },
+    {
+      "question": "Which organisation regulates the banking sector in India?",
+      "answer": "The Reserve Bank of India (RBI), established in 1935, is India's central bank. It regulates the money supply, manages foreign exchange, supervises commercial banks, controls inflation (monetary policy), and acts as the government's banker and debt manager.",
+      "topic": "Economy",
+      "importance": "high",
+      "source_line": "GK — RBI and Banking"
+    },
+    {
+      "question": "What is quantum computing?",
+      "answer": "Quantum computing uses quantum mechanical phenomena (superposition, entanglement) to process information. Unlike classical bits (0 or 1), qubits can be both simultaneously. Offers exponential speedup for specific problems: factoring (Shor's algorithm), search (Grover's), drug discovery, optimisation.",
+      "topic": "Technology",
+      "importance": "low",
+      "source_line": "GK — Quantum Computing"
+    },
+    {
+      "question": "What is the One Nation One Ration Card scheme?",
+      "answer": "Launched in 2019, ONORC allows migrant workers and their families to access their entitled food grain from any Fair Price Shop (ration shop) anywhere in India using their existing ration card. Promotes food security and portability for migrant population.",
+      "topic": "Social Schemes",
+      "importance": "medium",
+      "source_line": "GK — Government Schemes"
+    },
+    {
+      "question": "What is the Chandrayaan-3 achievement?",
+      "answer": "Chandrayaan-3 successfully soft-landed on the Moon's south pole on August 23, 2023, making India the first country to land near the lunar south pole and the 4th country to achieve a soft lunar landing (after USA, USSR, China). Vikram lander and Pragyan rover operated for one lunar day (~14 Earth days).",
+      "topic": "Science & Technology",
+      "importance": "high",
+      "source_line": "GK — Chandrayaan-3"
+    },
+    {
+      "question": "What are the fundamental rights guaranteed by the Indian Constitution?",
+      "answer": "Articles 12-35 of Part III guarantee 6 fundamental rights: 1) Right to Equality (14-18), 2) Right to Freedom (19-22), 3) Right against Exploitation (23-24), 4) Right to Freedom of Religion (25-28), 5) Cultural and Educational Rights (29-30), 6) Right to Constitutional Remedies (32) — Dr Ambedkar called this the 'heart and soul' of the Constitution.",
+      "topic": "Polity",
+      "importance": "high",
+      "source_line": "GK — Fundamental Rights"
+    },
+    {
+      "question": "What is the Internet of Things (IoT)?",
+      "answer": "IoT refers to the network of physical objects ('things') embedded with sensors, software, and connectivity to collect and exchange data over the internet. Examples: smart home devices, wearables, industrial sensors, connected cars. Security and privacy are major concerns.",
+      "topic": "Technology",
+      "importance": "medium",
+      "source_line": "GK — IoT"
+    },
+    {
+      "question": "What is the full form of NATO and who are its members?",
+      "answer": "NATO: North Atlantic Treaty Organisation (est. 1949). A military alliance of 32 member countries (as of 2024, including Sweden). Article 5: an attack on one member is an attack on all (collective defence). HQ: Brussels, Belgium.",
+      "topic": "International Affairs",
+      "importance": "medium",
+      "source_line": "GK — NATO"
+    },
+    {
+      "question": "What is 5G technology and its advantage over 4G?",
+      "answer": "5G is the 5th generation of mobile network technology. Key improvements over 4G: speed (up to 10-100x faster, ~10 Gbps peak), ultra-low latency (<1ms), massive device connectivity (IoT), better network slicing. India launched 5G in October 2022 with Airtel and Jio.",
+      "topic": "Technology",
+      "importance": "medium",
+      "source_line": "GK — 5G"
+    },
+    {
+      "question": "What is the Green Revolution in India?",
+      "answer": "The Green Revolution (1960s-70s) dramatically increased food production in India through high-yielding variety (HYV) seeds, irrigation expansion, and chemical fertilisers. M.S. Swaminathan is the 'Father of Green Revolution in India.' Punjab, Haryana, and western UP saw the greatest gains. India went from food importer to self-sufficient.",
+      "topic": "Science & Technology",
+      "importance": "medium",
+      "source_line": "GK — Green Revolution"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 from app import create_app
-from app.models import Deck, User, UserDeck, db
+from app.models import Card, Deck, User, UserDeck, db
 
 
 def test_health_returns_ok(client):
@@ -102,6 +102,24 @@ def test_csrf_is_on_outside_tests(tmp_path):
     app = create_app({"SQLALCHEMY_DATABASE_URI": f"sqlite:///{tmp_path / 'csrf.db'}"})
     response = app.test_client().post("/login", data={"email": "a@b.co", "password": "x"})
     assert response.status_code == 400
+
+
+def test_ready_deck_add_can_limit_question_count(app, client, make_user):
+    user_id = make_user()
+    with app.app_context():
+        deck = Deck(title="Sample Deck", folder="semester", is_ready=True)
+        db.session.add(deck)
+        db.session.flush()
+        for i in range(5):
+            db.session.add(Card(deck_id=deck.id, question=f"Q{i}", answer=f"A{i}", topic="Math"))
+        db.session.commit()
+        deck_id = deck.id
+
+    client.post("/login", data={"email": "riya@example.com", "password": "password123"})
+    response = client.post(f"/decks/ready/{deck_id}/add", data={"question_count": "3"})
+    assert response.status_code == 302
+    with client.session_transaction() as session:
+        assert session.get("deck_question_counts", {}).get(str(deck_id)) == 3
 
 
 def test_unknown_page_shows_friendly_404(client):

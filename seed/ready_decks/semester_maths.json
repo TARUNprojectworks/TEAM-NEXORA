@@ -1,0 +1,181 @@
+{
+  "folder": "semester",
+  "title": "Maths — Calculus & Algebra",
+  "cards": [
+    {
+      "question": "What is the derivative of xⁿ?",
+      "answer": "d/dx(xⁿ) = nxⁿ⁻¹ (Power Rule). Example: d/dx(x³) = 3x².",
+      "topic": "Calculus",
+      "importance": "high",
+      "source_line": "Differentiation — Power Rule"
+    },
+    {
+      "question": "What is the chain rule?",
+      "answer": "If y = f(g(x)), then dy/dx = f'(g(x)) · g'(x). Example: d/dx(sin(x²)) = cos(x²) · 2x.",
+      "topic": "Calculus",
+      "importance": "high",
+      "source_line": "Differentiation — Chain Rule"
+    },
+    {
+      "question": "What is the fundamental theorem of calculus?",
+      "answer": "Part 1: If F(x) = ∫ₐˣ f(t)dt, then F'(x) = f(x). Part 2: ∫ₐᵇ f(x)dx = F(b) - F(a), where F is any antiderivative of f. Connects differentiation and integration.",
+      "topic": "Calculus",
+      "importance": "high",
+      "source_line": "Integration — Fundamental Theorem"
+    },
+    {
+      "question": "What is the quadratic formula?",
+      "answer": "For ax² + bx + c = 0, x = (-b ± √(b²-4ac)) / 2a. The discriminant b²-4ac determines the nature of roots: >0 (two real roots), =0 (one real root), <0 (two complex roots).",
+      "topic": "Algebra",
+      "importance": "high",
+      "source_line": "Algebra — Quadratic Formula"
+    },
+    {
+      "question": "What is the product rule for differentiation?",
+      "answer": "If y = u·v, then dy/dx = u·(dv/dx) + v·(du/dx). Example: d/dx(x²·sinx) = x²cosx + 2x sinx.",
+      "topic": "Calculus",
+      "importance": "high",
+      "source_line": "Differentiation — Product Rule"
+    },
+    {
+      "question": "What is the quotient rule?",
+      "answer": "If y = u/v, then dy/dx = (v·du/dx - u·dv/dx) / v². Mnemonic: 'low d-high minus high d-low, over the square of what's below'.",
+      "topic": "Calculus",
+      "importance": "high",
+      "source_line": "Differentiation — Quotient Rule"
+    },
+    {
+      "question": "What are the derivatives of sin(x) and cos(x)?",
+      "answer": "d/dx(sin x) = cos x; d/dx(cos x) = -sin x; d/dx(tan x) = sec²x. The derivatives cycle: sin → cos → -sin → -cos → sin...",
+      "topic": "Calculus",
+      "importance": "high",
+      "source_line": "Differentiation — Trigonometric functions"
+    },
+    {
+      "question": "What is integration by parts?",
+      "answer": "∫u dv = uv - ∫v du. Choose u and dv using LIATE: Logarithmic, Inverse trig, Algebraic, Trigonometric, Exponential. Example: ∫x·eˣdx = xeˣ - eˣ + C.",
+      "topic": "Calculus",
+      "importance": "high",
+      "source_line": "Integration — By Parts"
+    },
+    {
+      "question": "What is a limit and how is it defined?",
+      "answer": "lim(x→a) f(x) = L means f(x) approaches L as x approaches a. Formally (ε-δ definition): for every ε>0, there exists δ>0 such that |x-a|<δ implies |f(x)-L|<ε.",
+      "topic": "Calculus",
+      "importance": "high",
+      "source_line": "Calculus — Limits"
+    },
+    {
+      "question": "What is the binomial theorem?",
+      "answer": "(a+b)ⁿ = Σₖ₌₀ⁿ C(n,k)·aⁿ⁻ᵏ·bᵏ, where C(n,k) = n!/(k!(n-k)!). Example: (a+b)² = a² + 2ab + b².",
+      "topic": "Algebra",
+      "importance": "high",
+      "source_line": "Algebra — Binomial Theorem"
+    },
+    {
+      "question": "What is a matrix and how is matrix multiplication performed?",
+      "answer": "A matrix is a rectangular array of numbers. For A (m×n) × B (n×p), element C[i][j] = Σₖ A[i][k]·B[k][j]. Matrix multiplication is only valid when number of columns in A = rows in B.",
+      "topic": "Linear Algebra",
+      "importance": "high",
+      "source_line": "Linear Algebra — Matrix Multiplication"
+    },
+    {
+      "question": "What is the determinant of a 2×2 matrix?",
+      "answer": "det([[a,b],[c,d]]) = ad - bc. The determinant tells us if the matrix is invertible (det ≠ 0) and represents the scaling factor of the linear transformation.",
+      "topic": "Linear Algebra",
+      "importance": "high",
+      "source_line": "Linear Algebra — Determinants"
+    },
+    {
+      "question": "What is L'Hôpital's Rule?",
+      "answer": "If lim f(x)/g(x) gives 0/0 or ∞/∞ form, then lim f(x)/g(x) = lim f'(x)/g'(x) (provided the latter limit exists). Apply repeatedly if needed.",
+      "topic": "Calculus",
+      "importance": "medium",
+      "source_line": "Calculus — L'Hôpital's Rule"
+    },
+    {
+      "question": "What is the integral of 1/x?",
+      "answer": "∫(1/x)dx = ln|x| + C. More generally, ∫xⁿdx = xⁿ⁺¹/(n+1) + C for n ≠ -1.",
+      "topic": "Calculus",
+      "importance": "medium",
+      "source_line": "Integration — Standard integrals"
+    },
+    {
+      "question": "What are arithmetic and geometric progressions?",
+      "answer": "AP: aₙ = a + (n-1)d; Sum Sₙ = n/2·(2a+(n-1)d). GP: aₙ = a·rⁿ⁻¹; Sum Sₙ = a(rⁿ-1)/(r-1) for r≠1. a = first term, d = common difference, r = common ratio.",
+      "topic": "Sequences",
+      "importance": "high",
+      "source_line": "Sequences — AP and GP"
+    },
+    {
+      "question": "What is Euler's formula?",
+      "answer": "eⁱᶿ = cos θ + i sin θ. For θ = π: eⁱᵖ + 1 = 0 (Euler's identity, often called the most beautiful equation in mathematics).",
+      "topic": "Complex Numbers",
+      "importance": "medium",
+      "source_line": "Complex Numbers — Euler's Formula"
+    },
+    {
+      "question": "What is a Taylor series?",
+      "answer": "f(x) = f(a) + f'(a)(x-a) + f''(a)(x-a)²/2! + ... = Σₙ₌₀∞ f⁽ⁿ⁾(a)(x-a)ⁿ/n!. For a=0 it's a Maclaurin series. Common: eˣ = 1+x+x²/2!+...; sin x = x-x³/3!+...",
+      "topic": "Calculus",
+      "importance": "medium",
+      "source_line": "Calculus — Taylor Series"
+    },
+    {
+      "question": "What is a function being continuous vs differentiable?",
+      "answer": "A function is continuous at x=a if lim(x→a)f(x) = f(a). It is differentiable at x=a if f'(a) exists. Differentiability implies continuity, but continuity does NOT imply differentiability (e.g., f(x) = |x| at x=0).",
+      "topic": "Calculus",
+      "importance": "medium",
+      "source_line": "Calculus — Continuity and Differentiability"
+    },
+    {
+      "question": "What is the mean value theorem?",
+      "answer": "If f is continuous on [a,b] and differentiable on (a,b), then there exists c ∈ (a,b) such that f'(c) = (f(b)-f(a))/(b-a). The instantaneous rate equals the average rate at some point.",
+      "topic": "Calculus",
+      "importance": "medium",
+      "source_line": "Calculus — Mean Value Theorem"
+    },
+    {
+      "question": "What is the determinant condition for system of equations to have a unique solution?",
+      "answer": "The system Ax = b has a unique solution if and only if det(A) ≠ 0 (A is invertible/non-singular). If det(A) = 0, the system has either no solution or infinitely many solutions.",
+      "topic": "Linear Algebra",
+      "importance": "medium",
+      "source_line": "Linear Algebra — Linear systems"
+    },
+    {
+      "question": "What is permutation vs combination?",
+      "answer": "Permutation P(n,r) = n!/(n-r)! — ordered arrangements of r items from n. Combination C(n,r) = n!/(r!(n-r)!) — unordered selections. Use combinations when order doesn't matter.",
+      "topic": "Combinatorics",
+      "importance": "high",
+      "source_line": "Combinatorics — Permutation and Combination"
+    },
+    {
+      "question": "What is the integral ∫eˣ dx?",
+      "answer": "∫eˣ dx = eˣ + C. Also: ∫eᵃˣ dx = eᵃˣ/a + C. The exponential function is its own derivative and integral.",
+      "topic": "Calculus",
+      "importance": "medium",
+      "source_line": "Integration — Exponential integral"
+    },
+    {
+      "question": "What are eigenvalues and eigenvectors?",
+      "answer": "For matrix A, if Av = λv (v ≠ 0), then λ is an eigenvalue and v is its eigenvector. Found by solving det(A - λI) = 0. Eigenvectors only scale under the transformation, they don't rotate.",
+      "topic": "Linear Algebra",
+      "importance": "medium",
+      "source_line": "Linear Algebra — Eigenvalues and Eigenvectors"
+    },
+    {
+      "question": "What is the formula for the sum of an infinite geometric series?",
+      "answer": "S∞ = a/(1-r), valid only when |r| < 1. If |r| ≥ 1, the series diverges. Example: 1 + 1/2 + 1/4 + ... = 1/(1-0.5) = 2.",
+      "topic": "Sequences",
+      "importance": "medium",
+      "source_line": "Sequences — Infinite GP sum"
+    },
+    {
+      "question": "What is Bayes' theorem?",
+      "answer": "P(A|B) = P(B|A)·P(A) / P(B). It updates the probability of event A given evidence B. P(A) = prior, P(A|B) = posterior, P(B|A) = likelihood.",
+      "topic": "Probability",
+      "importance": "medium",
+      "source_line": "Probability — Bayes' Theorem"
+    }
+  ]
+}

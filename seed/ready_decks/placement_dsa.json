@@ -1,0 +1,181 @@
+{
+  "folder": "placement",
+  "title": "DSA — Arrays, Trees & Sorting",
+  "cards": [
+    {
+      "question": "What is the time complexity of binary search?",
+      "answer": "O(log n) time, O(1) space (iterative). Binary search requires a sorted array and halves the search space each step. Worst case: ⌊log₂ n⌋ + 1 comparisons.",
+      "topic": "Searching",
+      "importance": "high",
+      "source_line": "DSA — Binary Search"
+    },
+    {
+      "question": "What is the time and space complexity of merge sort?",
+      "answer": "Time: O(n log n) always (best, average, worst). Space: O(n) auxiliary space for temporary arrays. It is a stable, divide-and-conquer sort — preferred when stability matters.",
+      "topic": "Sorting",
+      "importance": "high",
+      "source_line": "DSA — Merge Sort"
+    },
+    {
+      "question": "What is the difference between a stack and a queue?",
+      "answer": "Stack: LIFO (Last In First Out) — push/pop at the top. Queue: FIFO (First In First Out) — enqueue at rear, dequeue at front. Stack use: function calls, undo. Queue use: BFS, task scheduling.",
+      "topic": "Data Structures",
+      "importance": "high",
+      "source_line": "DSA — Stack vs Queue"
+    },
+    {
+      "question": "What is the time complexity of quicksort?",
+      "answer": "Average: O(n log n). Worst case: O(n²) with poor pivot choice (e.g., sorted array + first element as pivot). Best case: O(n log n). Space: O(log n) for call stack. In practice, fastest for large random data.",
+      "topic": "Sorting",
+      "importance": "high",
+      "source_line": "DSA — Quick Sort"
+    },
+    {
+      "question": "What is a binary search tree (BST)?",
+      "answer": "A BST is a binary tree where for every node: left subtree has smaller values, right subtree has larger values. Search, insert, delete: O(h) where h = height. Balanced BST → O(log n); skewed → O(n).",
+      "topic": "Trees",
+      "importance": "high",
+      "source_line": "DSA — Binary Search Tree"
+    },
+    {
+      "question": "What is BFS vs DFS?",
+      "answer": "BFS (Breadth-First Search): explores level by level using a queue. O(V+E). Finds shortest path in unweighted graphs. DFS (Depth-First Search): explores as deep as possible using stack/recursion. O(V+E). Used for topological sort, cycle detection.",
+      "topic": "Graphs",
+      "importance": "high",
+      "source_line": "DSA — BFS vs DFS"
+    },
+    {
+      "question": "What is dynamic programming?",
+      "answer": "DP is an optimisation technique: solve complex problems by breaking them into overlapping subproblems, storing results (memoisation/tabulation) to avoid recomputation. Key: optimal substructure + overlapping subproblems.",
+      "topic": "Dynamic Programming",
+      "importance": "high",
+      "source_line": "DSA — Dynamic Programming"
+    },
+    {
+      "question": "What is the difference between a linked list and an array?",
+      "answer": "Array: contiguous memory, O(1) random access, O(n) insert/delete (middle). Linked List: non-contiguous nodes, O(n) access, O(1) insert/delete (with pointer). Use arrays for random access; linked lists for frequent insertions/deletions.",
+      "topic": "Data Structures",
+      "importance": "high",
+      "source_line": "DSA — Array vs Linked List"
+    },
+    {
+      "question": "What is a heap and what are its operations?",
+      "answer": "A heap is a complete binary tree satisfying the heap property. Min-heap: parent ≤ children. Max-heap: parent ≥ children. Operations: insert O(log n), extract-min/max O(log n), peek O(1). Used in priority queues and heap sort.",
+      "topic": "Data Structures",
+      "importance": "high",
+      "source_line": "DSA — Heap"
+    },
+    {
+      "question": "What is the two-pointer technique?",
+      "answer": "Two pointers start at different positions (e.g., both ends) and move toward each other or in the same direction. Useful for sorted arrays: pair sum, removing duplicates, container with most water. Time: O(n), Space: O(1).",
+      "topic": "Arrays",
+      "importance": "high",
+      "source_line": "DSA — Two Pointer"
+    },
+    {
+      "question": "What is a hash table and what is its complexity?",
+      "answer": "A hash table maps keys to values via a hash function. Average: O(1) insert, delete, search. Worst case (all collisions): O(n). Collision resolution: chaining (linked lists) or open addressing (linear/quadratic probing).",
+      "topic": "Data Structures",
+      "importance": "high",
+      "source_line": "DSA — Hash Table"
+    },
+    {
+      "question": "What is Dijkstra's algorithm used for?",
+      "answer": "Dijkstra's finds the shortest path from a single source to all nodes in a weighted graph with non-negative edge weights. Time: O((V+E) log V) with a min-heap. Doesn't work with negative edges — use Bellman-Ford instead.",
+      "topic": "Graphs",
+      "importance": "high",
+      "source_line": "DSA — Dijkstra's Algorithm"
+    },
+    {
+      "question": "What is the sliding window technique?",
+      "answer": "Maintain a window (subarray/substring) that slides over data. Use for problems like maximum sum subarray of size k, longest substring without repeating characters. Converts O(n²) brute force to O(n).",
+      "topic": "Arrays",
+      "importance": "high",
+      "source_line": "DSA — Sliding Window"
+    },
+    {
+      "question": "What is an AVL tree?",
+      "answer": "A self-balancing BST where the height difference (balance factor) between left and right subtrees is at most 1 for every node. Rotations (LL, RR, LR, RL) maintain balance. All operations: O(log n).",
+      "topic": "Trees",
+      "importance": "medium",
+      "source_line": "DSA — AVL Tree"
+    },
+    {
+      "question": "What is the time complexity of bubble sort?",
+      "answer": "Best: O(n) (already sorted, with early termination). Average and Worst: O(n²). Space: O(1). Stable sort. Only useful for educational purposes; inefficient for large datasets.",
+      "topic": "Sorting",
+      "importance": "medium",
+      "source_line": "DSA — Bubble Sort"
+    },
+    {
+      "question": "What is memoisation vs tabulation (in DP)?",
+      "answer": "Memoisation (top-down): recursive approach that caches results of subproblems. Tabulation (bottom-up): iterative approach that fills a table from base cases up. Both give the same complexity; tabulation avoids stack overflow.",
+      "topic": "Dynamic Programming",
+      "importance": "medium",
+      "source_line": "DSA — Memoisation vs Tabulation"
+    },
+    {
+      "question": "What is in-order traversal of a BST?",
+      "answer": "In-order traversal (Left → Root → Right) visits BST nodes in ascending sorted order. Pre-order (Root → Left → Right) is used to copy trees. Post-order (Left → Right → Root) is used to delete trees.",
+      "topic": "Trees",
+      "importance": "medium",
+      "source_line": "DSA — Tree Traversal"
+    },
+    {
+      "question": "What is the knapsack problem?",
+      "answer": "0/1 Knapsack: given items with weights and values, find the max value that fits in a knapsack of capacity W (each item used at most once). DP solution: O(nW) time and space. Fractional knapsack is solved greedily.",
+      "topic": "Dynamic Programming",
+      "importance": "medium",
+      "source_line": "DSA — Knapsack Problem"
+    },
+    {
+      "question": "What is the difference between min-heap and max-heap?",
+      "answer": "Min-heap: the root is the smallest element; every parent ≤ its children. Max-heap: the root is the largest element; every parent ≥ its children. Used in priority queues — min-heap for shortest path, max-heap for k-th largest problems.",
+      "topic": "Data Structures",
+      "importance": "medium",
+      "source_line": "DSA — Min vs Max Heap"
+    },
+    {
+      "question": "What is topological sort and when is it used?",
+      "answer": "Topological sort gives a linear ordering of vertices in a Directed Acyclic Graph (DAG) such that for every edge u→v, u comes before v. Used for: task scheduling, build dependencies, course prerequisites. Algorithms: Kahn's (BFS) or DFS-based.",
+      "topic": "Graphs",
+      "importance": "medium",
+      "source_line": "DSA — Topological Sort"
+    },
+    {
+      "question": "What is the longest common subsequence (LCS) problem?",
+      "answer": "LCS finds the longest sequence present in both strings without changing order of characters. DP solution: O(m·n) time and space, where m and n are string lengths. Example: LCS of 'ABCBDAB' and 'BDCABA' is 'BCBA' (length 4).",
+      "topic": "Dynamic Programming",
+      "importance": "medium",
+      "source_line": "DSA — LCS"
+    },
+    {
+      "question": "What is a trie?",
+      "answer": "A trie (prefix tree) stores strings by sharing common prefixes. Insert/Search/Delete: O(L) where L = word length. Space: O(ALPHABET_SIZE × N × L). Used for: autocomplete, spell check, prefix search.",
+      "topic": "Data Structures",
+      "importance": "medium",
+      "source_line": "DSA — Trie"
+    },
+    {
+      "question": "What is Floyd-Warshall algorithm?",
+      "answer": "Floyd-Warshall finds shortest paths between all pairs of vertices in a weighted graph. Time: O(V³), Space: O(V²). Works with negative edges (but not negative cycles). For single-source shortest path, use Dijkstra's or Bellman-Ford.",
+      "topic": "Graphs",
+      "importance": "low",
+      "source_line": "DSA — Floyd-Warshall"
+    },
+    {
+      "question": "What is the difference between stable and unstable sorting algorithms?",
+      "answer": "Stable sort: preserves the relative order of equal elements. Stable: Merge sort, Bubble sort, Insertion sort. Unstable: Quick sort, Heap sort, Selection sort. Stability matters when sorting objects by multiple keys.",
+      "topic": "Sorting",
+      "importance": "medium",
+      "source_line": "DSA — Sorting stability"
+    },
+    {
+      "question": "What is Kadane's algorithm?",
+      "answer": "Kadane's algorithm finds the maximum subarray sum in O(n) time. Track current_sum = max(element, current_sum + element); update max_sum at each step. Works for arrays with negative numbers too.",
+      "topic": "Arrays",
+      "importance": "high",
+      "source_line": "DSA — Kadane's Algorithm"
+    }
+  ]
+}

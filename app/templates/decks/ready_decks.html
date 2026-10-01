@@ -1,0 +1,332 @@
+{% extends "base.html" %}
+{% block title %}Choose a Deck · Nexora Recall{% endblock %}
+
+{% block content %}
+<div class="deck-selection-page">
+
+  {# ---------- Welcome Header ---------- #}
+  <div class="learning-header">
+    <div class="welcome-badge">AI-Powered Learning</div>
+    <h1 class="welcome-title">Welcome back, {{ user.name.split(' ')[0] if user.name else 'Learner' }} 👋</h1>
+    <p class="welcome-subtitle">Choose what you want to learn today and master concepts with active recall.</p>
+  </div>
+
+  {# ---------- Search & Filter Bar ---------- #}
+  <div class="controls-toolbar">
+    <div class="search-box">
+      <span class="search-icon" aria-hidden="true">🔍</span>
+      <input type="text" id="deck-search" class="search-input"
+             placeholder="Search decks by title or keyword..."
+             aria-label="Search decks">
+    </div>
+
+    <div class="category-filters" role="tablist" aria-label="Category Filters">
+      {% for f in filters %}
+        <button type="button" class="filter-chip {% if f.active %}active{% endif %}"
+                data-filter="{{ f.key }}" onclick="applyFilter('{{ f.key }}', this)">
+          {{ f.name }}
+        </button>
+      {% endfor %}
+    </div>
+  </div>
+
+  {# ---------- Decks Grid ---------- #}
+  <div class="decks-grid" id="decks-grid">
+    {% for deck in decks %}
+      <div class="deck-card-saas" data-filter="{{ deck.category_filter }}"
+           data-title="{{ deck.title|lower }}" data-desc="{{ deck.description|lower }}"
+           onclick="openDeckOverview({{ deck|tojson|forceescape }})">
+
+        <div class="deck-card-top">
+          <div class="deck-category-header">
+            <span class="category-icon">{{ deck.category_icon }}</span>
+            <span class="category-name">{{ deck.category|upper }}</span>
+          </div>
+          <span class="difficulty-badge difficulty-{{ deck.difficulty|lower }}">
+            {{ deck.difficulty }}
+          </span>
+        </div>
+
+        <div class="deck-card-middle">
+          <h2 class="deck-title">{{ deck.title }}</h2>
+          <p class="deck-description">{{ deck.description }}</p>
+        </div>
+
+        <div class="deck-meta-row">
+          <span class="meta-tag">📄 {{ deck.card_count }} Cards</span>
+          <span class="meta-tag">⏱️ ~{{ deck.est_minutes }} min</span>
+        </div>
+
+        <div class="deck-progress-section">
+          <div class="progress-label-row">
+            <span class="progress-title">Progress</span>
+            <span class="progress-value">{{ deck.progress_percent }}%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width: {{ deck.progress_percent }}%;"></div>
+          </div>
+        </div>
+
+        <div class="deck-card-bottom">
+          <span class="last-studied">🕒 {{ deck.last_studied }}</span>
+          <button type="button" class="btn-card-action btn-card-action--{{ deck.status }}">
+            {{ deck.action_label }}
+          </button>
+        </div>
+
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="no-results-state" id="no-results" style="display: none;">
+    <span class="no-results-icon">🔎</span>
+    <h3>No matching decks found</h3>
+    <p>Try searching for a different term or selecting another category filter.</p>
+  </div>
+
+</div>
+
+{# ---------- Deck Overview Modal ---------- #}
+<div class="modal-overlay" id="deck-overview-modal" role="dialog" aria-modal="true" hidden>
+  <div class="modal-box modal-box--overview">
+    <button type="button" class="btn-modal-close" onclick="closeDeckOverview()" aria-label="Close">✕</button>
+
+    <div class="overview-header">
+      <span class="overview-icon" id="overview-icon">🧮</span>
+      <div>
+        <h2 class="overview-title" id="overview-title">Pipes & Cisterns</h2>
+        <div class="overview-tags">
+          <span class="badge-category" id="overview-category">Aptitude</span>
+          <span class="badge-bullet">•</span>
+          <span class="badge-difficulty" id="overview-difficulty">Medium</span>
+          <span class="badge-bullet">•</span>
+          <span class="badge-time" id="overview-time">~10 min</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="overview-progress-card">
+      <div class="overview-progress-header">
+        <span>Completion Progress</span>
+        <strong id="overview-progress-pct">70%</strong>
+      </div>
+      <div class="overview-progress-track">
+        <div class="overview-progress-fill" id="overview-progress-fill" style="width: 70%;"></div>
+      </div>
+      <div class="overview-meta-sub" id="overview-last-studied">Last studied: Yesterday</div>
+    </div>
+
+    <div class="overview-completed-banner" id="overview-completed-banner" style="display: none;">
+      <span class="completed-icon">🎉</span>
+      <div>
+        <strong>Deck Completed!</strong>
+        <p>You have practiced all cards in this deck.</p>
+      </div>
+    </div>
+
+    <div class="overview-body">
+      <h3 class="overview-section-title">What you'll learn:</h3>
+      <ul class="overview-learn-list" id="overview-learn-list">
+        <!-- Dynamically injected -->
+      </ul>
+    </div>
+
+    <div class="overview-picker">
+      <label for="overview-question-count">Questions to study</label>
+      <select id="overview-question-count" class="field-input">
+        <option value="all">All questions</option>
+      </select>
+    </div>
+
+    <div class="overview-footer">
+      <div class="overview-actions-primary">
+        <a href="#" class="btn btn-primary btn-block" id="overview-start-btn">
+          Continue Learning
+        </a>
+      </div>
+      <div class="overview-actions-secondary">
+        <a href="#" class="btn btn-ghost btn-sm" id="overview-restart-btn">
+          Start From Beginning
+        </a>
+        <button type="button" class="btn btn-secondary btn-sm" id="overview-fresh-btn" onclick="generateFreshFromModal()">
+          ✨ Generate Fresh Questions
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let activeFilter = 'all';
+  let activeDeckData = null;
+
+  // Search filter
+  document.getElementById('deck-search').addEventListener('input', function(e) {
+    applySearchAndFilter();
+  });
+
+  function applyFilter(key, btnEl) {
+    activeFilter = key;
+    document.querySelectorAll('.filter-chip').forEach(el => el.classList.remove('active'));
+    if (btnEl) btnEl.classList.add('active');
+    applySearchAndFilter();
+  }
+
+  function applySearchAndFilter() {
+    const query = document.getElementById('deck-search').value.toLowerCase().trim();
+    const cards = document.querySelectorAll('.deck-card-saas');
+    let visibleCount = 0;
+
+    cards.forEach(card => {
+      const cardFilter = card.getAttribute('data-filter');
+      const title = card.getAttribute('data-title');
+      const desc = card.getAttribute('data-desc');
+
+      const matchesFilter = (activeFilter === 'all' || cardFilter === activeFilter);
+      const matchesSearch = (!query || title.includes(query) || desc.includes(query));
+
+      if (matchesFilter && matchesSearch) {
+        card.style.display = 'flex';
+        visibleCount++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+
+    document.getElementById('no-results').style.display = (visibleCount === 0) ? 'block' : 'none';
+  }
+
+  function populateQuestionOptions(deck) {
+    const select = document.getElementById('overview-question-count');
+    const total = Number(deck.card_count || 0);
+    const presets = [5, 10, 15, 20, 25, 30, 40, 50, 75, 100];
+    const options = [];
+
+    presets.forEach(value => {
+      if (value > 0 && value < total && !options.includes(value)) {
+        options.push(value);
+      }
+    });
+    if (total > 0 && !options.includes(total)) {
+      options.push(total);
+    }
+
+    select.innerHTML = '';
+    if (total > 0) {
+      const allOption = document.createElement('option');
+      allOption.value = 'all';
+      allOption.textContent = `All ${total} questions`;
+      select.appendChild(allOption);
+    }
+
+    options.forEach(value => {
+      const option = document.createElement('option');
+      option.value = String(value);
+      option.textContent = `${value} questions`;
+      select.appendChild(option);
+    });
+
+    if (total > 0) {
+      select.value = 'all';
+    }
+  }
+
+  function openDeckOverview(deck) {
+    activeDeckData = deck;
+
+    document.getElementById('overview-icon').textContent = deck.category_icon || '📖';
+    document.getElementById('overview-title').textContent = deck.title;
+    document.getElementById('overview-category').textContent = deck.category;
+    document.getElementById('overview-difficulty').textContent = deck.difficulty;
+    document.getElementById('overview-time').textContent = `${deck.card_count} Cards • ~${deck.est_minutes} min`;
+
+    document.getElementById('overview-progress-pct').textContent = `${deck.progress_percent}%`;
+    document.getElementById('overview-progress-fill').style.width = `${deck.progress_percent}%`;
+    document.getElementById('overview-last-studied').textContent = `🕒 ${deck.last_studied}`;
+
+    // Completed state
+    const isCompleted = (deck.progress_percent >= 100);
+    document.getElementById('overview-completed-banner').style.display = isCompleted ? 'flex' : 'none';
+
+    // Learn list
+    const listEl = document.getElementById('overview-learn-list');
+    listEl.innerHTML = '';
+    (deck.topics || []).forEach(t => {
+      const li = document.createElement('li');
+      li.textContent = t;
+      listEl.appendChild(li);
+    });
+
+    populateQuestionOptions(deck);
+
+    const startBtn = document.getElementById('overview-start-btn');
+    if (isCompleted) {
+      startBtn.textContent = 'Review Cards';
+    } else if (deck.progress_percent > 0) {
+      startBtn.textContent = 'Continue Learning →';
+    } else {
+      startBtn.textContent = 'Start Learning →';
+    }
+
+    const updateStudyLink = () => {
+      const selected = document.getElementById('overview-question-count').value;
+      const suffix = (selected === 'all' || !selected) ? '' : `?question_count=${selected}`;
+      startBtn.href = `/study/${deck.id}${suffix}`;
+      document.getElementById('overview-restart-btn').href = `/study/${deck.id}${suffix}`;
+    };
+
+    document.getElementById('overview-question-count').onchange = updateStudyLink;
+    updateStudyLink();
+
+    document.getElementById('deck-overview-modal').hidden = false;
+    document.body.classList.add('modal-open');
+  }
+
+  function closeDeckOverview() {
+    document.getElementById('deck-overview-modal').hidden = true;
+    document.body.classList.remove('modal-open');
+  }
+
+  function generateFreshFromModal() {
+    if (!activeDeckData) return;
+    const btn = document.getElementById('overview-fresh-btn');
+    btn.disabled = true;
+    btn.textContent = '✨ Generating...';
+
+    fetch(`/study/${activeDeckData.id}/generate-fresh`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token() }}'
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        alert(`🎉 ${data.message}`);
+        window.location.href = `/study/${activeDeckData.id}`;
+      } else {
+        alert("Failed to generate fresh questions.");
+        btn.disabled = false;
+        btn.textContent = '✨ Generate Fresh Questions';
+      }
+    })
+    .catch(err => {
+      alert("Error generating questions.");
+      btn.disabled = false;
+      btn.textContent = '✨ Generate Fresh Questions';
+    });
+  }
+
+  // Close modal on click outside or escape
+  document.getElementById('deck-overview-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeDeckOverview();
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeDeckOverview();
+  });
+</script>
+{% endblock %}

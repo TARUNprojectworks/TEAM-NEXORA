@@ -1,0 +1,181 @@
+{
+  "folder": "competitive",
+  "title": "Reasoning — Logical & Verbal",
+  "cards": [
+    {
+      "question": "What is a syllogism? Solve: All cats are animals. All animals are living beings. Conclusion: All cats are living beings.",
+      "answer": "A syllogism is a deductive argument with two premises and a conclusion. This conclusion is VALID — using transitivity: if All A→B and All B→C, then All A→C. All cats→animals→living beings, so All cats→living beings.",
+      "topic": "Syllogisms",
+      "importance": "high",
+      "source_line": "Reasoning — Syllogisms"
+    },
+    {
+      "question": "What is the seating arrangement approach for circular arrangements?",
+      "answer": "For circular arrangements with n people, relative positions matter — fix one person and arrange the rest: (n-1)! ways. For clockwise and anticlockwise same: (n-1)!/2. In linear arrangements it's n!.",
+      "topic": "Arrangements",
+      "importance": "high",
+      "source_line": "Reasoning — Circular Arrangements"
+    },
+    {
+      "question": "If BOOK is coded as 2-15-15-11, what is the code for PENCIL?",
+      "answer": "The coding maps letters to their position in alphabet (A=1, B=2,...). P=16, E=5, N=14, C=3, I=9, L=12. So PENCIL = 16-5-14-3-9-12.",
+      "topic": "Coding & Decoding",
+      "importance": "high",
+      "source_line": "Reasoning — Coding Decoding"
+    },
+    {
+      "question": "What is the blood relation problem approach?",
+      "answer": "Draw a family tree step by step for each statement. Key terms: paternal (father's side), maternal (mother's side). Siblings share both parents. Use M/F labels. 'A is the son of B's father's wife' → B's father's wife = B's mother → A is B's brother (or B himself).",
+      "topic": "Blood Relations",
+      "importance": "high",
+      "source_line": "Reasoning — Blood Relations"
+    },
+    {
+      "question": "Direction sense: A person walks 10m north, turns right and walks 5m, turns right and walks 10m. How far and in what direction from the start?",
+      "answer": "Start at O. Goes 10m North to A. Turns right (East) and walks 5m to B. Turns right (South) and walks 10m to C. C is 5m East of O. Distance = 5m, Direction = East.",
+      "topic": "Direction Sense",
+      "importance": "high",
+      "source_line": "Reasoning — Direction Sense"
+    },
+    {
+      "question": "Number analogy: 4:16::7:?",
+      "answer": "Pattern: 4² = 16, so 7² = 49. The answer is 49. Always identify the relationship between the first pair and apply it to the second.",
+      "topic": "Analogies",
+      "importance": "high",
+      "source_line": "Reasoning — Number Analogies"
+    },
+    {
+      "question": "What is the odd one out approach?",
+      "answer": "Find the element that doesn't share the common property with the others. Check: shape, colour, number of sides, alphabetical pattern, mathematical relationship, category. Always justify your answer explicitly.",
+      "topic": "Classification",
+      "importance": "medium",
+      "source_line": "Reasoning — Odd One Out"
+    },
+    {
+      "question": "Input-Output machine: +2, ×3, -1. Input = 5. Output?",
+      "answer": "Step 1: 5 + 2 = 7. Step 2: 7 × 3 = 21. Step 3: 21 - 1 = 20. For reverse (find input given output), reverse the steps with inverse operations: +1, ÷3, -2.",
+      "topic": "Input Output",
+      "importance": "medium",
+      "source_line": "Reasoning — Input Output"
+    },
+    {
+      "question": "Logical reasoning: If all squares are rectangles and some rectangles are circles, can we conclude some squares are circles?",
+      "answer": "NO. The 'some' quantifier doesn't give enough information. The circles that are some rectangles may or may not overlap with squares. We cannot conclude — this is a common trap in syllogisms with 'some'.",
+      "topic": "Syllogisms",
+      "importance": "high",
+      "source_line": "Reasoning — Syllogism traps"
+    },
+    {
+      "question": "Matrix reasoning: Find the missing element in a 3×3 matrix [2,4,8; 3,9,27; 5,25,?]",
+      "answer": "Pattern: each row follows n, n², n³. Row 1: 2,4,8. Row 2: 3,9,27. Row 3: 5,25,125. Missing = 125.",
+      "topic": "Matrix Reasoning",
+      "importance": "medium",
+      "source_line": "Reasoning — Matrix"
+    },
+    {
+      "question": "Verbal analogy: Doctor:Hospital::Teacher:?",
+      "answer": "Doctor works in a Hospital; Teacher works in a School. The relationship is 'professional:place of work'. Answer: School.",
+      "topic": "Analogies",
+      "importance": "medium",
+      "source_line": "Reasoning — Verbal Analogies"
+    },
+    {
+      "question": "Statement: All birds can fly. Assumption 1: Penguin is not a bird. Is the assumption implicit?",
+      "answer": "Yes. Since the statement says all birds can fly and penguins cannot fly, the assumption that penguins are not birds must be implicit for the statement to hold true without contradiction.",
+      "topic": "Assumptions",
+      "importance": "medium",
+      "source_line": "Reasoning — Statement and Assumption"
+    },
+    {
+      "question": "A is taller than B. C is taller than D. B is taller than D. Who is the shortest?",
+      "answer": "From the clues: A > B, C > D, B > D. So: A > B > D, C > D. D is shorter than B and C. D is the shortest. (We cannot compare A and C without more info.)",
+      "topic": "Ranking",
+      "importance": "medium",
+      "source_line": "Reasoning — Rankings"
+    },
+    {
+      "question": "What is the cause and effect reasoning approach?",
+      "answer": "Identify if one statement is the cause and the other the effect. Ask: Does statement A naturally lead to statement B? Reverse it — does B lead to A? Independent events are neither. Common cause: both effects may stem from a third cause.",
+      "topic": "Cause and Effect",
+      "importance": "medium",
+      "source_line": "Reasoning — Cause and Effect"
+    },
+    {
+      "question": "Clock problems: What is the angle between the hands of a clock at 3:30?",
+      "answer": "Hour hand at 3:30 = (3×30 + 30×0.5) = 90+15 = 105°. Minute hand at 30 min = 30×6 = 180°. Angle between = |180 - 105| = 75°.",
+      "topic": "Clock Problems",
+      "importance": "medium",
+      "source_line": "Reasoning — Clocks"
+    },
+    {
+      "question": "Calendar problem: What day is January 1, 2100?",
+      "answer": "Use odd days method: 2100 is not a leap year (divisible by 100 but not 400). Count odd days from a reference date. Alternatively, recall Jan 1 2023 was Sunday; add total days modulo 7 to find the day.",
+      "topic": "Calendar",
+      "importance": "low",
+      "source_line": "Reasoning — Calendar"
+    },
+    {
+      "question": "Venn diagram: In a group of 100, 70 speak English, 60 speak Hindi. Both speak at least one. How many speak both?",
+      "answer": "n(E∪H) = n(E) + n(H) - n(E∩H) → 100 = 70 + 60 - x → x = 30. 30 people speak both languages.",
+      "topic": "Venn Diagrams",
+      "importance": "high",
+      "source_line": "Reasoning — Venn Diagrams"
+    },
+    {
+      "question": "Letter series: A, C, F, J, O, ?",
+      "answer": "Differences in positions: C-A=2, F-C=3, J-F=4, O-J=5, next gap=6. O is 15th letter; 15+6=21st letter = U. Answer: U.",
+      "topic": "Series",
+      "importance": "medium",
+      "source_line": "Reasoning — Letter Series"
+    },
+    {
+      "question": "Critical reasoning: 'We should ban all social media to reduce cyberbullying.' What is the strongest counter-argument?",
+      "answer": "Banning all social media is too extreme a measure that would eliminate its many legitimate benefits (communication, education, business) and may not even solve cyberbullying, which can occur on other platforms. Less restrictive measures (moderation, laws) are more proportionate.",
+      "topic": "Critical Reasoning",
+      "importance": "medium",
+      "source_line": "Reasoning — Critical Reasoning"
+    },
+    {
+      "question": "What is the approach to solve seating arrangement (linear)?",
+      "answer": "1) List all constraints. 2) Find the most constrained positions first. 3) Use a row of blanks and place fixed relationships. 4) Eliminate contradictions. 5) Consider multiple valid arrangements and check all conditions. Practice: draw the row, not just mental models.",
+      "topic": "Arrangements",
+      "importance": "high",
+      "source_line": "Reasoning — Linear Seating"
+    },
+    {
+      "question": "Number series: 1, 1, 2, 3, 5, 8, 13, ?",
+      "answer": "This is the Fibonacci sequence — each number is the sum of the two preceding ones: 1+1=2, 1+2=3, 2+3=5, 3+5=8, 5+8=13, 8+13=21. Answer: 21.",
+      "topic": "Series",
+      "importance": "high",
+      "source_line": "Reasoning — Fibonacci Series"
+    },
+    {
+      "question": "Cubes problem: A 3×3×3 cube is painted on all faces and cut into 27 unit cubes. How many have paint on exactly 2 faces?",
+      "answer": "Edge cubes (not corners) have exactly 2 painted faces. A 3×3×3 cube has 12 edges, each with 1 middle cube. So 12 cubes have exactly 2 painted faces. (Corner cubes = 3 faces; face centre = 1 face; inner cube = 0 faces.)",
+      "topic": "Cubes",
+      "importance": "medium",
+      "source_line": "Reasoning — Cubes"
+    },
+    {
+      "question": "What is a conclusion vs an inference in logical reasoning?",
+      "answer": "Conclusion: a statement that must definitely follow from the given statements (100% certain). Inference: a statement that probably follows but may not be definitive. In reasoning questions, look for what is necessarily true, not just possibly true.",
+      "topic": "Syllogisms",
+      "importance": "medium",
+      "source_line": "Reasoning — Conclusion vs Inference"
+    },
+    {
+      "question": "Missing character: Find ? in [3, 7, 13, 21, 31, ?]",
+      "answer": "Differences: 4, 6, 8, 10, 12. Second differences are all 2 (constant) — arithmetic sequence of differences. Next difference = 12, so ? = 31 + 12 = 43.",
+      "topic": "Series",
+      "importance": "medium",
+      "source_line": "Reasoning — Missing Number"
+    },
+    {
+      "question": "Pipes problem reasoning: If A fills in 6h and B fills in 4h, and C empties in 12h, find time to fill the tank with all three open.",
+      "answer": "Net rate = 1/6 + 1/4 - 1/12 = 2/12 + 3/12 - 1/12 = 4/12 = 1/3. Time to fill = 3 hours.",
+      "topic": "Work & Time",
+      "importance": "medium",
+      "source_line": "Reasoning — Pipes"
+    }
+  ]
+}

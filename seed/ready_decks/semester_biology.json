@@ -1,0 +1,181 @@
+{
+  "folder": "semester",
+  "title": "Biology — Cell & Genetics",
+  "cards": [
+    {
+      "question": "What is the powerhouse of the cell?",
+      "answer": "The mitochondrion. It generates most of the cell's supply of ATP through cellular respiration (oxidative phosphorylation on the inner membrane).",
+      "topic": "Cell Biology",
+      "importance": "high",
+      "source_line": "Cell organelles — Mitochondria"
+    },
+    {
+      "question": "What are the four types of macromolecules found in living organisms?",
+      "answer": "Carbohydrates, Lipids, Proteins, and Nucleic Acids (DNA & RNA).",
+      "topic": "Biomolecules",
+      "importance": "high",
+      "source_line": "Biochemistry — Macromolecules"
+    },
+    {
+      "question": "What is the difference between mitosis and meiosis?",
+      "answer": "Mitosis produces 2 genetically identical diploid daughter cells (for growth/repair). Meiosis produces 4 genetically unique haploid cells (for sexual reproduction).",
+      "topic": "Cell Division",
+      "importance": "high",
+      "source_line": "Cell division — Mitosis vs Meiosis"
+    },
+    {
+      "question": "What is the central dogma of molecular biology?",
+      "answer": "DNA → (Transcription) → mRNA → (Translation) → Protein. Genetic information flows from DNA to RNA to protein.",
+      "topic": "Molecular Biology",
+      "importance": "high",
+      "source_line": "Molecular Biology — Central Dogma"
+    },
+    {
+      "question": "What is a dominant vs recessive allele?",
+      "answer": "A dominant allele (A) masks the expression of a recessive allele (a) when both are present (Aa = dominant phenotype). Two copies of the recessive allele (aa) are needed to express the recessive phenotype.",
+      "topic": "Genetics",
+      "importance": "high",
+      "source_line": "Mendelian Genetics — Alleles"
+    },
+    {
+      "question": "What is the role of ribosomes?",
+      "answer": "Ribosomes are the site of protein synthesis (translation). They read mRNA codons and assemble amino acids into polypeptide chains.",
+      "topic": "Cell Biology",
+      "importance": "high",
+      "source_line": "Cell organelles — Ribosomes"
+    },
+    {
+      "question": "What is osmosis?",
+      "answer": "The movement of water molecules across a semi-permeable membrane from a region of lower solute concentration (higher water potential) to higher solute concentration (lower water potential).",
+      "topic": "Cell Transport",
+      "importance": "high",
+      "source_line": "Cell transport — Osmosis"
+    },
+    {
+      "question": "What is the difference between prokaryotic and eukaryotic cells?",
+      "answer": "Prokaryotes lack a membrane-bound nucleus and organelles (e.g., bacteria). Eukaryotes have a nucleus and membrane-bound organelles (e.g., plant/animal cells).",
+      "topic": "Cell Biology",
+      "importance": "high",
+      "source_line": "Cell types — Prokaryote vs Eukaryote"
+    },
+    {
+      "question": "What is photosynthesis and where does it occur?",
+      "answer": "Photosynthesis converts CO₂ + H₂O + light energy into glucose + O₂. It occurs in the chloroplasts (light reactions in thylakoid membranes; Calvin cycle in stroma).",
+      "topic": "Photosynthesis",
+      "importance": "high",
+      "source_line": "Plant biology — Photosynthesis"
+    },
+    {
+      "question": "What is Mendel's Law of Segregation?",
+      "answer": "Each organism carries two alleles for each trait. These alleles separate (segregate) during gamete formation, so each gamete carries only one allele for each trait.",
+      "topic": "Genetics",
+      "importance": "high",
+      "source_line": "Mendelian Genetics — Law of Segregation"
+    },
+    {
+      "question": "What are stem cells?",
+      "answer": "Undifferentiated cells capable of self-renewal and differentiation into specialised cell types. Embryonic stem cells are pluripotent; adult stem cells are multipotent.",
+      "topic": "Cell Biology",
+      "importance": "medium",
+      "source_line": "Cell biology — Stem cells"
+    },
+    {
+      "question": "What is the function of the endoplasmic reticulum (ER)?",
+      "answer": "Rough ER (with ribosomes) synthesises and processes proteins. Smooth ER synthesises lipids and detoxifies chemicals. Both transport materials via vesicles.",
+      "topic": "Cell Biology",
+      "importance": "medium",
+      "source_line": "Cell organelles — ER"
+    },
+    {
+      "question": "What is the role of the Golgi apparatus?",
+      "answer": "The Golgi apparatus modifies, packages, and ships proteins and lipids to their final destinations (secretion, lysosomes, plasma membrane).",
+      "topic": "Cell Biology",
+      "importance": "medium",
+      "source_line": "Cell organelles — Golgi"
+    },
+    {
+      "question": "What is a codon?",
+      "answer": "A sequence of three nucleotides on mRNA that specifies one amino acid (or a start/stop signal) during translation. There are 64 possible codons.",
+      "topic": "Molecular Biology",
+      "importance": "medium",
+      "source_line": "Molecular biology — Genetic code"
+    },
+    {
+      "question": "What are the phases of the cell cycle?",
+      "answer": "Interphase (G1 → S → G2) followed by M phase (Mitosis + Cytokinesis). S phase = DNA replication. G1 and G2 are growth phases.",
+      "topic": "Cell Division",
+      "importance": "medium",
+      "source_line": "Cell division — Cell cycle"
+    },
+    {
+      "question": "What is a mutation?",
+      "answer": "A permanent change in the DNA sequence. Types include point mutations (single base change), insertions, deletions, and chromosomal mutations. Mutations can be silent, missense, or nonsense.",
+      "topic": "Genetics",
+      "importance": "medium",
+      "source_line": "Genetics — Mutations"
+    },
+    {
+      "question": "What is the difference between active and passive transport?",
+      "answer": "Passive transport moves substances down their concentration gradient without energy (diffusion, osmosis, facilitated diffusion). Active transport moves substances against the gradient and requires ATP.",
+      "topic": "Cell Transport",
+      "importance": "medium",
+      "source_line": "Cell transport — Active vs Passive"
+    },
+    {
+      "question": "What is the function of DNA polymerase?",
+      "answer": "DNA polymerase synthesises new DNA strands by adding nucleotides complementary to the template strand during DNA replication. It reads 3'→5' and builds 5'→3'.",
+      "topic": "Molecular Biology",
+      "importance": "medium",
+      "source_line": "Molecular biology — DNA Replication"
+    },
+    {
+      "question": "What is natural selection?",
+      "answer": "The process by which organisms with heritable traits better suited to the environment survive and reproduce more, passing those traits to offspring — the key mechanism of evolution.",
+      "topic": "Evolution",
+      "importance": "medium",
+      "source_line": "Evolution — Natural Selection"
+    },
+    {
+      "question": "What is the difference between DNA and RNA?",
+      "answer": "DNA: double-stranded, deoxyribose sugar, bases A/T/G/C, stores genetic information. RNA: single-stranded, ribose sugar, bases A/U/G/C, involved in protein synthesis (mRNA, tRNA, rRNA).",
+      "topic": "Molecular Biology",
+      "importance": "high",
+      "source_line": "Molecular biology — DNA vs RNA"
+    },
+    {
+      "question": "What is an enzyme and how does it work?",
+      "answer": "An enzyme is a biological catalyst (usually protein) that speeds up chemical reactions by lowering activation energy. The substrate binds to the active site forming an enzyme-substrate complex.",
+      "topic": "Biochemistry",
+      "importance": "high",
+      "source_line": "Biochemistry — Enzymes"
+    },
+    {
+      "question": "What is Hardy-Weinberg equilibrium?",
+      "answer": "A population is in H-W equilibrium when allele and genotype frequencies remain constant across generations. Conditions: no mutation, random mating, no natural selection, no gene flow, large population.",
+      "topic": "Evolution",
+      "importance": "low",
+      "source_line": "Population genetics — Hardy-Weinberg"
+    },
+    {
+      "question": "What is Mendel's Law of Independent Assortment?",
+      "answer": "Alleles of different genes assort independently during gamete formation, so the inheritance of one trait doesn't influence another — provided genes are on different chromosomes.",
+      "topic": "Genetics",
+      "importance": "medium",
+      "source_line": "Mendelian Genetics — Law of Independent Assortment"
+    },
+    {
+      "question": "What is crossing over and when does it occur?",
+      "answer": "Crossing over is the exchange of genetic material between homologous chromosomes. It occurs during Prophase I of meiosis and increases genetic diversity.",
+      "topic": "Cell Division",
+      "importance": "medium",
+      "source_line": "Meiosis — Crossing over"
+    },
+    {
+      "question": "What are the products of glycolysis?",
+      "answer": "Glycolysis breaks one glucose (6C) into two pyruvate (3C) molecules, producing a net gain of 2 ATP and 2 NADH. It occurs in the cytoplasm.",
+      "topic": "Cellular Respiration",
+      "importance": "high",
+      "source_line": "Cellular respiration — Glycolysis"
+    }
+  ]
+}
