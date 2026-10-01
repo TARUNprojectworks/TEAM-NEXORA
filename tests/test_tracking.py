@@ -103,6 +103,33 @@ def test_weakest_topics_highlights_the_fixer_target(app, riya_client, riya):
     assert "DNA" not in page.split("Weakest topics")[1].split("Study calendar")[0]
 
 
+def test_resolved_uses_the_same_line_as_the_engine(app, riya_client, riya):
+    from app import engine
+    _, card_ids = add_deck(app, riya, ["Cells"] * 2)
+    set_progress(app, riya, card_ids[0], shelf=engine.RESOLVED_SHELF - 1, misconceptions=1)
+    set_progress(app, riya, card_ids[1], shelf=engine.RESOLVED_SHELF, misconceptions=1)
+    assert data(riya_client)["misconceptions"] == {"found": 2, "resolved": 1, "open": 1}
+
+
+def test_weakest_topics_count_only_open_misconceptions(app, riya_client, riya):
+    _, card_ids = add_deck(app, riya, ["Cells"] * 4)
+    set_progress(app, riya, card_ids[0], shelf=1, misconceptions=1)   # open
+    set_progress(app, riya, card_ids[1], shelf=2, misconceptions=1)   # open
+    set_progress(app, riya, card_ids[2], shelf=4, misconceptions=3)   # resolved
+    set_progress(app, riya, card_ids[3], shelf=5)
+    page = riya_client.get("/tracking/").get_data(as_text=True)
+    assert "2 open misconceptions" in page
+
+
+def test_topic_with_only_resolved_misconceptions_is_not_weak(app, riya_client, riya):
+    _, card_ids = add_deck(app, riya, ["Processes"] * 3)
+    for card_id in card_ids:
+        set_progress(app, riya, card_id, shelf=4, misconceptions=1)
+    weakest = riya_client.get("/tracking/").get_data(as_text=True).split("Weakest topics")[1].split("Study calendar")[0]
+    assert "Processes" not in weakest
+    assert "No weak topics yet" in weakest
+
+
 def test_calendar_counts_answers_per_day(app, riya_client, riya):
     _, card_ids = add_deck(app, riya, ["Cells"])
     yesterday = today_local() - timedelta(days=1)

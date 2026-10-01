@@ -164,6 +164,30 @@ def test_misconception_adds_3_once():
     assert many == one
 
 
+def test_resolved_misconception_gets_no_bonus():
+    # Same shelf, one card never wrong, one card a misconception now back on shelf 3.
+    never_wrong = engine.priority_score(progress(shelf=3), card(), TODAY)
+    resolved = engine.priority_score(progress(shelf=3, misconceptions=2), card(), TODAY)
+    assert resolved == never_wrong
+
+
+def test_open_misconception_on_shelf_2_still_gets_the_bonus():
+    plain = engine.priority_score(progress(shelf=2), card(), TODAY)
+    still_open = engine.priority_score(progress(shelf=2, misconceptions=1), card(), TODAY)
+    assert still_open - plain == 3
+
+
+@pytest.mark.parametrize("count, shelf, expected", [
+    (0, 1, False),   # never a misconception
+    (1, 1, True),    # just got it wrong while sure
+    (2, 2, True),    # known once since, not yet relearned
+    (1, 3, False),   # back on shelf 3: resolved
+    (3, 5, False),
+])
+def test_is_open_misconception(count, shelf, expected):
+    assert engine.is_open_misconception(count, shelf) is expected
+
+
 def test_new_card_scores_like_a_fresh_shelf_1_card():
     assert engine.priority_score(None, card(importance="high"), TODAY) == 10 + 6
 
@@ -265,9 +289,23 @@ def test_highest_weak_score_wins():
     assert engine.find_weak_topic(cards) == (1, "DNA")
 
 
-def test_two_misconception_cards_trigger_even_with_a_low_weak_score():
-    cards = [seen(1, "Cells", 3, misconceptions=1), seen(1, "Cells", 4, misconceptions=2), seen(1, "Cells", 5)]
+def test_two_open_misconception_cards_trigger_even_with_a_low_weak_score():
+    cards = [
+        seen(1, "Cells", 1, misconceptions=1), seen(1, "Cells", 2, misconceptions=2),
+        seen(1, "Cells", 5), seen(1, "Cells", 5), seen(1, "Cells", 5),
+    ]  # weak score 2/5 = 0.4, below 0.5, so only the misconception rule can fire
     assert engine.find_weak_topic(cards) == (1, "Cells")
+
+
+def test_resolved_misconceptions_do_not_trigger():
+    # Both cards were misconceptions once, but they're back on shelf 3+.
+    cards = [seen(1, "Cells", 3, misconceptions=1), seen(1, "Cells", 4, misconceptions=2), seen(1, "Cells", 5)]
+    assert engine.find_weak_topic(cards) is None
+
+
+def test_one_open_and_one_resolved_misconception_is_not_enough():
+    cards = [seen(1, "Cells", 2, misconceptions=1), seen(1, "Cells", 3, misconceptions=1), seen(1, "Cells", 5)]
+    assert engine.find_weak_topic(cards) is None
 
 
 def test_one_misconception_card_is_not_enough():
@@ -278,7 +316,7 @@ def test_one_misconception_card_is_not_enough():
 def test_misconception_topic_wins_over_higher_weak_score():
     cards = [
         seen(1, "DNA", 1), seen(1, "DNA", 1), seen(1, "DNA", 1),                       # weak score 1.0
-        seen(2, "Friction", 4, 1), seen(2, "Friction", 3, 1), seen(2, "Friction", 5),  # 2 misconceptions
+        seen(2, "Friction", 1, 1), seen(2, "Friction", 2, 1), seen(2, "Friction", 5),  # 2 open misconceptions
     ]
     assert engine.find_weak_topic(cards) == (2, "Friction")
 
