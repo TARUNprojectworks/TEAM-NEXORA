@@ -380,6 +380,13 @@ fieldset.field legend { font-weight: 700; margin-bottom: 4px; padding: 0; }
 .card-meta { margin: 6px 0 0; font-size: 0.875rem; color: var(--ink-soft); }
 .card-actions { display: flex; gap: 8px; align-items: flex-start; }
 
+.deck-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
+
+.hidden-link { margin: 16px 0 0; }
+.hidden-cards { margin-top: 24px; }
+.hidden-cards h3 { margin-bottom: 4px; }
+.card-row-hidden .card-front { color: var(--ink-soft); font-weight: 400; }
+
 /* ---------- Card form ---------- */
 
 .tip { margin: 0 0 16px; padding-left: 10px; border-left: 3px solid var(--rule-blue); }
