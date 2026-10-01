@@ -1,0 +1,31 @@
+{
+  "title": "DSA Basics",
+  "folder": "placement",
+  "cards": [
+    {"question": "What is the time complexity of accessing an array element by index?", "answer": "O(1).", "topic": "Arrays and Lists", "importance": "medium"},
+    {"question": "What is the time complexity of inserting at the head of a singly linked list?", "answer": "O(1). Only the head pointer changes.", "topic": "Arrays and Lists", "importance": "medium"},
+    {"question": "How can you detect a cycle in a linked list?", "answer": "Floyd's tortoise and hare: move one pointer by 1 and another by 2. If they ever meet, there is a cycle.", "topic": "Arrays and Lists", "importance": "high"},
+    {"question": "How do a stack and a queue differ?", "answer": "A stack is LIFO (last in, first out). A queue is FIFO (first in, first out).", "topic": "Stacks and Queues", "importance": "high"},
+    {"question": "Why use a circular queue instead of a simple array queue?", "answer": "It reuses the empty slots left at the front after dequeues, so no space is wasted.", "topic": "Stacks and Queues", "importance": "low"},
+    {"question": "Which data structure is used to convert an infix expression to postfix?", "answer": "A stack (to hold operators and brackets).", "topic": "Stacks and Queues", "importance": "medium"},
+    {"question": "What is the time complexity of linear search?", "answer": "O(n).", "topic": "Searching", "importance": "low"},
+    {"question": "What is the time complexity of binary search, and what does it need?", "answer": "O(log n). The array must be sorted.", "topic": "Searching", "importance": "high"},
+    {"question": "What is the average time for a lookup in a hash table?", "answer": "O(1) on average. Worst case O(n) when many keys collide.", "topic": "Searching", "importance": "high"},
+    {"question": "What is the worst-case time complexity of bubble sort?", "answer": "O(n²).", "topic": "Sorting", "importance": "low"},
+    {"question": "What are the average and worst-case time complexities of quicksort?", "answer": "Average O(n log n). Worst O(n²), for example when the pivot is always the smallest or largest element.", "topic": "Sorting", "importance": "high"},
+    {"question": "What is the time and extra space of merge sort?", "answer": "O(n log n) time in all cases, and O(n) extra space. It is stable.", "topic": "Sorting", "importance": "high"},
+    {"question": "What does it mean for a sorting algorithm to be stable?", "answer": "Equal elements keep their original relative order after sorting.", "topic": "Sorting", "importance": "medium"},
+    {"question": "What is the maximum number of nodes at level k of a binary tree (root at level 0)?", "answer": "2^k.", "topic": "Trees", "importance": "medium"},
+    {"question": "How many edges does a tree with n nodes have?", "answer": "n − 1.", "topic": "Trees", "importance": "medium"},
+    {"question": "Which traversal of a binary search tree gives the keys in sorted order?", "answer": "Inorder traversal (left, root, right).", "topic": "Trees", "importance": "high"},
+    {"question": "What is the search time in a BST: balanced vs skewed?", "answer": "Balanced: O(log n). Skewed (like a linked list): O(n).", "topic": "Trees", "importance": "high"},
+    {"question": "In a min-heap, where is the smallest element and how long does insert take?", "answer": "At the root, read in O(1). Insert takes O(log n).", "topic": "Trees", "importance": "medium"},
+    {"question": "Which data structures do BFS and DFS use?", "answer": "BFS uses a queue. DFS uses a stack (or recursion).", "topic": "Graphs", "importance": "high"},
+    {"question": "How much space do an adjacency matrix and an adjacency list need?", "answer": "Matrix: O(V²). List: O(V + E).", "topic": "Graphs", "importance": "medium"},
+    {"question": "Why doesn't Dijkstra's algorithm work with negative edge weights?", "answer": "It assumes a node's distance is final once picked. A negative edge found later could make it shorter. Use Bellman-Ford instead.", "topic": "Graphs", "importance": "high"},
+    {"question": "On which kind of graph can you do a topological sort?", "answer": "A directed acyclic graph (DAG).", "topic": "Graphs", "importance": "medium"},
+    {"question": "What does every recursive function need, and what happens without it?", "answer": "A base case. Without it the calls never stop and the program fails with a stack overflow.", "topic": "Recursion and DP", "importance": "medium"},
+    {"question": "What is the time complexity of the naive recursive Fibonacci?", "answer": "Exponential, about O(2^n), because it solves the same subproblems again and again.", "topic": "Recursion and DP", "importance": "medium"},
+    {"question": "When can a problem be solved with dynamic programming?", "answer": "When it has overlapping subproblems and optimal substructure.", "topic": "Recursion and DP", "importance": "high"}
+  ]
+}

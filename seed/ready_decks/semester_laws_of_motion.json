@@ -1,0 +1,32 @@
+{
+  "title": "Laws of Motion",
+  "folder": "semester",
+  "cards": [
+    {"question": "State Newton's first law of motion.", "answer": "A body stays at rest, or keeps moving in a straight line at constant speed, unless a net external force acts on it. It is also called the law of inertia.", "topic": "Newton's Laws", "importance": "high"},
+    {"question": "What is the measure of a body's inertia?", "answer": "Its mass. More mass means more inertia.", "topic": "Newton's Laws", "importance": "medium"},
+    {"question": "State Newton's second law of motion.", "answer": "The net force on a body equals its rate of change of momentum: F = dp/dt. For constant mass, F = ma.", "topic": "Newton's Laws", "importance": "high"},
+    {"question": "State Newton's third law. Why don't action and reaction cancel each other?", "answer": "For every action there is an equal and opposite reaction. They don't cancel because they act on two different bodies.", "topic": "Newton's Laws", "importance": "high"},
+    {"question": "What is the SI unit of force?", "answer": "The newton (N). 1 N = 1 kg m/s².", "topic": "Newton's Laws", "importance": "low"},
+    {"question": "How many newtons is 1 kgf?", "answer": "About 9.8 N (1 kg × g).", "topic": "Newton's Laws", "importance": "low"},
+    {"question": "What is a pseudo force?", "answer": "A force we add when working in an accelerating (non-inertial) frame. It equals −ma, opposite to the frame's acceleration. Example: being pushed back when a bus speeds up.", "topic": "Newton's Laws", "importance": "medium"},
+    {"question": "Define momentum. What is its SI unit?", "answer": "Momentum p = mv. It is a vector, and its SI unit is kg m/s.", "topic": "Momentum", "importance": "medium"},
+    {"question": "What is impulse?", "answer": "Force × time for which it acts, F × Δt. It equals the change in momentum. SI unit: N s.", "topic": "Momentum", "importance": "medium"},
+    {"question": "Why does a cricketer pull the hands back while catching a ball?", "answer": "It increases the time taken to stop the ball, so the force on the hands is smaller, since F = Δp / Δt.", "topic": "Momentum", "importance": "medium"},
+    {"question": "State the law of conservation of momentum.", "answer": "If no net external force acts on a system, its total momentum stays constant.", "topic": "Momentum", "importance": "high"},
+    {"question": "Why does a gun recoil when fired?", "answer": "By conservation of momentum: the bullet gets forward momentum, so the gun gets equal momentum backward. Total momentum stays zero.", "topic": "Momentum", "importance": "medium"},
+    {"question": "What is the recoil velocity of a gun?", "answer": "v_gun = −(m_bullet × v_bullet) / m_gun. The minus sign shows it is opposite to the bullet.", "topic": "Momentum", "importance": "medium"},
+    {"question": "Which law explains rocket propulsion?", "answer": "Newton's third law (and conservation of momentum): the rocket pushes exhaust gases backward, and the gases push the rocket forward.", "topic": "Momentum", "importance": "low"},
+    {"question": "Which is larger: limiting static friction or kinetic friction?", "answer": "Limiting static friction. That is why it is harder to start pushing a box than to keep it moving.", "topic": "Friction", "importance": "high"},
+    {"question": "Why is static friction called self-adjusting?", "answer": "It grows to match the applied force, up to its maximum value μs × N. Beyond that, the body starts to slide.", "topic": "Friction", "importance": "medium"},
+    {"question": "What is the coefficient of friction?", "answer": "μ = friction force / normal reaction (f / N). It is a ratio, so it has no unit.", "topic": "Friction", "importance": "medium"},
+    {"question": "What is the angle of repose?", "answer": "The angle of an incline at which a body just begins to slide down. tan θ = μs.", "topic": "Friction", "importance": "medium"},
+    {"question": "Which is smaller: rolling friction or sliding friction?", "answer": "Rolling friction is much smaller, which is why wheels and ball bearings are used.", "topic": "Friction", "importance": "low"},
+    {"question": "What is the formula for centripetal force?", "answer": "F = mv² / r, directed towards the centre of the circle.", "topic": "Circular Motion", "importance": "high"},
+    {"question": "What provides the centripetal force for a car turning on a flat road?", "answer": "Friction between the tyres and the road.", "topic": "Circular Motion", "importance": "medium"},
+    {"question": "What is the angle of banking for a road with no friction?", "answer": "tan θ = v² / (r g).", "topic": "Circular Motion", "importance": "high"},
+    {"question": "What is the apparent weight of a person in a lift accelerating upward? And downward?", "answer": "Upward: m(g + a). Downward: m(g − a).", "topic": "Applications", "importance": "high"},
+    {"question": "What is the apparent weight of a body in free fall?", "answer": "Zero, because the body and its support both fall with acceleration g.", "topic": "Applications", "importance": "medium"},
+    {"question": "For a block on a smooth incline of angle θ, what are its acceleration and the normal force?", "answer": "Acceleration down the incline = g sin θ. Normal force = mg cos θ.", "topic": "Applications", "importance": "medium"},
+    {"question": "In an Atwood machine with masses m1 > m2, what are the acceleration and the tension?", "answer": "a = (m1 − m2) g / (m1 + m2). T = 2 m1 m2 g / (m1 + m2).", "topic": "Applications", "importance": "medium"}
+  ]
+}

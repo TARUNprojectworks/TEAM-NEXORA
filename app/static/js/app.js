@@ -1,6 +1,14 @@
 // Shared helpers for every page. Page-specific code goes in its own file
 // (flip.js, study.js, cardmaker.js).
 
+// Forms with data-confirm="..." ask before submitting (used for deletes).
+document.addEventListener("submit", function (event) {
+  const message = event.target.dataset.confirm;
+  if (message && !window.confirm(message)) {
+    event.preventDefault();
+  }
+});
+
 // POST JSON with the CSRF token in a header, as Flask-WTF expects.
 // Returns the parsed JSON reply, or throws an Error with a readable message.
 async function postJSON(url, data) {

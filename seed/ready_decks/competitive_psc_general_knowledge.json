@@ -1,0 +1,31 @@
+{
+  "title": "PSC General Knowledge",
+  "folder": "competitive",
+  "cards": [
+    {"question": "When was the state of Kerala formed?", "answer": "1 November 1956, under the States Reorganisation Act.", "topic": "Kerala", "importance": "high"},
+    {"question": "How many districts does Kerala have?", "answer": "14.", "topic": "Kerala", "importance": "medium"},
+    {"question": "Who was the first Chief Minister of Kerala?", "answer": "E. M. S. Namboodiripad, in 1957.", "topic": "Kerala", "importance": "high"},
+    {"question": "Which is the longest river in Kerala?", "answer": "Periyar, about 244 km long.", "topic": "Kerala", "importance": "high", "note": "CHECK: 244 km is the usual PSC figure, but some sources give a different length. Confirm against the PSC guide you use."},
+    {"question": "Which is the highest peak in Kerala, and where is it?", "answer": "Anamudi (2,695 m), in Eravikulam National Park, Idukki. It is also the highest peak in South India.", "topic": "Kerala", "importance": "medium"},
+    {"question": "Which is the largest lake in Kerala?", "answer": "Vembanad Lake.", "topic": "Kerala", "importance": "medium"},
+    {"question": "Where and when did Vasco da Gama land in Kerala?", "answer": "At Kappad, near Kozhikode (Calicut), in 1498.", "topic": "Kerala", "importance": "high"},
+    {"question": "What are Kerala's state animal and state bird?", "answer": "State animal: Indian elephant. State bird: great hornbill.", "topic": "Kerala", "importance": "low"},
+    {"question": "What is Kerala's state fish?", "answer": "Karimeen (pearl spot).", "topic": "Kerala", "importance": "low"},
+    {"question": "In which district is Silent Valley National Park?", "answer": "Palakkad.", "topic": "Kerala", "importance": "medium"},
+    {"question": "Where is the Kerala High Court, and which Union Territory also comes under it?", "answer": "Kochi (Ernakulam). It also covers Lakshadweep.", "topic": "Kerala", "importance": "medium"},
+    {"question": "What was the Vaikom Satyagraha?", "answer": "A 1924–25 movement for the right of all castes to use the roads around the Vaikom temple.", "topic": "Kerala", "importance": "high"},
+    {"question": "When was the Temple Entry Proclamation made, and by whom?", "answer": "In 1936, by Sree Chithira Thirunal Balarama Varma, Maharaja of Travancore.", "topic": "Kerala", "importance": "high"},
+    {"question": "Who is known as the father of the Malayalam language?", "answer": "Thunchath Ramanujan Ezhuthachan.", "topic": "Kerala", "importance": "medium"},
+    {"question": "What is Sree Narayana Guru's famous message?", "answer": "\"One caste, one religion, one God for man.\" He also inspired the founding of the SNDP Yogam in 1903.", "topic": "Kerala", "importance": "high", "note": "CHECK: confirm the exact English wording of the quote and the SNDP Yogam detail (he was its first president)."},
+    {"question": "When was the Indian Constitution adopted, and when did it come into force?", "answer": "Adopted on 26 November 1949. Came into force on 26 January 1950.", "topic": "Indian Constitution", "importance": "high"},
+    {"question": "Who chaired the Drafting Committee of the Indian Constitution?", "answer": "Dr B. R. Ambedkar.", "topic": "Indian Constitution", "importance": "medium"},
+    {"question": "What does Article 21 of the Constitution protect?", "answer": "The right to life and personal liberty.", "topic": "Indian Constitution", "importance": "high"},
+    {"question": "Which article gives the right to education, and for which ages?", "answer": "Article 21A, added by the 86th Amendment (2002): free and compulsory education for children aged 6 to 14.", "topic": "Indian Constitution", "importance": "high"},
+    {"question": "How were the Fundamental Duties added, and how many are there now?", "answer": "Added by the 42nd Amendment (1976) in Article 51A. There are 11 now; the 11th was added by the 86th Amendment (2002).", "topic": "Indian Constitution", "importance": "high"},
+    {"question": "Which is the largest Indian state by area?", "answer": "Rajasthan.", "topic": "Indian Geography", "importance": "medium"},
+    {"question": "Who wrote India's national song, Vande Mataram?", "answer": "Bankim Chandra Chattopadhyay, in his novel Anandamath.", "topic": "Indian History", "importance": "medium"},
+    {"question": "In which year did the First War of Indian Independence begin?", "answer": "1857.", "topic": "Indian History", "importance": "medium"},
+    {"question": "What was the Dandi March?", "answer": "Gandhi's Salt Satyagraha in 1930: a march from Sabarmati Ashram to Dandi (12 March to 6 April) to break the salt law.", "topic": "Indian History", "importance": "high"},
+    {"question": "Deficiency of which vitamin causes scurvy?", "answer": "Vitamin C.", "topic": "Science", "importance": "low"}
+  ]
+}

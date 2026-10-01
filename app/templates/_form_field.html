@@ -1,8 +1,18 @@
-{# One labelled form field with its errors. Include it inside {% for field in [...] %}. #}
+{# One labelled form field with its hint and errors. Include it inside {% for field in [...] %}. #}
+{% set hint_id = field.id ~ "-hint" if field.description else "" %}
+{% set error_id = field.id ~ "-error" if field.errors else "" %}
+{% set described_by = [hint_id, error_id] | select | join(" ") %}
 <div class="field">
   {{ field.label }}
-  {{ field(**({"aria-invalid": "true", "aria-describedby": field.id ~ "-error"} if field.errors else {})) }}
+  {% if field.description %}
+    <p class="field-hint" id="{{ hint_id }}">{{ field.description }}</p>
+  {% endif %}
   {% if field.errors %}
-    <p class="field-error" id="{{ field.id }}-error">{{ field.errors | join(" ") }}</p>
+    {{ field(**{"aria-invalid": "true", "aria-describedby": described_by}) }}
+    <p class="field-error" id="{{ error_id }}">{{ field.errors | join(" ") }}</p>
+  {% elif described_by %}
+    {{ field(**{"aria-describedby": described_by}) }}
+  {% else %}
+    {{ field() }}
   {% endif %}
 </div>

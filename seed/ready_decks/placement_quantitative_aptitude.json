@@ -1,0 +1,31 @@
+{
+  "title": "Quantitative Aptitude",
+  "folder": "placement",
+  "cards": [
+    {"question": "What is 20% of 150?", "answer": "30. (150 × 20 / 100)", "topic": "Percentages", "importance": "low"},
+    {"question": "15% of a number is 45. What is the number?", "answer": "300. (45 × 100 / 15)", "topic": "Percentages", "importance": "medium"},
+    {"question": "A price rises by 10% and then by 20%. What is the total increase?", "answer": "32%. (1.10 × 1.20 = 1.32)", "topic": "Percentages", "importance": "high"},
+    {"question": "The price of sugar rises by 25%. By how much must a family cut its use to keep spending the same?", "answer": "20%. (25 / 125 × 100)", "topic": "Percentages", "importance": "high"},
+    {"question": "An item bought for ₹400 is sold for ₹500. What is the profit percent?", "answer": "25%. (Profit 100 ÷ cost 400 × 100)", "topic": "Profit and Loss", "importance": "medium"},
+    {"question": "An item marked ₹1000 gets two successive discounts of 10%. What is the selling price?", "answer": "₹810. (1000 × 0.9 × 0.9)", "topic": "Profit and Loss", "importance": "high"},
+    {"question": "What is the simple interest on ₹5000 at 8% per year for 3 years?", "answer": "₹1200. (5000 × 8 × 3 / 100)", "topic": "Interest", "importance": "medium"},
+    {"question": "What is the compound interest on ₹10,000 at 10% per year for 2 years, compounded yearly?", "answer": "₹2100. (10000 × 1.1² = 12100, minus 10000)", "topic": "Interest", "importance": "high"},
+    {"question": "A sum doubles in 10 years at simple interest. What is the rate?", "answer": "10% per year. (Interest = principal, so R × 10 / 100 = 1)", "topic": "Interest", "importance": "medium"},
+    {"question": "A can do a job in 10 days and B in 15 days. How long will they take together?", "answer": "6 days. (1/10 + 1/15 = 1/6)", "topic": "Time and Work", "importance": "high"},
+    {"question": "Pipe A fills a tank in 12 hours; pipe B empties it in 18 hours. With both open, how long to fill it?", "answer": "36 hours. (1/12 − 1/18 = 1/36)", "topic": "Time and Work", "importance": "high"},
+    {"question": "Convert 72 km/h to m/s.", "answer": "20 m/s. (Multiply by 5/18)", "topic": "Speed and Distance", "importance": "medium"},
+    {"question": "A 200 m long train runs at 72 km/h. How long does it take to cross a pole?", "answer": "10 seconds. (200 m ÷ 20 m/s)", "topic": "Speed and Distance", "importance": "high"},
+    {"question": "A car goes from A to B at 40 km/h and returns at 60 km/h. What is the average speed?", "answer": "48 km/h. (2 × 40 × 60 / (40 + 60))", "topic": "Speed and Distance", "importance": "high"},
+    {"question": "A boat goes 10 km/h in still water and the stream flows at 2 km/h. What are its downstream and upstream speeds?", "answer": "Downstream 12 km/h, upstream 8 km/h.", "topic": "Speed and Distance", "importance": "medium"},
+    {"question": "What is the average of the first 10 natural numbers?", "answer": "5.5. (Sum 55 ÷ 10)", "topic": "Numbers", "importance": "low"},
+    {"question": "What is the sum of the first n natural numbers?", "answer": "n(n + 1) / 2.", "topic": "Numbers", "importance": "medium"},
+    {"question": "What are the HCF and LCM of 12 and 18?", "answer": "HCF = 6, LCM = 36.", "topic": "Numbers", "importance": "medium"},
+    {"question": "For two numbers, how are their product, HCF and LCM related?", "answer": "Product of the two numbers = HCF × LCM.", "topic": "Numbers", "importance": "high"},
+    {"question": "What is the divisibility rule for 9?", "answer": "A number is divisible by 9 if the sum of its digits is divisible by 9.", "topic": "Numbers", "importance": "low"},
+    {"question": "Divide 64 in the ratio 3 : 5.", "answer": "24 and 40. (8 parts, each part 8)", "topic": "Ratio", "importance": "medium"},
+    {"question": "If A : B = 2 : 3 and B : C = 4 : 5, what is A : B : C?", "answer": "8 : 12 : 15.", "topic": "Ratio", "importance": "high"},
+    {"question": "What is the angle between the clock hands at 3:15?", "answer": "7.5°. (Hour hand at 97.5°, minute hand at 90°)", "topic": "Clocks", "importance": "medium"},
+    {"question": "Two dice are thrown. What is the probability that the sum is 7?", "answer": "1/6. (6 favourable outcomes out of 36)", "topic": "Probability", "importance": "high"},
+    {"question": "In how many ways can the letters of LEVEL be arranged?", "answer": "30. (5! / (2! × 2!) = 120 / 4)", "topic": "Permutations", "importance": "medium"}
+  ]
+}

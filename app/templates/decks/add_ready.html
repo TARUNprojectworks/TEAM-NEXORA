@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Add {{ deck.title }} · Nexora Recall{% endblock %}
+{% block content %}
+<section class="narrow">
+  <h1>Add {{ deck.title }}</h1>
+  <form method="post" novalidate>
+    {{ form.hidden_tag() }}
+    {% include "decks/_exam_fields.html" %}
+    <div class="actions">
+      <button type="submit" class="button button-primary">Add to my decks</button>
+      <a class="button" href="{{ url_for('decks.ready_decks', folder=deck.folder) }}">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

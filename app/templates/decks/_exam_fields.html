@@ -1,0 +1,17 @@
+{# The exam question, shared by Add to my decks, Create My Own and the deck page. Needs `form` and `today`. #}
+<fieldset class="field">
+  <legend>{{ form.has_exam.label.text }}</legend>
+  <div class="options">
+    {% for option in form.has_exam %}
+      <label class="option">{{ option() }} {{ option.label.text }}</label>
+    {% endfor %}
+  </div>
+</fieldset>
+<div class="field">
+  {{ form.exam_date.label }}
+  <p class="field-hint" id="exam-date-hint">Only needed if you said Yes. Cards are timed to be ready before this date.</p>
+  {{ form.exam_date(min=today.isoformat(), **{"aria-describedby": "exam-date-hint"}) }}
+  {% if form.exam_date.errors %}
+    <p class="field-error">{{ form.exam_date.errors | join(" ") }}</p>
+  {% endif %}
+</div>
