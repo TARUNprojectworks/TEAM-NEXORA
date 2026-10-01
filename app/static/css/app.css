@@ -386,8 +386,108 @@ fieldset.field legend { font-weight: 700; margin-bottom: 4px; padding: 0; }
 .long-warning { margin: -8px 0 16px; padding: 6px 10px; background: var(--paper); border-left: 3px solid var(--ink-soft); }
 .field textarea { min-height: 96px; resize: vertical; font-family: var(--font-card); }
 
+/* ---------- Study ---------- */
+
+.study { max-width: 640px; margin: 0 auto; }
+
+.study-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.style-switch { display: flex; gap: 16px; margin-top: 4px; }
+.style-switch a { text-decoration: none; padding-bottom: 2px; border-bottom: 2px solid transparent; }
+.style-switch a[aria-current="page"] { font-weight: 700; border-bottom-color: var(--ink); }
+
+.session-progress { margin-bottom: 16px; }
+.progress-track { height: 10px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.progress-fill { height: 100%; background: var(--ink); transition: width 0.3s ease; }
+.progress-text { margin: 4px 0 0; color: var(--ink-soft); font-size: 0.9375rem; }
+
+.coming-back { margin: 0 0 12px; color: var(--ink-soft); }
+
+/* The flip: a real 3D turn. Both faces sit in the same grid cell,
+   so the card is as tall as its longer side. */
+.flip-card { perspective: 1400px; cursor: pointer; }
+.flip-inner {
+  display: grid;
+  transform-style: preserve-3d;
+  transition: transform 0.55s ease;
+}
+.flip-card.is-flipped .flip-inner { transform: rotateY(180deg); }
+.card-face {
+  grid-area: 1 / 1;
+  min-height: 280px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.card-face-back { transform: rotateY(180deg); }
+.card-face .card-text { font-size: 1.375rem; overflow-wrap: anywhere; }
+
+.flip-row { display: flex; align-items: center; gap: 10px; margin: 16px 0; }
+
+.key-hint {
+  display: inline-block;
+  min-width: 1.5em;
+  padding: 0 5px;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  text-align: center;
+  opacity: 0.75;
+}
+
+.answer-form { margin-top: 8px; }
+
+.confidence { border: 0; margin: 0 0 16px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.confidence legend { font-weight: 700; margin-bottom: 8px; padding: 0; }
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 2px solid var(--ink-soft);
+  border-radius: var(--radius);
+  background: var(--paper);
+  cursor: pointer;
+}
+.pill:has(input:checked) { border-color: var(--ink); background: #F2F5F7; font-weight: 700; }
+.pill:has(input:focus-visible) { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.answer-buttons { display: flex; flex-wrap: wrap; gap: 12px; }
+.answer-buttons .button { min-width: 160px; }
+.button:disabled { opacity: 0.45; cursor: not-allowed; }
+.button-know:hover:not(:disabled) { background: #26754A; }
+
+/* ---------- Session summary ---------- */
+
+.summary { max-width: 640px; margin: 0 auto; }
+.summary-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  margin: 16px 0;
+  background: var(--paper);
+  border: 1px solid var(--line);
+}
+.summary-stats div { padding: 14px 16px; border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+.summary-stats div:nth-child(-n+2) { border-top: 0; }
+.summary-stats div:nth-child(odd) { border-left: 0; }
+.summary-stats dt { color: var(--ink-soft); }
+.summary-stats dd { margin: 0; font-size: 1.75rem; font-weight: 700; }
+.stat-highlight dd { display: inline-block; background: var(--highlight); padding: 0 6px; }
+
+.study-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
 @media (max-width: 600px) {
   .choices { grid-template-columns: 1fr; }
+  .card-face { min-height: 220px; }
+  .card-face .card-text { font-size: 1.25rem; }
+  .answer-buttons .button { flex: 1 1 140px; min-width: 0; }
   .folder-tab { padding: 8px 10px 6px; }
   .shelf-count { font-size: 1.25rem; }
   h1 { font-size: 1.5rem; }

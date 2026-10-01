@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Session summary · Nexora Recall{% endblock %}
+{% block content %}
+<section class="summary">
+  <h1>Session summary</h1>
+  {% if deck %}<p class="deck-meta">{{ deck.title }} · {{ "Smart Study" if style == "smart" else "Free Practice" }}</p>{% endif %}
+
+  {% if stats.studied == 0 %}
+    {% if style == "smart" %}
+      <p class="empty">Nothing is due in this deck right now. Try Free Practice, or come back tomorrow.</p>
+    {% else %}
+      <p class="empty">You didn't answer any cards this time.</p>
+    {% endif %}
+  {% else %}
+    <dl class="summary-stats">
+      <div><dt>Cards studied</dt><dd>{{ stats.studied }}</dd></div>
+      <div><dt>Moved up a shelf</dt><dd>{{ stats.moved_up }}</dd></div>
+      <div><dt>XP earned</dt><dd>{{ stats.xp }}</dd></div>
+      <div class="{{ 'stat-highlight' if stats.misconceptions }}"><dt>Misconceptions found</dt><dd>{{ stats.misconceptions }}</dd></div>
+    </dl>
+    {% if stats.misconceptions %}
+      <p class="field-hint">A misconception is a card you were sure about but got wrong. Those come back sooner.</p>
+    {% endif %}
+  {% endif %}
+
+  {# Weak spot box: phase 5 fills this with the explanation, links and "Practice these 3 cards". #}
+  <section class="weak-spot-slot" id="weak-spot" aria-label="Weak spot"></section>
+
+  <div class="actions">
+    {% if deck %}
+      <a class="button button-primary" href="{{ url_for('study.start', deck_id=deck.id, style=style) }}">Study again</a>
+      {% if style == "smart" %}
+        <a class="button" href="{{ url_for('study.start', deck_id=deck.id, style='free') }}">Free Practice</a>
+      {% endif %}
+      <a class="button" href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">Back to deck</a>
+    {% endif %}
+    <a class="button" href="{{ url_for('planner.home') }}">Home</a>
+  </div>
+</section>
+{% endblock %}
