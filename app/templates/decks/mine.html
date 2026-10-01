@@ -17,6 +17,7 @@
         <a class="deck-title" href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">{{ deck.title }}</a>
         <span class="deck-meta">
           {{ item.card_count }} {{ "card" if item.card_count == 1 else "cards" }}
+          {% if item.hidden_count %} · {{ item.hidden_count }} hidden{% endif %}
           · {{ folders.get(deck.folder, "My own") }}
         </span>
         {% if deck.is_weak_spot %}
@@ -29,6 +30,20 @@
           <a class="badge badge-passed" href="{{ url_for('decks.deck_page', deck_id=deck.id) }}#exam">{{ text }}</a>
         {% else %}
           <span class="badge badge-{{ kind }}">{{ text }}</span>
+        {% endif %}
+        {# Own decks can be deleted, ready decks removed; the Weak spot practice deck stays. #}
+        {% if deck.is_ready %}
+          <form method="post" action="{{ url_for('decks.remove_ready_deck', deck_id=deck.id) }}" class="inline-form"
+                data-confirm="Remove {{ deck.title }} from your decks? Your progress is kept if you add it again.">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="button button-small">Remove from my decks</button>
+          </form>
+        {% elif not deck.is_weak_spot %}
+          <form method="post" action="{{ url_for('decks.delete_deck', deck_id=deck.id) }}" class="inline-form"
+                data-confirm="Delete {{ deck.title }} and all its cards? This can't be undone.">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="button button-small button-danger">Delete deck</button>
+          </form>
         {% endif %}
       </div>
     </li>

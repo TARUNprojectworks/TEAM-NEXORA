@@ -17,7 +17,7 @@ from sqlalchemy import func
 from wtforms import DateField, RadioField, SelectField, StringField, TextAreaField
 from wtforms.validators import DataRequired, Length, Optional
 
-from app.models import DEFAULT_TOPIC, Card, Deck, Progress, UserDeck, db, today_local
+from app.models import DEFAULT_TOPIC, Card, Deck, Progress, UserDeck, db, hidden_card_ids, today_local
 
 bp = Blueprint("decks", __name__, url_prefix="/decks")
 log = logging.getLogger("nexora.decks")
@@ -170,11 +170,21 @@ def count_cards(deck_ids):
     return dict(rows)
 
 
+def count_hidden_cards(user_id):
+    """{deck_id: number of cards this student has hidden}."""
+    rows = db.session.query(Card.deck_id, func.count()).join(
+        Progress, Progress.card_id == Card.id
+    ).filter(Progress.user_id == user_id, Progress.hidden.is_(True)).group_by(Card.deck_id).all()
+    return dict(rows)
+
+
 def shelf_counts(user_id, deck_id):
     """How many of this deck's cards sit on shelves 1-5 for this student."""
     rows = db.session.query(Progress.shelf, func.count()).join(
         Card, Card.id == Progress.card_id
-    ).filter(Progress.user_id == user_id, Card.deck_id == deck_id).group_by(Progress.shelf).all()
+    ).filter(
+        Progress.user_id == user_id, Card.deck_id == deck_id, Progress.hidden.is_(False),
+    ).group_by(Progress.shelf).all()
     counts = dict(rows)
     return [counts.get(shelf, 0) for shelf in range(1, 6)]
 
@@ -287,8 +297,14 @@ def my_decks():
     ).all()
     rows.sort(key=my_decks_order)
     card_counts = count_cards([deck.id for _, deck in rows])
+    hidden_counts = count_hidden_cards(current_user.id)
     items = [
-        {"deck": deck, "badge": mode_badge(user_deck, today), "card_count": card_counts.get(deck.id, 0)}
+        {
+            "deck": deck,
+            "badge": mode_badge(user_deck, today),
+            "card_count": card_counts.get(deck.id, 0) - hidden_counts.get(deck.id, 0),
+            "hidden_count": hidden_counts.get(deck.id, 0),
+        }
         for user_deck, deck in rows
     ]
     return render_template("decks/mine.html", items=items, folders=READY_FOLDERS)
@@ -323,13 +339,18 @@ def deck_page(deck_id):
     today = today_local()
     expire_past_exams(current_user.id, today)
     user_deck = get_user_deck(deck.id)
-    cards = db.session.query(Card).filter_by(deck_id=deck.id).order_by(Card.topic, Card.id).all()
+    all_cards = db.session.query(Card).filter_by(deck_id=deck.id).order_by(Card.topic, Card.id).all()
+    hidden_ids = hidden_card_ids(current_user.id, deck.id)
+    cards = [card for card in all_cards if card.id not in hidden_ids]
+    hidden_cards = [card for card in all_cards if card.id in hidden_ids]
     shelves = shelf_counts(current_user.id, deck.id)
 
     return render_template(
         "decks/deck.html",
         deck=deck,
         cards=cards,
+        hidden_cards=hidden_cards,
+        show_hidden=request.args.get("show_hidden") == "1",
         user_deck=user_deck,
         can_edit=deck.owner_id == current_user.id,
         badge=mode_badge(user_deck, today) if user_deck else None,
@@ -433,6 +454,49 @@ def edit_card(deck_id, card_id):
         "decks/card_form.html", deck=deck, form=form, card=card, topics=deck_topics(deck.id),
         long_front=LONG_FRONT_CHARS, long_back=LONG_BACK_CHARS,
     )
+
+
+def ready_deck_card_or_error(deck_id, card_id):
+    """A card in a ready deck that is in the student's list. Only these can be hidden."""
+    deck = viewable_deck_or_404(deck_id)
+    if not deck.is_ready:
+        abort(403)  # own decks: delete the card instead
+    if get_user_deck(deck.id) is None:
+        abort(404)
+    return deck, deck_card_or_404(deck, card_id)
+
+
+@bp.post("/<int:deck_id>/cards/<int:card_id>/hide")
+@login_required
+def hide_card(deck_id, card_id):
+    """Hide a shared card for this student only. Other students still see it."""
+    deck, card = ready_deck_card_or_error(deck_id, card_id)
+    progress = db.session.get(Progress, (current_user.id, card.id))
+    if progress is None:
+        progress = Progress(user_id=current_user.id, card_id=card.id, shelf=1, next_due=today_local(),
+                            wrong_count=0, misconception_count=0)
+        db.session.add(progress)
+    progress.hidden = True
+    db.session.commit()
+    flash("Card hidden. You won't see it when you study this deck.", "info")
+    return redirect(url_for("decks.deck_page", deck_id=deck.id))
+
+
+@bp.post("/<int:deck_id>/cards/<int:card_id>/unhide")
+@login_required
+def unhide_card(deck_id, card_id):
+    deck, card = ready_deck_card_or_error(deck_id, card_id)
+    progress = db.session.get(Progress, (current_user.id, card.id))
+    if progress is not None and progress.hidden:
+        if progress.last_seen is None:
+            # Hidden before it was ever answered: drop the row so it counts
+            # as a new card again (and uses the daily new-card limit).
+            db.session.delete(progress)
+        else:
+            progress.hidden = False
+        db.session.commit()
+    flash("Card is back in your study.", "info")
+    return redirect(url_for("decks.deck_page", deck_id=deck.id, show_hidden=1))
 
 
 @bp.post("/<int:deck_id>/cards/<int:card_id>/delete")

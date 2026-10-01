@@ -6,6 +6,7 @@
     <h1>{{ deck.title }}</h1>
     <p class="deck-meta">
       {{ cards | length }} {{ "card" if cards | length == 1 else "cards" }}
+      {% if hidden_cards %} · {{ hidden_cards | length }} hidden{% endif %}
       {% if deck.is_ready %} · Ready deck, read-only{% endif %}
       {% if badge %}
         {% set text, kind = badge %}
@@ -99,17 +100,55 @@
           </div>
           {% if can_edit %}
             <div class="card-actions">
-              <a class="button button-small" href="{{ url_for('decks.edit_card', deck_id=deck.id, card_id=card.id) }}">Edit</a>
+              <a class="button" href="{{ url_for('decks.edit_card', deck_id=deck.id, card_id=card.id) }}">Edit</a>
               <form method="post" action="{{ url_for('decks.delete_card', deck_id=deck.id, card_id=card.id) }}"
                     class="inline-form" data-confirm="Delete this card? This can't be undone.">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="button button-small button-danger">Delete</button>
+                <button type="submit" class="button button-danger">Delete</button>
+              </form>
+            </div>
+          {% elif deck.is_ready and user_deck %}
+            <div class="card-actions">
+              <form method="post" action="{{ url_for('decks.hide_card', deck_id=deck.id, card_id=card.id) }}"
+                    class="inline-form" data-confirm="Hide this card? You can show it again from this page.">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="button">Hide this card</button>
               </form>
             </div>
           {% endif %}
         </li>
       {% endfor %}
     </ul>
+  {% endif %}
+
+  {% if hidden_cards %}
+    {% if not show_hidden %}
+      <p class="hidden-link">
+        <a href="{{ url_for('decks.deck_page', deck_id=deck.id, show_hidden=1) }}#hidden-cards">Show hidden cards ({{ hidden_cards | length }})</a>
+      </p>
+    {% else %}
+      <section class="hidden-cards" id="hidden-cards" aria-labelledby="hidden-heading">
+        <h3 id="hidden-heading">Hidden cards ({{ hidden_cards | length }})</h3>
+        <p class="field-hint">Only you have hidden these. They're left out of your study and plan.</p>
+        <ul class="card-list">
+          {% for card in hidden_cards %}
+            <li class="card-row card-row-hidden" id="card-{{ card.id }}">
+              <div class="card-sides">
+                <p class="card-front">{{ card.question }}</p>
+                <p class="card-meta">{{ card.topic }}</p>
+              </div>
+              <div class="card-actions">
+                <form method="post" action="{{ url_for('decks.unhide_card', deck_id=deck.id, card_id=card.id) }}" class="inline-form">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="button">Show this card again</button>
+                </form>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+        <p class="hidden-link"><a href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">Close hidden cards</a></p>
+      </section>
+    {% endif %}
   {% endif %}
 </section>
 {% endblock %}
