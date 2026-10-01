@@ -5,16 +5,63 @@
   <div class="home-top">
     <h1>Hi {{ user.name }}</h1>
     <p class="stats">
-      <span>Streak: {{ user.streak }} {{ "day" if user.streak == 1 else "days" }}</span>
+      <span>Streak: {{ streak }} {{ "day" if streak == 1 else "days" }}</span>
       <span>XP: {{ user.xp }}</span>
     </p>
   </div>
 
-  {# Phase 4 adds Today's plan, "Welcome back" and the weak spot box here. #}
+  {% if welcome_back %}
+    <p class="welcome-back" role="status">Welcome back. {{ welcome_back }} {{ "card" if welcome_back == 1 else "cards" }} due.
+      Today's plan takes a normal-sized slice; the rest waits for the next few days.</p>
+  {% endif %}
+
   <section class="plan-box" aria-labelledby="plan-heading">
-    <h2 id="plan-heading">Today's plan</h2>
-    <p>No cards due yet. Add a ready deck or make your own to get a plan.</p>
+    <div class="plan-top">
+      <h2 id="plan-heading">Today's plan</h2>
+      <form method="post" action="{{ url_for('planner.change_plan_length') }}" class="plan-length">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <span class="plan-length-label" id="plan-length-label">Time</span>
+        <div class="segmented" role="group" aria-labelledby="plan-length-label">
+          {% for value, minutes in choices.items() %}
+            <button type="submit" name="minutes" value="{{ value }}"
+                    aria-pressed="{{ 'true' if plan.minutes == minutes else 'false' }}">
+              {{ "No limit" if minutes is none else minutes ~ " min" }}
+            </button>
+          {% endfor %}
+        </div>
+      </form>
+    </div>
+
+    {% if plan.card_ids %}
+      <p class="plan-meta">
+        {{ plan.card_ids | length }} cards · about {{ total_minutes }} min
+        {% if cards_done %} · {{ cards_done }} done{% endif %}
+      </p>
+      <ul class="plan-list">
+        {% for group in groups %}
+          <li>
+            <span class="plan-topic">{{ group.deck }} · {{ group.topic }}</span>
+            <span class="plan-count">{{ group.cards }} {{ "card" if group.cards == 1 else "cards" }} · {{ group.minutes }} min</span>
+          </li>
+        {% endfor %}
+      </ul>
+      {% if plan.moved %}
+        <p class="plan-moved">{{ plan.moved }} {{ "card" if plan.moved == 1 else "cards" }} moved to tomorrow.</p>
+      {% endif %}
+
+      {% if plan_finished %}
+        <p class="plan-done">Today's plan is done. You earned 10 bonus XP.</p>
+      {% elif cards_left %}
+        <a class="button button-primary" href="{{ url_for('study.start_plan') }}">
+          {{ "Continue today's plan" if cards_done else "Start today's plan" }}
+        </a>
+      {% endif %}
+    {% else %}
+      <p>Nothing to study today. Add a ready deck or make your own, and your plan shows up here.</p>
+    {% endif %}
   </section>
+
+  {# Phase 5 adds the weak spot box here. #}
 
   <div class="choices">
     <a class="choice" href="{{ url_for('decks.ready_decks') }}">
