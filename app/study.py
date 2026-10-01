@@ -25,7 +25,7 @@ from sqlalchemy import func
 from app import engine
 from app.config import Config
 from app.decks import expire_past_exams, get_user_deck, mode_badge, viewable_deck_or_404
-from app.models import Card, Deck, Progress, Review, db, today_local, utc_now
+from app.models import Card, Deck, Progress, Review, db, hidden_card_ids, today_local, utc_now
 
 bp = Blueprint("study", __name__, url_prefix="/study")
 log = logging.getLogger("nexora.study")
@@ -86,9 +86,19 @@ def new_cards_started_today(user_id, today):
 
 
 def unanswered_cards(state):
+    """Cards not answered yet this session, leaving out cards the student hid."""
+    skip = set(state["answered"]) | hidden_card_ids(current_user.id, state["deck_id"])
     return db.session.query(Card).filter(
-        Card.deck_id == state["deck_id"], Card.id.notin_(state["answered"])
+        Card.deck_id == state["deck_id"], Card.id.notin_(skip)
     ).all()
+
+
+def drop_hidden_cards(state):
+    """If a card was hidden mid-session (say, in another tab), stop showing it."""
+    hidden = hidden_card_ids(current_user.id, state["deck_id"])
+    state["returns"] = [entry for entry in state["returns"] if entry[0] not in hidden]
+    if state["current"] in hidden:
+        state["current"] = None
 
 
 def smart_queue(state, user_deck, today):
@@ -231,6 +241,7 @@ def show_card():
         return redirect(url_for("decks.my_decks"))
 
     today = today_local()
+    drop_hidden_cards(state)
     queue = queue_for(state, user_deck, today)
     # Keep showing the same card on a page reload; otherwise take the next one.
     card = card_in_deck(state["current"], deck) or card_in_deck(pick_next_card(state, queue), deck)
