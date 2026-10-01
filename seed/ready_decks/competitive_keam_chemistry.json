@@ -1,0 +1,31 @@
+{
+  "title": "KEAM Chemistry",
+  "folder": "competitive",
+  "cards": [
+    {"question": "What is the value of Avogadro's number?", "answer": "6.022 × 10²³ particles per mole.", "topic": "Basic Concepts", "importance": "high"},
+    {"question": "What volume does one mole of an ideal gas take up at STP?", "answer": "22.4 L at 273 K and 1 atm. (22.7 L if STP is taken as 273 K and 1 bar.)", "topic": "Basic Concepts", "importance": "high"},
+    {"question": "Write the ideal gas equation and the value of R.", "answer": "PV = nRT. R = 8.314 J mol⁻¹ K⁻¹ (or 0.0821 L atm mol⁻¹ K⁻¹).", "topic": "Basic Concepts", "importance": "medium"},
+    {"question": "State Pauli's exclusion principle.", "answer": "No two electrons in an atom can have the same set of all four quantum numbers.", "topic": "Atomic Structure", "importance": "high"},
+    {"question": "State Hund's rule of maximum multiplicity.", "answer": "Electrons fill orbitals of equal energy singly, with parallel spins, before any pairing starts.", "topic": "Atomic Structure", "importance": "medium"},
+    {"question": "What does the Aufbau principle say?", "answer": "Electrons fill orbitals in order of increasing energy, following the (n + l) rule.", "topic": "Atomic Structure", "importance": "medium"},
+    {"question": "Write the electronic configurations of chromium and copper.", "answer": "Cr: [Ar] 3d⁵ 4s¹. Cu: [Ar] 3d¹⁰ 4s¹. Half-filled and fully filled d subshells are extra stable.", "topic": "Atomic Structure", "importance": "high"},
+    {"question": "What is the maximum number of electrons in shell n?", "answer": "2n².", "topic": "Atomic Structure", "importance": "low"},
+    {"question": "What is the hybridisation of carbon in methane, ethene and ethyne?", "answer": "Methane sp³, ethene sp², ethyne sp.", "topic": "Chemical Bonding", "importance": "high"},
+    {"question": "What are the shapes of NH₃ and H₂O?", "answer": "NH₃: trigonal pyramidal, about 107°. H₂O: bent, about 104.5°. Lone pairs squeeze the bond angles.", "topic": "Chemical Bonding", "importance": "high"},
+    {"question": "Which is the most electronegative element?", "answer": "Fluorine (4.0 on the Pauling scale).", "topic": "Chemical Bonding", "importance": "low"},
+    {"question": "What are the bond orders of O₂ and N₂, and are they magnetic?", "answer": "O₂: bond order 2, paramagnetic (two unpaired electrons in π* orbitals). N₂: bond order 3, diamagnetic.", "topic": "Chemical Bonding", "importance": "high"},
+    {"question": "State Le Chatelier's principle.", "answer": "If a system at equilibrium is disturbed (concentration, pressure or temperature), it shifts to reduce the effect of the change.", "topic": "Equilibrium", "importance": "high"},
+    {"question": "How does a catalyst affect a chemical equilibrium?", "answer": "It doesn't change the position of equilibrium or K. It only helps the system reach equilibrium faster.", "topic": "Equilibrium", "importance": "medium"},
+    {"question": "What is the pH of pure water at 25 °C?", "answer": "7, because Kw = 1 × 10⁻¹⁴ and [H⁺] = [OH⁻] = 10⁻⁷ M.", "topic": "Equilibrium", "importance": "medium"},
+    {"question": "What is a buffer solution? Give an example.", "answer": "A solution that resists change in pH when a little acid or base is added. Example: acetic acid with sodium acetate.", "topic": "Equilibrium", "importance": "medium"},
+    {"question": "What is the half-life of a first-order reaction?", "answer": "t½ = 0.693 / k. It doesn't depend on the starting concentration.", "topic": "Kinetics", "importance": "high"},
+    {"question": "What is the oxidation number of Mn in KMnO₄?", "answer": "+7.", "topic": "Redox", "importance": "medium"},
+    {"question": "What is the oxidation number of Cr in K₂Cr₂O₇?", "answer": "+6.", "topic": "Redox", "importance": "medium"},
+    {"question": "Define oxidation and reduction in terms of electrons.", "answer": "Oxidation is loss of electrons; reduction is gain of electrons (OIL RIG).", "topic": "Redox", "importance": "high"},
+    {"question": "State Markovnikov's rule.", "answer": "When HX adds to an unsymmetrical alkene, H goes to the carbon that already has more hydrogens, and X goes to the other carbon.", "topic": "Organic Chemistry", "importance": "high"},
+    {"question": "State Hückel's rule of aromaticity.", "answer": "A planar, cyclic, fully conjugated ring is aromatic if it has (4n + 2) π electrons. Benzene has 6.", "topic": "Organic Chemistry", "importance": "high"},
+    {"question": "Compare SN1 and SN2 reactions.", "answer": "SN1: two steps via a carbocation, gives racemisation, rate depends on the substrate only, favoured by 3° halides. SN2: one step with backside attack, gives inversion, rate depends on substrate and nucleophile, favoured by 1° halides.", "topic": "Organic Chemistry", "importance": "high"},
+    {"question": "What is lanthanide contraction?", "answer": "The steady decrease in atomic and ionic radii across the lanthanides, due to poor shielding by 4f electrons. It is why Zr and Hf have almost the same size.", "topic": "Inorganic Chemistry", "importance": "medium"},
+    {"question": "What causes hardness of water?", "answer": "Dissolved calcium and magnesium salts: bicarbonates cause temporary hardness, chlorides and sulphates cause permanent hardness.", "topic": "Inorganic Chemistry", "importance": "low"}
+  ]
+}

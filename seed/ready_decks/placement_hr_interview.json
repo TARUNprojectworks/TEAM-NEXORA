@@ -1,0 +1,26 @@
+{
+  "title": "HR Interview",
+  "folder": "placement",
+  "cards": [
+    {"question": "How should you answer \"Tell me about yourself\"?", "answer": "In 60 to 90 seconds: present (degree, college), past (a key project or internship), future (why this role). Keep it about study and work.", "topic": "Introduction", "importance": "high"},
+    {"question": "What structure works well for \"Tell me about a time when...\" questions?", "answer": "STAR: Situation, Task, Action, Result. Spend the most time on what you did and what happened.", "topic": "Introduction", "importance": "high"},
+    {"question": "How do you answer \"Why did you choose your branch of engineering?\"", "answer": "Give your honest reason, then link it to the skills this job needs.", "topic": "Introduction", "importance": "medium"},
+    {"question": "How do you answer \"What is your greatest weakness?\"", "answer": "Pick a real weakness that isn't critical for the job, and say what you are doing to improve it. Avoid clichés like \"I'm a perfectionist\".", "topic": "Strengths and Weaknesses", "importance": "high"},
+    {"question": "How do you answer \"What are your strengths?\"", "answer": "Name 2 or 3 strengths that fit the job, each backed by a short real example.", "topic": "Strengths and Weaknesses", "importance": "high"},
+    {"question": "How do you answer \"Are you a team player?\"", "answer": "Yes, with an example: the team, your role in it, and what the team achieved.", "topic": "Strengths and Weaknesses", "importance": "medium"},
+    {"question": "How do you show leadership if you have never had a formal title?", "answer": "Use a time you took initiative: leading a project, organising a college event. Say what you did and the result.", "topic": "Strengths and Weaknesses", "importance": "medium"},
+    {"question": "How do you answer \"Why should we hire you?\"", "answer": "Match your skills to what the job needs, give proof from projects or internships, and show real interest in the role.", "topic": "Company Fit", "importance": "high"},
+    {"question": "How do you answer \"Why do you want to join our company?\"", "answer": "Show you researched them: what they do, their values, recent news. Then connect that to your own goals.", "topic": "Company Fit", "importance": "high"},
+    {"question": "How do you answer \"Where do you see yourself in five years?\"", "answer": "Growing in skills and responsibility in this field, ideally with this company. Avoid goals unrelated to the job.", "topic": "Company Fit", "importance": "medium"},
+    {"question": "How do you answer \"Why an IT services company\" if you are from a non-CS branch?", "answer": "Show proof of interest in tech (courses, projects, coding practice) and how problem-solving from your branch carries over.", "topic": "Company Fit", "importance": "medium"},
+    {"question": "How do you answer \"Are you willing to relocate?\"", "answer": "Answer honestly. If yes, say so clearly. If you have a real constraint, mention it politely.", "topic": "Company Fit", "importance": "low"},
+    {"question": "How do you answer \"Tell me about a time you failed\"?", "answer": "Pick a real failure, own your part, and explain what you learned and what you now do differently.", "topic": "Situations", "importance": "high"},
+    {"question": "How do you answer \"Describe a conflict in your team\"?", "answer": "Explain how you listened, found common ground and reached a result. Don't blame others.", "topic": "Situations", "importance": "medium"},
+    {"question": "How do you answer \"How do you handle pressure and deadlines?\"", "answer": "Prioritise, break the work into steps, and tell people early if something slips. Back it up with a real example.", "topic": "Situations", "importance": "medium"},
+    {"question": "How do you explain a gap year?", "answer": "Briefly and honestly: what you did, what you learned, then move the talk back to the present.", "topic": "Situations", "importance": "medium"},
+    {"question": "What should you do if you don't know the answer to a question?", "answer": "Say so honestly and explain how you would find the answer. Don't bluff.", "topic": "Situations", "importance": "medium"},
+    {"question": "How should a fresher answer \"What are your salary expectations?\"", "answer": "Campus roles often have a fixed package, so say you are open to the company's standard fresher offer. If pushed, give a range you researched.", "topic": "Closing", "importance": "medium"},
+    {"question": "What should you say to \"Do you have any questions for us?\"", "answer": "Always ask one or two, such as how freshers are trained or what success looks like in the first six months. Don't open with leave or salary.", "topic": "Closing", "importance": "high"},
+    {"question": "What body language helps in an interview?", "answer": "Steady eye contact, sitting upright, a calm voice, a natural smile, and listening fully before you answer.", "topic": "Closing", "importance": "low"}
+  ]
+}

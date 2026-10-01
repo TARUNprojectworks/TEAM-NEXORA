@@ -1,0 +1,31 @@
+{
+  "title": "GATE CS Operating Systems",
+  "folder": "competitive",
+  "cards": [
+    {"question": "What are the five states of a process?", "answer": "New, Ready, Running, Waiting (Blocked), Terminated.", "topic": "Processes", "importance": "high"},
+    {"question": "What does a Process Control Block (PCB) hold?", "answer": "Process ID, state, program counter, CPU registers, scheduling info, memory-management info, and I/O status such as open files.", "topic": "Processes", "importance": "medium"},
+    {"question": "What is a context switch?", "answer": "Saving the state of the running process in its PCB and loading the saved state of the next one. It is pure overhead: no useful work is done during it.", "topic": "Processes", "importance": "medium"},
+    {"question": "What does fork() return?", "answer": "0 in the child, the child's PID in the parent, and −1 if it fails.", "topic": "Processes", "importance": "high"},
+    {"question": "A program calls fork() n times in a row. How many processes are there in total, and how many are children?", "answer": "2^n processes in total, so 2^n − 1 child processes.", "topic": "Processes", "importance": "high"},
+    {"question": "What do threads of the same process share, and what does each have its own copy of?", "answer": "Shared: code, data, heap and open files. Own: stack, registers and program counter.", "topic": "Processes", "importance": "high"},
+    {"question": "What is the difference between a zombie and an orphan process?", "answer": "Zombie: it has finished but its parent hasn't called wait(), so its entry stays in the process table. Orphan: its parent ended first; init (or systemd) adopts it.", "topic": "Processes", "importance": "medium"},
+    {"question": "Which CPU scheduling algorithm gives the minimum average waiting time?", "answer": "Shortest Job First (SRTF in the preemptive case), when burst times are known.", "topic": "CPU Scheduling", "importance": "high"},
+    {"question": "What is the convoy effect?", "answer": "In FCFS scheduling, short processes wait behind one long process, so average waiting time goes up.", "topic": "CPU Scheduling", "importance": "medium"},
+    {"question": "What happens in Round Robin if the time quantum is too large or too small?", "answer": "Too large: it behaves like FCFS. Too small: too many context switches waste CPU time.", "topic": "CPU Scheduling", "importance": "high"},
+    {"question": "How is starvation in priority scheduling solved?", "answer": "Aging: slowly raise the priority of processes that have waited a long time.", "topic": "CPU Scheduling", "importance": "medium"},
+    {"question": "What three conditions must a critical-section solution satisfy?", "answer": "Mutual exclusion, progress and bounded waiting.", "topic": "Synchronization", "importance": "high"},
+    {"question": "What is Peterson's solution?", "answer": "A software solution to the critical-section problem for two processes, using flag[2] and turn. It satisfies all three conditions.", "topic": "Synchronization", "importance": "medium"},
+    {"question": "What do the semaphore operations wait (P) and signal (V) do?", "answer": "wait decrements the semaphore and blocks the process if no unit is available. signal increments it and wakes a waiting process.", "topic": "Synchronization", "importance": "high"},
+    {"question": "How does a binary semaphore differ from a counting semaphore?", "answer": "A binary semaphore holds only 0 or 1 and works like a lock. A counting semaphore can hold any non-negative value, to manage several copies of a resource.", "topic": "Synchronization", "importance": "medium"},
+    {"question": "What are the four necessary conditions for deadlock?", "answer": "Mutual exclusion, hold and wait, no preemption, and circular wait. All four must hold at once.", "topic": "Deadlocks", "importance": "high"},
+    {"question": "What does the Banker's algorithm do?", "answer": "Deadlock avoidance: it grants a request only if the system stays in a safe state afterwards.", "topic": "Deadlocks", "importance": "high"},
+    {"question": "What is a safe state?", "answer": "A state where there is at least one order in which every process can get its maximum needs and finish.", "topic": "Deadlocks", "importance": "medium"},
+    {"question": "Which fragmentation does paging remove, and which can it still have?", "answer": "It removes external fragmentation. It can still have internal fragmentation in a process's last page.", "topic": "Memory Management", "importance": "high"},
+    {"question": "What is a TLB?", "answer": "Translation Lookaside Buffer: a small, fast cache of recent page-table entries that speeds up address translation.", "topic": "Memory Management", "importance": "medium"},
+    {"question": "What is the effective memory access time with a TLB and a single-level page table?", "answer": "EAT = h(t + m) + (1 − h)(t + 2m), where h is the TLB hit ratio, t the TLB time and m the memory access time.", "topic": "Memory Management", "importance": "high"},
+    {"question": "What is Belady's anomaly?", "answer": "Giving a process more frames causes more page faults. It can happen with FIFO, but not with LRU or Optimal.", "topic": "Virtual Memory", "importance": "high"},
+    {"question": "How does the Optimal page replacement algorithm choose a page?", "answer": "It replaces the page that won't be used for the longest time in the future. It gives the fewest faults but can't be built in practice, so it is used as a benchmark.", "topic": "Virtual Memory", "importance": "medium"},
+    {"question": "What is thrashing?", "answer": "A process spends more time swapping pages than running, because it has too few frames. The working-set model helps prevent it.", "topic": "Virtual Memory", "importance": "medium"},
+    {"question": "How does SCAN disk scheduling work, and which algorithm can starve far requests?", "answer": "SCAN (elevator) moves the head from one end to the other serving requests, then reverses. SSTF can starve requests far from the head.", "topic": "Disk Scheduling", "importance": "medium"}
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "title": "Cell Biology",
+  "folder": "semester",
+  "cards": [
+    {"question": "Who proposed the cell theory?", "answer": "Matthias Schleiden (plants, 1838) and Theodor Schwann (animals, 1839).", "topic": "Cell Theory", "importance": "medium"},
+    {"question": "What did Rudolf Virchow add to the cell theory?", "answer": "That all cells arise from pre-existing cells: \"Omnis cellula e cellula\" (1855).", "topic": "Cell Theory", "importance": "high"},
+    {"question": "Who first saw and named cells?", "answer": "Robert Hooke, in 1665, while looking at thin slices of cork.", "topic": "Cell Theory", "importance": "low"},
+    {"question": "Which organelle is called the powerhouse of the cell, and why?", "answer": "Mitochondria. They make most of the cell's ATP through aerobic respiration.", "topic": "Cell Organelles", "importance": "high"},
+    {"question": "Why are mitochondria and chloroplasts called semi-autonomous?", "answer": "They have their own DNA and 70S ribosomes, so they can make some of their own proteins.", "topic": "Cell Organelles", "importance": "high"},
+    {"question": "What is the function of ribosomes?", "answer": "Protein synthesis: they translate mRNA into a chain of amino acids.", "topic": "Cell Organelles", "importance": "high"},
+    {"question": "Which type of ribosome is found in prokaryotes, and which in the eukaryotic cytoplasm?", "answer": "Prokaryotes: 70S (50S + 30S subunits). Eukaryotic cytoplasm: 80S (60S + 40S subunits).", "topic": "Cell Organelles", "importance": "high"},
+    {"question": "How is rough ER different from smooth ER?", "answer": "Rough ER has ribosomes on it and makes proteins for secretion and membranes. Smooth ER has no ribosomes; it makes lipids such as steroids and helps in detoxification.", "topic": "Cell Organelles", "importance": "medium"},
+    {"question": "What does the Golgi apparatus do?", "answer": "It modifies, sorts and packages proteins and lipids into vesicles for secretion or delivery. Glycoproteins and glycolipids are formed here.", "topic": "Cell Organelles", "importance": "medium"},
+    {"question": "Why are lysosomes called suicide bags?", "answer": "They hold hydrolytic (digestive) enzymes. If the lysosome bursts, these enzymes can digest the cell itself.", "topic": "Cell Organelles", "importance": "medium"},
+    {"question": "What is the function of the nucleolus?", "answer": "It is the site where rRNA is made and ribosome subunits are assembled.", "topic": "Cell Organelles", "importance": "medium"},
+    {"question": "What is the membrane around the plant vacuole called?", "answer": "The tonoplast.", "topic": "Cell Organelles", "importance": "low"},
+    {"question": "Name structures found in plant cells but not in animal cells.", "answer": "Cell wall, plastids such as chloroplasts, and a large central vacuole.", "topic": "Cell Organelles", "importance": "medium"},
+    {"question": "Which cell structure is present in animal cells but absent in most higher plant cells?", "answer": "Centrioles.", "topic": "Cell Organelles", "importance": "low"},
+    {"question": "Who proposed the fluid mosaic model of the cell membrane?", "answer": "Singer and Nicolson, in 1972. The membrane is a fluid lipid bilayer with proteins floating in it.", "topic": "Cell Membrane", "importance": "high"},
+    {"question": "What is the main lipid in the plasma membrane and how is it arranged?", "answer": "Phospholipids, in a bilayer: water-loving heads face outward and water-fearing tails face inward.", "topic": "Cell Membrane", "importance": "medium"},
+    {"question": "What is osmosis?", "answer": "Movement of water across a semi-permeable membrane from a region of lower solute concentration to a region of higher solute concentration.", "topic": "Cell Membrane", "importance": "high"},
+    {"question": "How is active transport different from passive transport?", "answer": "Active transport uses energy (ATP) to move substances against their concentration gradient, as in the Na+/K+ pump. Passive transport needs no energy and moves down the gradient.", "topic": "Cell Membrane", "importance": "high"},
+    {"question": "What is the cell wall made of in plants, fungi and bacteria?", "answer": "Plants: cellulose. Fungi: chitin. Bacteria: peptidoglycan.", "topic": "Prokaryotes and Eukaryotes", "importance": "medium"},
+    {"question": "What is the key difference between a prokaryotic and a eukaryotic cell?", "answer": "Prokaryotes have no membrane-bound nucleus or membrane-bound organelles; their DNA lies in a region called the nucleoid.", "topic": "Prokaryotes and Eukaryotes", "importance": "high"},
+    {"question": "List the phases of mitosis in order.", "answer": "Prophase, metaphase, anaphase, telophase, followed by cytokinesis.", "topic": "Cell Division", "importance": "high"},
+    {"question": "In which phase of interphase does DNA replicate?", "answer": "S phase (synthesis phase).", "topic": "Cell Division", "importance": "high"},
+    {"question": "In which stage of mitosis do chromosomes line up at the equator of the cell?", "answer": "Metaphase. The chromosomes line up on the metaphase plate.", "topic": "Cell Division", "importance": "medium"},
+    {"question": "What is the main result of meiosis?", "answer": "Four haploid cells with half the chromosome number of the parent cell. Crossing over and independent assortment create variation.", "topic": "Cell Division", "importance": "high"},
+    {"question": "In which stage of meiosis does crossing over happen?", "answer": "Pachytene, in prophase I.", "topic": "Cell Division", "importance": "high"}
+  ]
+}
