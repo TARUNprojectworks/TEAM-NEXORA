@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Tracking · Nexora Recall{% endblock %}
+{% block content %}
+<section class="tracking">
+  <div class="page-top">
+    <h1>Tracking</h1>
+    <p class="stats"><span>Streak: {{ streak }} {{ "day" if streak == 1 else "days" }}</span></p>
+  </div>
+
+  {% if not has_reviews %}
+    <p class="empty">No study history yet. Study a deck and your progress shows up here.</p>
+  {% endif %}
+
+  <section class="track-section" aria-labelledby="weakest-heading">
+    <h2 id="weakest-heading">Weakest topics</h2>
+    {% if weakest %}
+      <ul class="weak-list">
+        {% for row in weakest %}
+          <li>
+            <span class="weak-topic">{% if row.is_target %}<mark>{{ row.topic }}</mark>{% else %}{{ row.topic }}{% endif %}</span>
+            <span class="deck-meta">{{ row.deck }}</span>
+            <span class="weak-detail">
+              {{ row.weak_percent }}% of {{ row.seen }} seen still on shelf 1–2
+              {% if row.misconceptions %} · {{ row.misconceptions }} {{ "misconception" if row.misconceptions == 1 else "misconceptions" }}{% endif %}
+            </span>
+          </li>
+        {% endfor %}
+      </ul>
+      <p class="field-hint">The highlighted topic is the one the Weak Spot Fixer will work on.</p>
+    {% else %}
+      <p class="empty">No weak topics yet. A topic shows up here once you've seen 3 of its cards and keep missing them.</p>
+    {% endif %}
+  </section>
+
+  <section class="track-section" aria-labelledby="calendar-heading">
+    <h2 id="calendar-heading">Study calendar</h2>
+    <p class="field-hint">Last {{ calendar | length }} weeks. Each square is a day; darker means more cards answered.</p>
+    <div class="calendar" role="table" aria-label="Cards answered per day">
+      <div class="calendar-days" role="row" aria-hidden="true">
+        {% for name in ["Mon", "", "Wed", "", "Fri", "", "Sun"] %}<span>{{ name }}</span>{% endfor %}
+      </div>
+      {% for week in calendar %}
+        <div class="calendar-week" role="row">
+          {% for day in week %}
+            {% set level = 0 if day.count == 0 else (1 if day.count < 10 else (2 if day.count < 25 else 3)) %}
+            <span role="cell" class="calendar-day level-{{ level }}{% if day.future %} is-future{% endif %}"
+                  title="{{ day.date }}: {{ day.count }} {{ 'card' if day.count == 1 else 'cards' }}"
+                  aria-label="{{ day.date }}: {{ day.count }} {{ 'card' if day.count == 1 else 'cards' }}"></span>
+          {% endfor %}
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="track-section" aria-labelledby="mastery-heading">
+    <h2 id="mastery-heading">Mastery by topic</h2>
+    <p class="field-hint">Share of each topic's cards on shelf 5.</p>
+    {% if data.mastery %}
+      <div class="chart-box" style="height: {{ 60 + data.mastery | length * 28 }}px">
+        <canvas id="mastery-chart" role="img" aria-label="Mastery percent for each topic. The same numbers are in the table below."></canvas>
+      </div>
+      <details class="chart-table">
+        <summary>Show as a table</summary>
+        <table>
+          <thead><tr><th scope="col">Deck</th><th scope="col">Topic</th><th scope="col">Learned</th><th scope="col">Mastery</th></tr></thead>
+          <tbody>
+            {% for row in data.mastery %}
+              <tr><td>{{ row.deck }}</td><td>{{ row.topic }}</td><td>{{ row.learned }} of {{ row.total }}</td><td>{{ row.mastery }}%</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </details>
+    {% else %}
+      <p class="empty">Add a deck to see mastery here.</p>
+    {% endif %}
+  </section>
+
+  <section class="track-section" aria-labelledby="decks-heading">
+    <h2 id="decks-heading">Progress per deck</h2>
+    {% if data.decks %}
+      <div class="chart-box" style="height: {{ 90 + data.decks | length * 44 }}px">
+        <canvas id="deck-chart" role="img" aria-label="Cards on each shelf for each deck. The same numbers are in the table below."></canvas>
+      </div>
+      <details class="chart-table">
+        <summary>Show as a table</summary>
+        <table>
+          <thead>
+            <tr><th scope="col">Deck</th><th scope="col">Not studied</th>
+              {% for shelf in range(1, 6) %}<th scope="col">Shelf {{ shelf }}</th>{% endfor %}</tr>
+          </thead>
+          <tbody>
+            {% for row in data.decks %}
+              <tr><td>{{ row.deck }}</td><td>{{ row.new }}</td>{% for count in row.shelves %}<td>{{ count }}</td>{% endfor %}</tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </details>
+    {% else %}
+      <p class="empty">Add a deck to see your progress here.</p>
+    {% endif %}
+  </section>
+
+  <section class="track-section" aria-labelledby="misconceptions-heading">
+    <h2 id="misconceptions-heading">Misconceptions</h2>
+    <p class="field-hint">Cards you were sure about but got wrong. One counts as resolved once it's back on shelf 3 or higher.</p>
+    <dl class="summary-stats">
+      <div class="{{ 'stat-highlight' if data.misconceptions.open }}"><dt>Found</dt><dd>{{ data.misconceptions.found }}</dd></div>
+      <div><dt>Resolved</dt><dd>{{ data.misconceptions.resolved }}</dd></div>
+    </dl>
+    {% if data.misconceptions.found %}
+      <div class="chart-box chart-box-small">
+        <canvas id="misconception-chart" role="img"
+                aria-label="{{ data.misconceptions.found }} misconceptions found, {{ data.misconceptions.resolved }} resolved."></canvas>
+      </div>
+    {% endif %}
+  </section>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js"
+        integrity="sha512-WoViKhKD4qI2WruSZqv9+kvM4WfFhUMQCLN4QlDTt5aU56fLQy2gYoxWIqlEnXqJy/+Ac5q/hk1oWfqnMDhwMA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="{{ url_for('static', filename='js/tracking.js') }}" data-url="{{ url_for('tracking.tracking_json') }}" id="tracking-script"></script>
+{% endblock %}

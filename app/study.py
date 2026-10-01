@@ -2,6 +2,7 @@
 
 How a session works:
 - /study/<deck_id>?style=smart|free starts a session for one deck.
+- /study/plan starts Smart Study on exactly the cards in today's plan.
 - /study/card shows the current card. /study/answer saves the answer and
   redirects back to /study/card for the next one (a plain form post, so
   there is no client-side state to get out of sync).
@@ -15,17 +16,17 @@ card in the deck in a shuffled order and never changes shelves.
 
 import logging
 import random
-from datetime import datetime, time, timedelta, timezone
-from zoneinfo import ZoneInfo
+from datetime import timedelta
 
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
-from sqlalchemy import func
 
 from app import engine
-from app.config import Config
 from app.decks import expire_past_exams, get_user_deck, mode_badge, viewable_deck_or_404
-from app.models import Card, Deck, Progress, Review, db, hidden_card_ids, today_local, utc_now
+from app.models import (
+    Card, Deck, Progress, Review, db, hidden_card_ids, new_cards_started_today, today_local, utc_now,
+)
+from app.planner import PLAN_XP, award_plan_xp_if_finished, plan_cards_left, todays_plan
 
 bp = Blueprint("study", __name__, url_prefix="/study")
 log = logging.getLogger("nexora.study")
@@ -37,15 +38,16 @@ XP_REVIEW_AGAIN = 1
 
 # ---------- Session state (kept in the cookie: ids and numbers only) ----------
 
-def start_session(deck_id, style):
+def start_session(style, deck_id=None, plan=False):
     session["study"] = {
-        "deck_id": deck_id,
+        "deck_id": deck_id,  # one deck, or None when studying today's plan
+        "plan": plan,
         "style": style,
         "seed": random.randrange(1_000_000),  # Free Practice order; a new seed = a new shuffle
         "answered": [],    # card ids answered at least once this session
         "returns": [],     # [card_id, cards_still_to_wait] for "Review again" cards
         "current": None,   # the card on screen, so a double submit can't answer twice
-        "stats": {"studied": 0, "moved_up": 0, "xp": 0, "misconceptions": 0},
+        "stats": {"studied": 0, "moved_up": 0, "xp": 0, "misconceptions": 0, "plan_finished": False},
     }
 
 
@@ -70,20 +72,6 @@ def load_deck_for(state):
 
 
 # ---------- Choosing cards ----------
-
-def local_day_start_utc(today):
-    """Midnight at the start of `today` in India, as a UTC time (how we store times)."""
-    start = datetime.combine(today, time.min, tzinfo=ZoneInfo(Config.APP_TIMEZONE))
-    return start.astimezone(timezone.utc).replace(tzinfo=None)
-
-
-def new_cards_started_today(user_id, today):
-    """Cards whose first ever Smart Study answer was today. Shared limit with the planner."""
-    first_answers = db.session.query(Review.card_id).filter(
-        Review.user_id == user_id, Review.style == "smart",
-    ).group_by(Review.card_id).having(func.min(Review.reviewed_at) >= local_day_start_utc(today))
-    return first_answers.count()
-
 
 def unanswered_cards(state):
     """Cards not answered yet this session, leaving out cards the student hid."""
@@ -129,15 +117,29 @@ def free_queue(state):
     return card_ids
 
 
+def plan_queue(state, today):
+    """Today's plan cards not answered yet, in plan order (the planner already ranked them)."""
+    left = plan_cards_left(current_user.id, session.get("plan"), today)
+    return [card_id for card_id in left if card_id not in state["answered"]]
+
+
 def queue_for(state, user_deck, today):
+    if state["plan"]:
+        return plan_queue(state, today)
     if state["style"] == "smart":
         return smart_queue(state, user_deck, today)
     return free_queue(state)
 
 
-def card_in_deck(card_id, deck):
+def session_card(state, card_id):
+    """The card if it belongs to this session: the session's deck, or today's plan."""
     card = db.session.get(Card, card_id) if card_id else None
-    return card if card is not None and card.deck_id == deck.id else None
+    if card is None or get_user_deck(card.deck_id) is None:
+        return None
+    if state["plan"]:
+        plan = session.get("plan") or {}
+        return card if card.id in plan.get("card_ids", []) else None
+    return card if card.deck_id == state["deck_id"] else None
 
 
 def pick_next_card(state, queue):
@@ -224,7 +226,20 @@ def start(deck_id):
         style = "smart"
     # A passed exam must not keep capping waits, so check before choosing cards.
     expire_past_exams(current_user.id, today_local())
-    start_session(deck.id, style)
+    start_session(style, deck_id=deck.id)
+    return redirect(url_for("study.show_card"))
+
+
+@bp.get("/plan")
+@login_required
+def start_plan():
+    """Smart Study on exactly the cards in today's plan."""
+    today = today_local()
+    plan = todays_plan(current_user.id, today)
+    if not plan_cards_left(current_user.id, plan, today):
+        flash("Nothing left in today's plan. Pick a deck to study more.", "info")
+        return redirect(url_for("planner.home"))
+    start_session("smart", plan=True)
     return redirect(url_for("study.show_card"))
 
 
@@ -234,17 +249,19 @@ def show_card():
     state = get_session()
     if not state:
         return redirect(url_for("decks.my_decks"))
-    deck, user_deck = load_deck_for(state)
-    if deck is None:
-        session.pop("study", None)
-        flash("That deck isn't in your list any more.", "info")
-        return redirect(url_for("decks.my_decks"))
+    deck, user_deck = None, None
+    if not state["plan"]:
+        deck, user_deck = load_deck_for(state)
+        if deck is None:
+            session.pop("study", None)
+            flash("That deck isn't in your list any more.", "info")
+            return redirect(url_for("decks.my_decks"))
 
     today = today_local()
     drop_hidden_cards(state)
     queue = queue_for(state, user_deck, today)
     # Keep showing the same card on a page reload; otherwise take the next one.
-    card = card_in_deck(state["current"], deck) or card_in_deck(pick_next_card(state, queue), deck)
+    card = session_card(state, state["current"]) or session_card(state, pick_next_card(state, queue))
     if card is None:
         return redirect(url_for("study.summary"))
 
@@ -255,7 +272,7 @@ def show_card():
         deck=deck,
         card=card,
         style=state["style"],
-        badge=mode_badge(user_deck, today),
+        badge=mode_badge(user_deck, today) if user_deck else None,
         progress=session_progress(state, queue),
         coming_back=card.id in [entry[0] for entry in state["returns"]],
     )
@@ -279,10 +296,10 @@ def answer():
         flash("Pick Sure or Unsure first, then Know it or Review again.", "error")
         return redirect(url_for("study.show_card"))
 
-    deck, user_deck = load_deck_for(state)
-    card = card_in_deck(card_id, deck) if deck else None
+    card = session_card(state, card_id)
     if card is None:
         return redirect(url_for("study.show_card"))
+    user_deck = get_user_deck(card.deck_id)
 
     knew_it = knew == "1"
     confident = confidence == "sure"
@@ -300,6 +317,9 @@ def answer():
         "style": state["style"], "knew_it": knew_it, "confident": confident, "moved_up": moved_up,
     }})
     update_session_after_answer(state, card.id, knew_it, confident, moved_up, xp)
+    if award_plan_xp_if_finished(current_user, today):
+        state["stats"]["xp"] += PLAN_XP
+        state["stats"]["plan_finished"] = True
     save_session(state)
     return redirect(url_for("study.show_card"))
 
@@ -323,12 +343,13 @@ def summary():
     state = get_session()
     if not state:
         return redirect(url_for("decks.my_decks"))
-    deck = db.session.get(Deck, state["deck_id"])
+    deck = db.session.get(Deck, state["deck_id"]) if state["deck_id"] else None
     state["current"] = None
     save_session(state)
     return render_template(
         "study/summary.html",
         deck=deck if deck and (deck.is_ready or deck.owner_id == current_user.id) else None,
+        is_plan=state["plan"],
         style=state["style"],
         stats=state["stats"],
     )
