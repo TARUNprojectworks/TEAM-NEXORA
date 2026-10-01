@@ -21,7 +21,6 @@ bp = Blueprint("tracking", __name__, url_prefix="/tracking")
 
 CALENDAR_WEEKS = 8
 WEAKEST_SHOWN = 5
-RESOLVED_SHELF = 3  # a misconception card back on shelf 3+ was answered Know it + Sure twice since
 
 
 def topic_mastery_rows(user_id):
@@ -60,20 +59,21 @@ def weakest_topics(user_id):
 
     rows = []
     for (deck_id, topic), entry in stats.items():
-        if entry["seen"] < engine.MIN_CARDS_SEEN and entry["misconceptions"] < engine.MISCONCEPTION_CARDS_TRIGGER:
+        open_misconceptions = entry["open_misconceptions"]
+        if entry["seen"] < engine.MIN_CARDS_SEEN and open_misconceptions < engine.MISCONCEPTION_CARDS_TRIGGER:
             continue
         weak_score = entry["weak"] / entry["seen"]
-        if weak_score == 0 and entry["misconceptions"] == 0:
+        if weak_score == 0 and open_misconceptions == 0:
             continue
         rows.append({
             "deck": deck_titles.get(deck_id, ""),
             "topic": topic,
             "weak_percent": round(weak_score * 100),
             "seen": entry["seen"],
-            "misconceptions": entry["misconceptions"],
+            "open_misconceptions": open_misconceptions,
             "is_target": (deck_id, topic) == target,
         })
-    rows.sort(key=lambda row: (not row["is_target"], -row["weak_percent"], -row["misconceptions"]))
+    rows.sort(key=lambda row: (not row["is_target"], -row["weak_percent"], -row["open_misconceptions"]))
     return rows[:WEAKEST_SHOWN]
 
 
@@ -97,11 +97,11 @@ def deck_progress(user_id):
 
 def misconception_counts(user_id):
     """Cards the student was sure about but got wrong, and how many of those are now fixed."""
-    found = db.session.query(Progress.shelf).filter(
+    found = db.session.query(Progress.misconception_count, Progress.shelf).filter(
         Progress.user_id == user_id, Progress.hidden.is_(False), Progress.misconception_count > 0,
     ).all()
-    resolved = sum(1 for (shelf,) in found if shelf >= RESOLVED_SHELF)
-    return {"found": len(found), "resolved": resolved, "open": len(found) - resolved}
+    still_open = sum(1 for count, shelf in found if engine.is_open_misconception(count, shelf))
+    return {"found": len(found), "resolved": len(found) - still_open, "open": still_open}
 
 
 def streak_calendar(user_id, today):
@@ -142,6 +142,7 @@ def tracking_page():
         weakest=weakest_topics(current_user.id),
         calendar=streak_calendar(current_user.id, today),
         streak=streak_to_show(current_user, today),
+        resolved_shelf=engine.RESOLVED_SHELF,
         has_reviews=db.session.query(Review.id).filter_by(user_id=current_user.id).count() > 0,
     )
 
