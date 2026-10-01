@@ -18,6 +18,7 @@ MAX_SHELF = 5
 IMPORTANCE_POINTS = {"high": 6, "medium": 4, "low": 2}
 MAX_OVERDUE_POINTS = 5
 MISCONCEPTION_POINTS = 3
+RESOLVED_SHELF = 3  # a misconception card back on this shelf counts as fixed
 
 # New (never seen) cards per student per day, shared by Smart Study and the planner.
 NEW_CARDS_PER_DAY = 10
@@ -77,6 +78,15 @@ def apply_answer(progress, knew_it, confident, today, mode="normal", exam_date=N
     return progress
 
 
+def is_open_misconception(misconception_count, shelf):
+    """A card the student was once sure about but got wrong, and hasn't relearned yet.
+
+    Back on shelf 3 means two "Know it + Sure" answers since the mistake,
+    so we count the misconception as resolved.
+    """
+    return misconception_count > 0 and shelf < RESOLVED_SHELF
+
+
 def is_due(progress, today):
     return progress.next_due <= today
 
@@ -110,7 +120,8 @@ def priority_score(progress, card, today, mode="normal", exam_date=None):
     urgency = exam_urgency(mode, days_left_until(exam_date, today))
     days_overdue = (today - progress.next_due).days
     forgetting_risk = min(max(days_overdue, 0), MAX_OVERDUE_POINTS)
-    misconception = MISCONCEPTION_POINTS if progress.misconception_count > 0 else 0
+    open_misconception = is_open_misconception(progress.misconception_count, progress.shelf)
+    misconception = MISCONCEPTION_POINTS if open_misconception else 0
     return weakness + importance + urgency + forgetting_risk + misconception
 
 
@@ -162,12 +173,12 @@ def topic_stats(seen_cards):
     """
     stats = {}
     for deck_id, topic, shelf, misconception_count in seen_cards:
-        entry = stats.setdefault((deck_id, topic), {"seen": 0, "weak": 0, "misconceptions": 0})
+        entry = stats.setdefault((deck_id, topic), {"seen": 0, "weak": 0, "open_misconceptions": 0})
         entry["seen"] += 1
         if shelf <= 2:
             entry["weak"] += 1
-        if misconception_count > 0:
-            entry["misconceptions"] += 1
+        if is_open_misconception(misconception_count, shelf):
+            entry["open_misconceptions"] += 1  # fixed mistakes don't keep a topic weak
     return stats
 
 
@@ -176,11 +187,12 @@ def find_weak_topic(seen_cards):
     stats = topic_stats(seen_cards)
 
     # Misconception rule, checked first because it wins when both rules match:
-    # 2 or more cards in a topic that the student was sure about but got wrong.
+    # 2 or more cards in a topic that the student was sure about, got wrong,
+    # and hasn't relearned yet (open misconceptions).
     misconception_topics = [
-        (entry["misconceptions"], entry["weak"] / entry["seen"], key)
+        (entry["open_misconceptions"], entry["weak"] / entry["seen"], key)
         for key, entry in stats.items()
-        if entry["misconceptions"] >= MISCONCEPTION_CARDS_TRIGGER
+        if entry["open_misconceptions"] >= MISCONCEPTION_CARDS_TRIGGER
     ]
     if misconception_topics:
         return max(misconception_topics)[2]
