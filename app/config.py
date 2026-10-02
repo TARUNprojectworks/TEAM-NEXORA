@@ -61,7 +61,9 @@ class Config:
     # Storage for note photos
     STORAGE_BACKEND = os.environ.get("STORAGE_BACKEND", "local")  # local | gcs
     UPLOAD_FOLDER = os.environ.get("UPLOAD_FOLDER", "")  # empty = instance/uploads
-    MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # note photos are max 5 MB
+    # One Card Maker upload: up to 5 photos (5 MB each) + 1 PDF (10 MB) + a text file.
+    # Per-file limits are checked in storage.py; this caps the whole request.
+    MAX_CONTENT_LENGTH = 40 * 1024 * 1024
 
     # Google Cloud (only needed on the VM)
     GCP_PROJECT = os.environ.get("GCP_PROJECT", "")

@@ -69,13 +69,14 @@ def load_secret_key(app):
 
 def register_blueprints(app):
     from app.auth import bp as auth_bp
+    from app.cardmaker import bp as cardmaker_bp
     from app.decks import bp as decks_bp
     from app.fixer import bp as fixer_bp
     from app.planner import bp as planner_bp
     from app.study import bp as study_bp
     from app.tracking import bp as tracking_bp
 
-    for blueprint in (auth_bp, decks_bp, study_bp, planner_bp, fixer_bp, tracking_bp):
+    for blueprint in (auth_bp, decks_bp, cardmaker_bp, study_bp, planner_bp, fixer_bp, tracking_bp):
         app.register_blueprint(blueprint)
 
 
@@ -112,6 +113,12 @@ def register_error_pages(app):
     def forbidden(error):
         message = "That isn't yours to open. Go back to your decks."
         return render_template("error.html", message=message), 403
+
+    @app.errorhandler(413)
+    def too_large(error):
+        message = ("Those files are too big together. Upload up to 5 photos (5 MB each), "
+                   "one PDF (10 MB) and one text file at a time.")
+        return render_template("error.html", message=message), 413
 
     @app.errorhandler(CSRFError)
     def csrf_failed(error):

@@ -9,7 +9,7 @@ from zoneinfo import ZoneInfo
 
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import event, func
+from sqlalchemy import event, func, or_
 from sqlalchemy.engine import Engine
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -108,6 +108,10 @@ class Card(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     deck_id = db.Column(db.Integer, db.ForeignKey("decks.id", ondelete="CASCADE"), nullable=False, index=True)
+    # Null = a shared card from a ready deck, seen by everyone.
+    # Set = made by this student (in their own deck, or privately in a ready deck);
+    # only they can see, edit or delete it.
+    owner_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), index=True)
     question = db.Column(db.Text, nullable=False)
     answer = db.Column(db.Text, nullable=False)
     topic = db.Column(db.String(80), nullable=False, default=DEFAULT_TOPIC)
@@ -151,6 +155,19 @@ class Review(db.Model):
     confident = db.Column(db.Boolean, nullable=False)
     style = db.Column(db.String(10), nullable=False, default="smart")  # smart | free
     reviewed_at = db.Column(db.DateTime, nullable=False, default=utc_now)
+
+
+def visible_to(user_id):
+    """Query filter: the cards a student may see (shared cards plus their own).
+
+    Use it in every card query, so private cards never leak to other students.
+    """
+    return or_(Card.owner_id.is_(None), Card.owner_id == user_id)
+
+
+def card_is_visible_to(card, user_id):
+    """The same rule as visible_to(), for a card already loaded."""
+    return card.owner_id is None or card.owner_id == user_id
 
 
 def hidden_card_ids(user_id, deck_id=None):
