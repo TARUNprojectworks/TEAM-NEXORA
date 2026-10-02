@@ -1,0 +1,28 @@
+{# The weak spot box. Needs `box`; `show_links` and `widget` are optional. #}
+<section class="weak-spot-box" aria-labelledby="weak-spot-heading">
+  <h2 id="weak-spot-heading">Weak spot: <mark>{{ box.topic }}</mark></h2>
+  <p class="deck-meta">{{ box.deck_title }}</p>
+  {% if box.explanation %}<p class="weak-spot-text">{{ box.explanation }}</p>{% endif %}
+  {% if box.note %}<p class="notice">{{ box.note }}</p>{% endif %}
+
+  {% if show_links and box.links %}
+    <h3>Learn more</h3>
+    <ul class="resource-links">
+      {% for link in box.links %}
+        <li><a href="{{ link.uri }}" target="_blank" rel="noopener noreferrer">{{ link.title }}</a></li>
+      {% endfor %}
+    </ul>
+    {% if widget %}
+      {# Google-provided HTML (the Search suggestions widget that grounding returns),
+         not user content. Google's terms require us to show it with grounded links.
+         This is the only |safe in the app. #}
+      <div class="search-widget">{{ widget | safe }}</div>
+    {% endif %}
+  {% endif %}
+
+  {% if box.card_ids %}
+    <a class="button button-primary" href="{{ url_for('study.start_practice') }}">
+      Practice these {{ box.card_ids | length }} {{ "card" if box.card_ids | length == 1 else "cards" }}
+    </a>
+  {% endif %}
+</section>
