@@ -48,7 +48,8 @@ def test_tracking_needs_login(client):
 
 def test_tracking_page_has_every_section(riya_client):
     page = riya_client.get("/tracking/").get_data(as_text=True)
-    for heading in ["Weakest topics", "Study calendar", "Mastery by topic", "Progress per deck", "Misconceptions"]:
+    assert "My Progress" in page
+    for heading in ["Weak spots", "Study calendar", "Mastery by topic", "Progress per deck", "Misconceptions"]:
         assert heading in page
     assert "No study history yet" in page
 
@@ -91,16 +92,21 @@ def test_misconceptions_found_and_resolved(app, riya_client, riya):
     assert data(riya_client)["misconceptions"] == {"found": 2, "resolved": 1, "open": 1}
 
 
-def test_weakest_topics_highlights_the_fixer_target(app, riya_client, riya):
-    _, card_ids = add_deck(app, riya, ["Cells"] * 3 + ["DNA"] * 3)
+def weak_spots_section(client):
+    return client.get("/tracking/").get_data(as_text=True).split('id="weak-heading"')[1].split("Study calendar")[0]
+
+
+def test_weak_spots_lists_open_topics_with_fix_it(app, riya_client, riya):
+    deck_id, card_ids = add_deck(app, riya, ["Cells"] * 3 + ["DNA"] * 3)
     for card_id in card_ids[:3]:
         set_progress(app, riya, card_id, shelf=1)
     for card_id in card_ids[3:]:
         set_progress(app, riya, card_id, shelf=5)
-    page = riya_client.get("/tracking/").get_data(as_text=True)
-    assert "<mark>Cells</mark>" in page
-    assert "100% of 3 seen still on shelf 1–2" in page
-    assert "DNA" not in page.split("Weakest topics")[1].split("Study calendar")[0]
+    section = weak_spots_section(riya_client)
+    assert "<mark>Cells</mark>" in section and ">Open<" in section
+    assert "100% of 3 seen on Learning or Getting there" in section
+    assert f"/fixer/topic/{deck_id}?topic=Cells" in section
+    assert "DNA" not in section
 
 
 def test_resolved_uses_the_same_line_as_the_engine(app, riya_client, riya):
@@ -125,9 +131,9 @@ def test_topic_with_only_resolved_misconceptions_is_not_weak(app, riya_client, r
     _, card_ids = add_deck(app, riya, ["Processes"] * 3)
     for card_id in card_ids:
         set_progress(app, riya, card_id, shelf=4, misconceptions=1)
-    weakest = riya_client.get("/tracking/").get_data(as_text=True).split("Weakest topics")[1].split("Study calendar")[0]
-    assert "Processes" not in weakest
-    assert "No weak topics yet" in weakest
+    section = weak_spots_section(riya_client)
+    assert "Processes" not in section
+    assert "No weak spots yet" in section
 
 
 def test_calendar_counts_answers_per_day(app, riya_client, riya):

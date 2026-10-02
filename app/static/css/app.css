@@ -344,9 +344,8 @@ fieldset.field legend { font-weight: 700; margin-bottom: 4px; padding: 0; }
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   border: 2px solid var(--ink);
-  border-top-width: 6px;
   background: var(--paper);
-  max-width: 520px;
+  max-width: 560px;
 }
 .shelf-slot {
   display: flex;
@@ -358,7 +357,18 @@ fieldset.field legend { font-weight: 700; margin-bottom: 4px; padding: 0; }
 .shelf-slot:first-child { border-left: 0; }
 .shelf-count { font-size: 1.5rem; font-weight: 700; }
 .shelf-name { font-size: 0.875rem; color: var(--ink-soft); }
-.shelf-slot-learned .shelf-count { color: var(--know-green); }
+/* Each slot gets a coloured stripe: the same blue steps as the My Progress chart,
+   and green only for Mastered (green means "known" across the app). */
+.shelf-slot { border-top: 6px solid var(--shelf-colour); }
+.shelf-1 { --shelf-colour: #B9C6D0; }
+.shelf-2 { --shelf-colour: #8EA2B3; }
+.shelf-3 { --shelf-colour: #5F7A91; }
+.shelf-4 { --shelf-colour: #34506A; }
+.shelf-5 { --shelf-colour: var(--know-green); }
+.shelf-5 .shelf-count { color: var(--know-green); }
+.shelf-name { text-align: center; line-height: 1.2; }
+.how-it-works { margin-top: 8px; max-width: 65ch; }
+.how-it-works summary { cursor: pointer; color: var(--ink-soft); text-decoration: underline; }
 
 .exam-form { max-width: 440px; }
 .remove-form { margin-top: 16px; }
@@ -697,3 +707,94 @@ mark { background: var(--highlight); color: var(--ink); padding: 0 3px; }
   .draft-row { grid-template-columns: 1fr; gap: 0; }
   .maker-step { padding: 14px; }
 }
+
+/* ---------- Deck Library ---------- */
+
+.library-search { display: flex; gap: 8px; flex: 1 1 280px; max-width: 420px; }
+.library-search input {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 12px;
+  border: 1px solid var(--ink-soft);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+.search-result { margin: 12px 0 0; }
+
+/* Decks laid out like index cards spread on a desk: plain cards (no ruled lines),
+   the red header line, and a slight alternating tilt. */
+.library-grid {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+.library-deck.index-card { background-image: none; display: flex; flex-direction: column; gap: 8px; padding-bottom: 16px; }
+.library-deck:nth-child(odd) { transform: rotate(-0.4deg); }
+.library-deck:nth-child(even) { transform: rotate(0.35deg); }
+.library-title { font-family: var(--font-ui); font-size: 1.25rem; margin: 6px 0 0; }
+.library-title a { text-decoration: none; }
+.library-title a:hover { text-decoration: underline; }
+.library-description { margin: 0; font-size: 1rem; }
+.library-topics { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; font-family: var(--font-ui); }
+.library-topics .badge { font-size: 0.8125rem; }
+.library-preview { font-family: var(--font-ui); font-size: 0.9375rem; }
+.library-preview summary { cursor: pointer; text-decoration: underline; }
+.library-preview ol { margin: 8px 0 0; padding-left: 20px; display: grid; gap: 6px; }
+.preview-q { display: block; font-weight: 700; }
+.preview-a { display: block; color: var(--ink-soft); }
+.library-actions { margin-top: auto; display: flex; align-items: center; gap: 12px; font-family: var(--font-ui); }
+.badge-added { border-color: var(--know-green); color: var(--know-green); font-weight: 700; }
+
+@media (prefers-reduced-motion: reduce) {
+  .library-deck:nth-child(odd), .library-deck:nth-child(even) { transform: none; }
+}
+
+/* ---------- Study, summary, plan and card maker additions ---------- */
+
+.misconception-note { margin: 10px 0 0; }
+.weak-spot-loading { margin: 24px 0; color: var(--ink-soft); }
+.refresh-plan { margin: 12px 0 0; }
+.refresh-plan .link-button { text-decoration: underline; color: var(--ink-soft); }
+.plan-finished .actions-inline { margin-top: 10px; }
+
+.skipped-lines {
+  margin: 0 0 20px;
+  padding: 14px 18px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--ink-soft);
+  border-radius: var(--radius);
+}
+.skipped-lines h2 { font-size: 1.0625rem; margin: 0 0 4px; }
+.skipped-lines ul { margin: 6px 0 12px; padding-left: 20px; font-family: var(--font-card); }
+
+/* ---------- My Progress: weak spots and misconceptions ---------- */
+
+.status-pill {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: var(--radius);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.status-open { background: var(--highlight); color: var(--ink); }
+.status-fixed { border: 1px solid var(--know-green); color: var(--know-green); }
+.weak-list li .button-small { margin-left: auto; }
+.weak-detail { margin-left: 0; }
+
+.misconception-list { list-style: none; margin: 12px 0 0; padding: 0; border-top: 1px solid var(--line); }
+.misconception-list li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.misconception-card { flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 2px; align-items: flex-start; }

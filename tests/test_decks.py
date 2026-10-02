@@ -77,12 +77,13 @@ def test_ready_page_lists_decks_in_chosen_folder(app, riya_client, ready_deck, r
     assert "Cell Biology" in page
     assert "DSA Basics" not in page
     assert "private deck" not in page
-    assert "Add to my decks" in page
+    assert ">Add</a>" in page
 
 
-def test_ready_page_without_folder_asks_to_choose(riya_client, ready_deck):
+def test_deck_library_opens_the_first_folder(riya_client, ready_deck):
     page = riya_client.get("/decks/ready").get_data(as_text=True)
-    assert "Choose a folder" in page
+    assert "Deck Library" in page
+    assert "Cell Biology" in page  # a Semester deck: the first folder is open
     assert "Semester" in page and "Placement" in page and "Competitive" in page
 
 

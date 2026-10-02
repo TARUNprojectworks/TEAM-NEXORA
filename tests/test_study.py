@@ -94,7 +94,7 @@ def test_past_exam_is_switched_to_normal_before_study(app, riya_client, riya):
 def test_deck_page_offers_both_study_styles(app, riya_client, riya):
     deck_id, _ = make_study_deck(app, riya)
     page = riya_client.get(f"/decks/{deck_id}").get_data(as_text=True)
-    assert "Smart Study" in page and "Free Practice" in page
+    assert "Smart Study" in page and "Quick Revise" in page
 
 
 def test_study_page_has_flip_confidence_and_progress(app, riya_client, riya):
