@@ -4,8 +4,11 @@ How a session works:
 - /study/<deck_id>?style=smart|free starts a session for one deck.
 - /study/plan starts Smart Study on exactly the cards in today's plan.
 - /study/practice starts Smart Study on the Weak Spot Fixer's practice cards.
+- /study/cards?ids=1,2 studies chosen cards (e.g. misconceptions on My Progress).
+- /study/revise is Quick Revise on today's plan cards, for no extra XP.
 - /study/explain/<card_id> returns a short explanation (cached on the card).
-- When a session ends, the summary page runs the Weak Spot Fixer once.
+- The summary page shows at once; it then asks /study/weak-spot for the
+  Weak Spot Fixer's box (Gemini can take several seconds).
 - /study/card shows the current card. /study/answer saves the answer and
   redirects back to /study/card for the next one (a plain form post, so
   there is no client-side state to get out of sync).
@@ -43,8 +46,9 @@ XP_REVIEW_AGAIN = 1
 
 # ---------- Session state (kept in the cookie: ids and numbers only) ----------
 
-def start_session(style, deck_id=None, plan=False, card_ids=None):
+def start_session(style, deck_id=None, plan=False, card_ids=None, revise=False):
     session["study"] = {
+        "revise": revise,  # revising today's plan again: no XP
         "deck_id": deck_id,  # one deck, or None when studying today's plan or practice cards
         "plan": plan,
         "card_ids": card_ids,  # a fixed list of cards (Fixer practice), or None
@@ -279,6 +283,65 @@ def start_practice():
     return redirect(url_for("study.show_card"))
 
 
+MAX_CHOSEN_CARDS = 50
+
+
+def cards_i_can_study(card_ids):
+    """Of these ids, the cards that are in the student's decks, visible to them and not hidden."""
+    hidden = hidden_card_ids(current_user.id)
+    cards = db.session.query(Card).filter(Card.id.in_(card_ids), visible_to(current_user.id)).all()
+    allowed = {c.id for c in cards if c.id not in hidden and get_user_deck(c.deck_id) is not None}
+    return [card_id for card_id in card_ids if card_id in allowed][:MAX_CHOSEN_CARDS]
+
+
+@bp.get("/cards")
+@login_required
+def start_cards():
+    """Study chosen cards, e.g. "Practice" next to a misconception on My Progress."""
+    ids = [int(part) for part in request.args.get("ids", "").split(",") if part.strip().isdigit()]
+    card_ids = cards_i_can_study(ids)
+    if not card_ids:
+        flash("Those cards aren't available to study.", "info")
+        return redirect(url_for("tracking.tracking_page"))
+    style = "free" if request.args.get("style") == "free" else "smart"
+    start_session(style, card_ids=card_ids)
+    return redirect(url_for("study.show_card"))
+
+
+@bp.get("/revise")
+@login_required
+def start_revise():
+    """Quick Revise on today's plan cards after finishing the plan. No XP, no shelf changes."""
+    plan = todays_plan(current_user.id, today_local())
+    card_ids = cards_i_can_study(plan["card_ids"])
+    if not card_ids:
+        return redirect(url_for("planner.home"))
+    start_session("free", card_ids=card_ids, revise=True)
+    return redirect(url_for("study.show_card"))
+
+
+@bp.post("/weak-spot")
+@login_required
+def weak_spot():
+    """The Weak Spot Fixer's box for the session that just ended, as HTML (or "" if none).
+
+    At most one Fixer per session; it only looks at the decks studied in it.
+    Practice and revise sessions (fixed lists of cards) don't start a Fixer.
+    """
+    state = get_session()
+    if not state or not state["stats"]["studied"] or state.get("card_ids"):
+        return jsonify(html="")
+    today = today_local()
+    if state.get("fixer_done"):
+        box = fixer.todays_box(today) if state.get("fixer_box") else None
+        return jsonify(html=fixer.render_box(box, None) if box else "")
+    box, widget = fixer.run_after_session(current_user, today, decks_studied(state))
+    state["fixer_done"] = True
+    state["fixer_box"] = box is not None
+    save_session(state)
+    return jsonify(html=fixer.render_box(box, widget) if box else "")
+
+
 @bp.post("/explain/<int:card_id>")
 @login_required
 def explain(card_id):
@@ -369,7 +432,7 @@ def answer():
         moved_up = update_progress(card, user_deck, knew_it, confident, today, now)
     db.session.add(Review(user_id=current_user.id, card_id=card.id, knew_it=knew_it,
                           confident=confident, style=state["style"], reviewed_at=now))
-    xp = reward_student(current_user, knew_it, today)
+    xp = 0 if state.get("revise") else reward_student(current_user, knew_it, today)
     db.session.commit()
 
     log.info("review", extra={"fields": {
@@ -404,25 +467,14 @@ def summary():
         return redirect(url_for("decks.my_decks"))
     deck = db.session.get(Deck, state["deck_id"]) if state["deck_id"] else None
     state["current"] = None
-    today = today_local()
-    box, widget = None, None
-    if state["stats"]["studied"] and not state.get("fixer_done") and not state.get("card_ids"):
-        # At most one Fixer per session: run it the first time the summary opens.
-        # It only looks at the decks studied in this session. Practice sessions
-        # (the Fixer's own cards) don't start another Fixer.
-        box, widget = fixer.run_after_session(current_user, today, decks_studied(state))
-        state["fixer_done"] = True
-        state["fixer_box"] = box is not None
-    elif state.get("fixer_box"):
-        box = fixer.todays_box(today)  # summary reloaded: show this session's box again
     save_session(state)
     return render_template(
         "study/summary.html",
         deck=deck if deck and (deck.is_ready or deck.owner_id == current_user.id) else None,
         is_plan=state["plan"],
         is_practice=bool(state.get("card_ids")),
-        box=box,
-        widget=widget,
+        is_revise=bool(state.get("revise")),
+        look_for_weak_spot=bool(state["stats"]["studied"]) and not state.get("card_ids"),
         style=state["style"],
         stats=state["stats"],
     )

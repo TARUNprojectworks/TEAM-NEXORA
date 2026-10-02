@@ -3,12 +3,14 @@
 {% block content %}
 <section class="summary">
   <h1>Session summary</h1>
-  {% if is_practice %}
+  {% if is_revise %}
+    <p class="deck-meta">Revising today's cards · Quick Revise, no XP</p>
+  {% elif is_practice %}
     <p class="deck-meta">Practice cards</p>
   {% elif is_plan %}
     <p class="deck-meta">Today's plan</p>
   {% elif deck %}
-    <p class="deck-meta">{{ deck.title }} · {{ "Smart Study" if style == "smart" else "Free Practice" }}</p>
+    <p class="deck-meta">{{ deck.title }} · {{ "Smart Study" if style == "smart" else "Quick Revise" }}</p>
   {% endif %}
   {% if stats.plan_finished %}
     <p class="plan-done">You finished today's plan. That's 10 bonus XP, included below.</p>
@@ -16,7 +18,7 @@
 
   {% if stats.studied == 0 %}
     {% if style == "smart" and not is_plan %}
-      <p class="empty">Nothing is due in this deck right now. Try Free Practice, or come back tomorrow.</p>
+      <p class="empty">Nothing is due in this deck right now. Try Quick Revise, or come back tomorrow.</p>
     {% else %}
       <p class="empty">You didn't answer any cards this time.</p>
     {% endif %}
@@ -32,21 +34,26 @@
     {% endif %}
   {% endif %}
 
-  <div id="weak-spot">
-    {% if box %}
-      {% with show_links = true %}{% include "_weak_spot_box.html" %}{% endwith %}
-    {% endif %}
-  </div>
+  {% if look_for_weak_spot %}
+    {# Filled in by weakspot.js: the Fixer can take several seconds with Gemini. #}
+    <div id="weak-spot" class="weak-spot-slot" data-weak-spot-url="{{ url_for('study.weak_spot') }}"
+         aria-live="polite">
+      <p class="weak-spot-loading">Finding your weak spot…</p>
+    </div>
+  {% endif %}
 
   <div class="actions">
     {% if deck %}
       <a class="button button-primary" href="{{ url_for('study.start', deck_id=deck.id, style=style) }}">Study again</a>
       {% if style == "smart" %}
-        <a class="button" href="{{ url_for('study.start', deck_id=deck.id, style='free') }}">Free Practice</a>
+        <a class="button" href="{{ url_for('study.start', deck_id=deck.id, style='free') }}">Quick Revise</a>
       {% endif %}
       <a class="button" href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">Back to deck</a>
     {% endif %}
     <a class="button{{ ' button-primary' if is_plan }}" href="{{ url_for('planner.home') }}">Home</a>
   </div>
 </section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/weakspot.js') }}"></script>
 {% endblock %}
