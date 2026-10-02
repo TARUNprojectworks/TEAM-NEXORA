@@ -51,6 +51,20 @@
     enableAnswerButtons();
   }
 
+  // Sure + Review again is a misconception. Stop once on this card so the student
+  // can tap Explain; pressing Review again (now "Next card") a second time moves on.
+  const misconceptionNote = document.getElementById("misconception-note");
+  let misconceptionShown = false;
+  form.addEventListener("submit", function (event) {
+    const sure = form.querySelector('input[name="confident"][value="sure"]').checked;
+    if (event.submitter !== againButton || !sure || misconceptionShown || !misconceptionNote) return;
+    event.preventDefault();
+    misconceptionShown = true;
+    misconceptionNote.hidden = false;
+    againButton.firstChild.textContent = "Next card ";
+    if (explainButton && !explainButton.hidden) explainButton.focus();
+  });
+
   function answer(button) {
     if (button.disabled) {
       hint.textContent = "Pick Sure or Unsure first (S or U).";

@@ -1,4 +1,4 @@
-"""Smart Study, Free Practice, the answer endpoint and the session summary.
+"""Smart Study, Quick Revise (style "free" in code), the answer endpoint and the session summary.
 
 How a session works:
 - /study/<deck_id>?style=smart|free starts a session for one deck.
@@ -16,7 +16,7 @@ How a session works:
   back, running totals) lives in the Flask session cookie as card ids and
   numbers only. Shelves and reviews live in the database.
 
-Smart Study asks engine.py which card to show. Free Practice shows every
+Smart Study asks engine.py which card to show. Quick Revise shows every
 card in the deck in a shuffled order and never changes shelves.
 """
 
@@ -449,7 +449,7 @@ def answer():
 @bp.post("/shuffle")
 @login_required
 def shuffle():
-    """Free Practice: shuffle the cards that are left."""
+    """Quick Revise: shuffle the cards that are left."""
     state = get_session()
     if state and state["style"] == "free":
         state["seed"] = random.randrange(1_000_000)

@@ -15,7 +15,7 @@
         <a href="{{ url_for('study.start', deck_id=deck.id, style='smart') }}"
            {% if style == 'smart' %}aria-current="page"{% endif %}>Smart Study</a>
         <a href="{{ url_for('study.start', deck_id=deck.id, style='free') }}"
-           {% if style == 'free' %}aria-current="page"{% endif %}>Free Practice</a>
+           {% if style == 'free' %}aria-current="page"{% endif %}>Quick Revise</a>
       </nav>
       {% endif %}
     </div>
@@ -29,6 +29,10 @@
       <a class="button" href="{{ url_for('study.summary') }}">End session</a>
     </div>
   </div>
+
+  {% if style == 'free' %}
+    <p class="notice">Practice only, your progress doesn't change. Use Smart Study to update progress and find weak spots.</p>
+  {% endif %}
 
   <div class="session-progress">
     <div class="progress-track" role="progressbar" aria-label="Session progress"
@@ -79,6 +83,9 @@
       </button>
     </div>
     <p class="field-hint" id="confidence-hint">Pick Sure or Unsure first.</p>
+    <p class="misconception-note" id="misconception-note" role="status" hidden>
+      <mark>You were sure about this one.</mark> Tap Explain to see why.
+    </p>
   </form>
 
   <section class="explain" id="explain-area" hidden aria-label="Explanation">

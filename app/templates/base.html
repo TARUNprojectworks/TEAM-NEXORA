@@ -21,8 +21,8 @@
       {% if current_user.is_authenticated %}
         <a href="{{ url_for('planner.home') }}">Home</a>
         <a href="{{ url_for('decks.my_decks') }}">My decks</a>
-        <a href="{{ url_for('decks.ready_decks') }}">Ready decks</a>
-        <a href="{{ url_for('tracking.tracking_page') }}">Tracking</a>
+        <a href="{{ url_for('decks.ready_decks') }}">Deck Library</a>
+        <a href="{{ url_for('tracking.tracking_page') }}">My Progress</a>
         <form method="post" action="{{ url_for('auth.logout') }}" class="inline-form">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <button type="submit" class="link-button">Log out</button>
