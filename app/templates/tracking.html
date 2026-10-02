@@ -56,7 +56,7 @@
 
   <section class="track-section" aria-labelledby="mastery-heading">
     <h2 id="mastery-heading">Mastery by topic</h2>
-    <p class="field-hint">Share of each topic's cards on shelf 5.</p>
+    <p class="field-hint">Share of each topic's cards that are Mastered.</p>
     {% if data.mastery %}
       <div class="chart-box" style="height: {{ 60 + data.mastery | length * 28 }}px">
         <canvas id="mastery-chart" role="img" aria-label="Mastery percent for each topic. The same numbers are in the table below."></canvas>
@@ -88,7 +88,7 @@
         <table>
           <thead>
             <tr><th scope="col">Deck</th><th scope="col">Not studied</th>
-              {% for shelf in range(1, 6) %}<th scope="col">Shelf {{ shelf }}</th>{% endfor %}</tr>
+              {% for name in shelf_names %}<th scope="col">{{ name }}</th>{% endfor %}</tr>
           </thead>
           <tbody>
             {% for row in data.decks %}
@@ -139,9 +139,10 @@
 </section>
 {% endblock %}
 {% block scripts %}
+{# progress.js first: the Explain buttons shouldn't wait for Chart.js to download. #}
+<script src="{{ url_for('static', filename='js/progress.js') }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js"
         integrity="sha512-WoViKhKD4qI2WruSZqv9+kvM4WfFhUMQCLN4QlDTt5aU56fLQy2gYoxWIqlEnXqJy/+Ac5q/hk1oWfqnMDhwMA=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="{{ url_for('static', filename='js/progress.js') }}"></script>
-<script src="{{ url_for('static', filename='js/tracking.js') }}" data-url="{{ url_for('tracking.tracking_json') }}" id="tracking-script"></script>
+<script src="{{ url_for('static', filename='js/tracking.js') }}" data-url="{{ url_for('tracking.tracking_json') }}" id="tracking-script" data-shelf-names='{{ shelf_names | tojson }}'></script>
 {% endblock %}

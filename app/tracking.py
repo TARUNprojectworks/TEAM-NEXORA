@@ -11,7 +11,7 @@ from flask import Blueprint, jsonify, render_template
 from flask_login import current_user, login_required
 
 from app import engine
-from app.decks import count_cards, count_hidden_cards, shelf_counts
+from app.decks import SHELF_NAMES, count_cards, count_hidden_cards, shelf_counts
 from app.models import (
     Card, Deck, Progress, Review, UserDeck, db, local_date_of, local_day_start_utc, today_local, visible_to,
 )
@@ -166,6 +166,7 @@ def tracking_page():
         calendar=streak_calendar(current_user.id, today),
         streak=streak_to_show(current_user, today),
         resolved_shelf=engine.RESOLVED_SHELF,
+        shelf_names=SHELF_NAMES,
         has_reviews=db.session.query(Review.id).filter_by(user_id=current_user.id).count() > 0,
     )
 

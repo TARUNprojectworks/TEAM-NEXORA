@@ -11,6 +11,7 @@
   const green = color("--know-green");
   const line = color("--line");
   // Shelves 1-4 in steps of navy, shelf 5 (learned) in green.
+  const shelfNames = JSON.parse(script.dataset.shelfNames);
   const shelfColors = ["#B9C6D0", "#8EA2B3", "#5F7A91", "#34506A", green];
 
   Chart.defaults.font.family = css.getPropertyValue("--font-ui");
@@ -42,7 +43,7 @@
           legend: { display: false },
           tooltip: { callbacks: { label: (item) => {
             const row = rows[item.dataIndex];
-            return row.mastery + "% (" + row.learned + " of " + row.total + " cards on shelf 5)";
+            return row.mastery + "% (" + row.learned + " of " + row.total + " cards Mastered)";
           } } },
         },
       },
@@ -55,7 +56,7 @@
     const datasets = [{ label: "Not studied", data: rows.map((row) => row.new), backgroundColor: "#E9EEF2" }];
     for (let shelf = 0; shelf < 5; shelf++) {
       datasets.push({
-        label: "Shelf " + (shelf + 1),
+        label: shelfNames[shelf],
         data: rows.map((row) => row.shelves[shelf]),
         backgroundColor: shelfColors[shelf],
       });
