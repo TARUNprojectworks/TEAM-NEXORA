@@ -1,0 +1,29 @@
+{# One editable draft card. Needs `draft` (question, answer, topic, importance, source_line) and `importance_levels`. #}
+<li class="draft index-card">
+  <div class="draft-top">
+    <span class="card-header">Draft card</span>
+    <button type="button" class="link-button remove-draft">Remove</button>
+  </div>
+  <label class="draft-field">Front
+    <textarea name="question" rows="2" maxlength="1000">{{ draft.question }}</textarea>
+  </label>
+  <label class="draft-field">Back
+    <textarea name="answer" rows="3" maxlength="2000">{{ draft.answer }}</textarea>
+  </label>
+  <div class="draft-row">
+    <label class="draft-field">Topic
+      <input type="text" name="topic" value="{{ draft.topic }}" maxlength="80">
+    </label>
+    <label class="draft-field">Importance
+      <select name="importance">
+        {% for level in importance_levels %}
+          <option value="{{ level }}" {% if draft.importance == level %}selected{% endif %}>{{ level | capitalize }}</option>
+        {% endfor %}
+      </select>
+    </label>
+  </div>
+  <input type="hidden" name="source_line" value="{{ draft.source_line }}">
+  {% if draft.source_line %}
+    <p class="source-line">From your notes: “{{ draft.source_line }}”</p>
+  {% endif %}
+</li>

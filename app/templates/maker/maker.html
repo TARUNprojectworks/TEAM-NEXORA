@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}AI Card Maker · Nexora Recall{% endblock %}
+{% block content %}
+<section class="maker">
+  <h1>AI Card Maker</h1>
+  <p>Paste your notes or upload a photo, PDF or text file. You'll check every card before anything is saved.</p>
+
+  {% if error %}<p class="flash flash-error" role="alert">{{ error }}</p>{% endif %}
+
+  <form method="post" action="{{ url_for('cardmaker.make_drafts') }}" enctype="multipart/form-data"
+        novalidate id="maker-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <section class="maker-step" aria-labelledby="step-target">
+      <h2 id="step-target">Add to</h2>
+      <div class="field">
+        <label for="target">Deck</label>
+        <select name="target" id="target">
+          <option value="new" {% if chosen == "new" %}selected{% endif %}>A new deck</option>
+          {% for deck in decks %}
+            <option value="{{ deck.id }}" {% if chosen == deck.id | string %}selected{% endif %}>
+              {{ deck.title }}{% if deck.is_ready %} (ready deck: your cards stay private){% endif %}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div id="new-deck-fields">
+        <div class="field">
+          <label for="new_title">New deck name</label>
+          <input type="text" name="new_title" id="new_title" value="{{ new_title }}" maxlength="120">
+        </div>
+        {% with form = exam_form %}{% include "decks/_exam_fields.html" %}{% endwith %}
+      </div>
+    </section>
+
+    <section class="maker-step" aria-labelledby="step-type">
+      <h2 id="step-type">Type cards</h2>
+      <p>
+        <a id="type-link" data-new-url="{{ url_for('decks.create_my_own') }}"
+           data-deck-url="{{ url_for('decks.new_card', deck_id=0) }}"
+           href="{{ url_for('decks.new_card', deck_id=chosen) if chosen != 'new' else url_for('decks.create_my_own') }}">Type cards one by one instead</a>
+      </p>
+    </section>
+
+    <section class="maker-step" aria-labelledby="step-paste">
+      <h2 id="step-paste">Paste notes</h2>
+      <div class="field">
+        <label for="notes" class="visually-hidden">Your notes</label>
+        <p class="field-hint" id="notes-hint">Up to 3,000 words. For Quick split, put one term per line, like
+          “Osmosis - water moving across a membrane”.</p>
+        <textarea name="notes" id="notes" rows="10" aria-describedby="notes-hint">{{ notes }}</textarea>
+      </div>
+    </section>
+
+    <section class="maker-step" aria-labelledby="step-upload">
+      <h2 id="step-upload">Upload</h2>
+      <div class="field">
+        <label for="files" class="visually-hidden">Files</label>
+        <p class="field-hint" id="files-hint">Photos (jpg, png, webp, heic): up to 5, 5 MB each.
+          PDF: up to 10 pages, 10 MB. Or a .txt file.</p>
+        <input type="file" name="files" id="files" multiple aria-describedby="files-hint"
+               accept=".jpg,.jpeg,.png,.webp,.heic,.heif,.pdf,.txt,image/jpeg,image/png,image/webp,image/heic,image/heif,application/pdf,text/plain">
+        <ul class="file-list" id="file-list" aria-live="polite"></ul>
+      </div>
+    </section>
+
+    <div class="actions maker-actions">
+      <button type="submit" name="action" value="ai" class="button button-primary">Make cards with AI</button>
+      <button type="submit" name="action" value="split" class="button">Quick split</button>
+      <span class="field-hint">Quick split needs no AI: it turns “term - meaning” lines into cards.</span>
+    </div>
+  </form>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/cardmaker.js') }}"></script>
+{% endblock %}
