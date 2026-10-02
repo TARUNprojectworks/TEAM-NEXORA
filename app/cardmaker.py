@@ -22,7 +22,7 @@ from app.ai_service import AIError, AILimitReached
 from app.decks import (
     ExamForm, apply_exam_choice, deck_for_new_cards_or_error, first_error, new_card_for, visible_deck_cards,
 )
-from app.models import DEFAULT_TOPIC, IMPORTANCE_LEVELS, Deck, UserDeck, db, today_local
+from app.models import IMPORTANCE_LEVELS, Deck, UserDeck, db, today_local
 
 bp = Blueprint("cardmaker", __name__, url_prefix="/maker")
 log = logging.getLogger("nexora.cardmaker")
@@ -59,14 +59,22 @@ def split_line(line):
 
 
 def quick_split(text):
-    """Each 'term - meaning' or 'term: meaning' line becomes a card, term on the front."""
+    """Each 'term - meaning' or 'term: meaning' line becomes a card, term on the front.
+
+    The topic is left empty; saving fills it with the deck's name.
+    """
     cards = []
     for line in (text or "").splitlines():
         parts = split_line(line)
         if parts:
-            cards.append({"question": parts[0], "answer": parts[1], "topic": DEFAULT_TOPIC,
-                          "importance": "medium", "source_line": line.strip()})
+            cards.append({"question": parts[0], "answer": parts[1], "topic": "",
+                          "importance": "medium", "source_line": line.strip(), "source": "manual"})
     return cards
+
+
+def skipped_lines(text):
+    """Non-empty lines Quick split couldn't turn into a card, so the student can see them."""
+    return [line.strip() for line in (text or "").splitlines() if line.strip() and not split_line(line)]
 
 
 def looks_like_term_lines(text):
@@ -207,13 +215,35 @@ def render_maker(error=None, status=200):
     ), status
 
 
-def render_drafts(drafts, target, origin, note=None, error=None):
+def render_drafts(drafts, target, origin, note=None, error=None, skipped=()):
+    for draft in drafts:
+        draft.setdefault("source", "ai" if origin == "ai" else "manual")
     return render_template(
         "maker/drafts.html",
         drafts=drafts, target=target, deck=target_deck(target), origin=origin, note=note, error=error,
-        stand_in=origin == "ai" and not ai_service.ai_enabled(),
-        importance_levels=IMPORTANCE_LEVELS,
+        stand_in=any(d["source"] == "ai" for d in drafts) and not ai_service.ai_enabled(),
+        importance_levels=IMPORTANCE_LEVELS, skipped=list(skipped),
     )
+
+
+DRAFT_FIELDS = ("question", "answer", "topic", "importance", "source_line", "source")
+
+
+def drafts_from_form():
+    """The drafts as the student left them on the page (blank rows dropped)."""
+    questions = request.form.getlist("question")
+    columns = {name: request.form.getlist(name) for name in DRAFT_FIELDS}
+    # A draft without its own source (an older page) takes the form's overall origin.
+    origin = "ai" if request.form.get("origin") == "ai" else "manual"
+    columns["source"] = columns["source"] or [origin] * len(questions)
+    drafts = []
+    for row in zip(*(columns[name] for name in DRAFT_FIELDS)):
+        raw = dict(zip(DRAFT_FIELDS, row))
+        card = ai_service.clean_card(raw)
+        if card:
+            card["source"] = "ai" if raw["source"] == "ai" else "manual"
+            drafts.append(card)
+    return drafts
 
 
 # ---------- Routes ----------
@@ -231,8 +261,10 @@ def make_drafts():
     if error:
         return render_maker(error, 400)
 
+    skipped = []
     if request.form.get("action") == "split":
-        drafts, origin, note = quick_split(request.form.get("notes", "")), "manual", None
+        notes = request.form.get("notes", "")
+        drafts, origin, note, skipped = quick_split(notes), "manual", None, skipped_lines(notes)
         if not drafts:
             return render_maker(
                 "No “term - meaning” lines found. Put one term per line, like "
@@ -260,7 +292,28 @@ def make_drafts():
         note = (note + " " if note else "") + f"Left out {before - len(drafts)} that were already in the deck."
     if not drafts:
         return render_maker("Every card from these notes is already in that deck.", 400)
-    return render_drafts(drafts, target, origin, note)
+    return render_drafts(drafts, target, origin, note, skipped=skipped)
+
+
+@bp.post("/drafts/add-ai")
+@login_required
+def add_ai_drafts():
+    """"Make these with AI" for the lines Quick split skipped. Keeps the drafts already on the page."""
+    target, error = read_target(request.form)
+    if error:
+        return render_maker(error, 400)
+    drafts = drafts_from_form()
+    lines = request.form.get("skipped", "").strip()
+    deck = target_deck(target)
+    topics = sorted({c.topic for c in visible_deck_cards(deck.id, current_user.id)}) if deck else []
+    try:
+        new, note = drafts_with_ai(lines, [], topics)
+    except AIError as ai_error:
+        return render_drafts(drafts, target, "manual", error=str(ai_error), skipped=lines.splitlines())
+    for draft in new:
+        draft["source"] = "manual" if note else "ai"
+    new = remove_near_duplicates(new, [d["question"] for d in drafts] + existing_questions(deck))
+    return render_drafts(drafts + new, target, "ai", note=note or f"Added {len(new)} AI drafts from the skipped lines.")
 
 
 @bp.post("/more/<int:deck_id>")
@@ -299,18 +352,15 @@ def save_drafts():
     if error:
         return render_maker(error, 400)
     origin = "ai" if request.form.get("origin") == "ai" else "manual"
-
-    rows = zip(*(request.form.getlist(name) for name in ("question", "answer", "topic", "importance", "source_line")))
-    kept = [card for card in (ai_service.clean_card(dict(zip(
-        ("question", "answer", "topic", "importance", "source_line"), row))) for row in rows) if card]
+    kept = drafts_from_form()
     if not kept:
         return render_drafts([], target, origin, error="Keep at least one card with a front and a back.")
 
     deck = target_deck(target) or create_target_deck(target)
     for draft in kept[:MAX_SAVED_CARDS]:
-        db.session.add(new_card_for(deck, source=origin, question=draft["question"], answer=draft["answer"],
-                                    topic=draft["topic"], importance=draft["importance"],
-                                    source_line=draft["source_line"] or None))
+        db.session.add(new_card_for(deck, source=draft["source"], question=draft["question"],
+                                    answer=draft["answer"], topic=draft["topic"] or deck.title,
+                                    importance=draft["importance"], source_line=draft["source_line"] or None))
     db.session.commit()
     log.info("cards_saved", extra={"fields": {"deck_id": deck.id, "count": min(len(kept), MAX_SAVED_CARDS),
                                               "source": origin}})

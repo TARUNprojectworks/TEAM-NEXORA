@@ -19,7 +19,7 @@ from wtforms import DateField, RadioField, SelectField, StringField, TextAreaFie
 from wtforms.validators import DataRequired, Length, Optional
 
 from app.models import (
-    DEFAULT_TOPIC, Card, Deck, Progress, UserDeck, card_is_visible_to, db, hidden_card_ids, today_local,
+    Card, Deck, Progress, UserDeck, card_is_visible_to, db, hidden_card_ids, today_local,
     visible_to,
 )
 
@@ -89,7 +89,7 @@ class CardForm(FlaskForm):
         validators=[DataRequired(message="Write something on the back."), Length(max=2000)],
     )
     topic = StringField(
-        "Topic", description="Optional. Cards with no topic go under General.",
+        "Topic", description="Optional. Cards with no topic use the deck's name as their topic.",
         validators=[Optional(), Length(max=80)],
     )
     importance = SelectField("Importance", choices=IMPORTANCE_CHOICES, default="medium")
@@ -231,10 +231,10 @@ def visible_deck_cards(deck_id, user_id):
     ).order_by(Card.topic, Card.id).all()
 
 
-def fill_card_from_form(card, form):
+def fill_card_from_form(card, form, deck):
     card.question = form.question.data.strip()
     card.answer = form.answer.data.strip()
-    card.topic = (form.topic.data or "").strip() or DEFAULT_TOPIC
+    card.topic = (form.topic.data or "").strip() or deck.title  # no topic: the deck is the topic
     card.importance = form.importance.data
 
 
@@ -454,7 +454,7 @@ def new_card(deck_id):
     form = CardForm()
     if form.validate_on_submit():
         card = new_card_for(deck, source="manual")
-        fill_card_from_form(card, form)
+        fill_card_from_form(card, form, deck)
         db.session.add(card)
         db.session.commit()
         if "save_next" in request.form:
@@ -474,7 +474,7 @@ def edit_card(deck_id, card_id):
     deck, card = editable_card_or_error(deck_id, card_id)
     form = CardForm(obj=card)
     if form.validate_on_submit():
-        fill_card_from_form(card, form)
+        fill_card_from_form(card, form, deck)
         card.explanation = None  # the cached Explain text no longer matches
         db.session.commit()
         flash("Card updated.", "info")

@@ -265,7 +265,7 @@ def test_exam_setting_needs_deck_in_my_list(riya_client, ready_deck):
 
 # ---------- Cards ----------
 
-def test_add_card_with_empty_topic_goes_to_general(app, riya_client, riya_deck):
+def test_add_card_with_empty_topic_uses_the_deck_name(app, riya_client, riya_deck):
     deck_id, _ = riya_deck
     response = riya_client.post(f"/decks/{deck_id}/cards/new", data={
         "question": "What is ATP?", "answer": "The cell's energy currency.", "topic": "", "importance": "high",
@@ -273,7 +273,7 @@ def test_add_card_with_empty_topic_goes_to_general(app, riya_client, riya_deck):
     assert response.headers["Location"].endswith(f"/decks/{deck_id}")
     with app.app_context():
         card = db.session.query(Card).filter_by(question="What is ATP?").one()
-        assert card.topic == "General"
+        assert card.topic == "My Notes"
         assert card.importance == "high"
         assert card.source == "manual"
 
