@@ -108,3 +108,25 @@ def test_unknown_page_shows_friendly_404(client):
     response = client.get("/no-such-page")
     assert response.status_code == 404
     assert "find that page" in response.get_data(as_text=True)
+
+
+def test_old_database_stops_the_app_with_a_clear_message(tmp_path):
+    import sqlite3
+
+    import pytest
+
+    from app import OldDatabaseError
+
+    # A cards table made by pre-phase-5 code: no owner_id column.
+    path = tmp_path / "old.db"
+    connection = sqlite3.connect(path)
+    connection.execute(
+        "CREATE TABLE cards (id INTEGER PRIMARY KEY, deck_id INTEGER NOT NULL, question TEXT NOT NULL, "
+        "answer TEXT NOT NULL, topic VARCHAR(80) NOT NULL, importance VARCHAR(10) NOT NULL, source_line TEXT, "
+        "source VARCHAR(10) NOT NULL, explanation TEXT, created_at DATETIME NOT NULL)"
+    )
+    connection.commit()
+    connection.close()
+
+    with pytest.raises(OldDatabaseError, match=r"missing: cards\.owner_id.*delete instance/nexora\.db"):
+        create_app({"SQLALCHEMY_DATABASE_URI": f"sqlite:///{path}"})
