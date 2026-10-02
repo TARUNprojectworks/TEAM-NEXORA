@@ -1,10 +1,11 @@
 """Ready decks, my decks, deck page and card create/edit/delete.
 
 Who can do what:
-- Ready decks are shared by everyone and read-only. Any student can open one
-  and add it to their list, but nobody changes its cards.
+- Ready decks are shared by everyone. Their shared cards are read-only
+  (a student can only hide them), but a student who added the deck can add
+  private cards to it (cards.owner_id = them). Only they see those.
 - A student's own decks can be renamed, deleted and fully edited.
-- Someone else's deck is a 404, so we don't even reveal it exists.
+- Someone else's deck or private card is a 404, so we don't reveal it exists.
 """
 
 import logging
@@ -17,7 +18,10 @@ from sqlalchemy import func
 from wtforms import DateField, RadioField, SelectField, StringField, TextAreaField
 from wtforms.validators import DataRequired, Length, Optional
 
-from app.models import DEFAULT_TOPIC, Card, Deck, Progress, UserDeck, db, hidden_card_ids, today_local
+from app.models import (
+    DEFAULT_TOPIC, Card, Deck, Progress, UserDeck, card_is_visible_to, db, hidden_card_ids, today_local,
+    visible_to,
+)
 
 bp = Blueprint("decks", __name__, url_prefix="/decks")
 log = logging.getLogger("nexora.decks")
@@ -111,11 +115,36 @@ def own_deck_or_error(deck_id):
 
 def deck_card_or_404(deck, card_id):
     # The card must belong to this deck, so a changed URL can't reach
-    # a card in some other deck.
+    # a card in some other deck, and it must not be another student's private card.
     card = db.session.get(Card, card_id)
-    if card is None or card.deck_id != deck.id:
+    if card is None or card.deck_id != deck.id or not card_is_visible_to(card, current_user.id):
         abort(404)
     return card
+
+
+def deck_for_new_cards_or_error(deck_id):
+    """A deck the student may add cards to: their own, or a ready deck in their list."""
+    deck = viewable_deck_or_404(deck_id)
+    if deck.owner_id == current_user.id:
+        return deck
+    if deck.is_ready and get_user_deck(deck.id) is not None:
+        return deck  # new cards here are private to this student
+    abort(403)
+
+
+def editable_card_or_error(deck_id, card_id):
+    """A card the student may edit or delete: any card in their own deck,
+    or their own private card in a ready deck. Shared ready cards can only be hidden."""
+    deck = viewable_deck_or_404(deck_id)
+    card = deck_card_or_404(deck, card_id)
+    if deck.owner_id != current_user.id and card.owner_id != current_user.id:
+        abort(403)
+    return deck, card
+
+
+def new_card_for(deck, **fields):
+    """A card owned by the current student (private when the deck is a ready deck)."""
+    return Card(deck_id=deck.id, owner_id=current_user.id, **fields)
 
 
 def get_user_deck(deck_id):
@@ -160,12 +189,12 @@ def mode_badge(user_deck, today):
     return "Normal", "normal"
 
 
-def count_cards(deck_ids):
-    """{deck_id: number of cards} for the given decks."""
+def count_cards(deck_ids, user_id):
+    """{deck_id: number of cards this student can see} for the given decks."""
     if not deck_ids:
         return {}
     rows = db.session.query(Card.deck_id, func.count(Card.id)).filter(
-        Card.deck_id.in_(deck_ids)
+        Card.deck_id.in_(deck_ids), visible_to(user_id)
     ).group_by(Card.deck_id).all()
     return dict(rows)
 
@@ -189,9 +218,17 @@ def shelf_counts(user_id, deck_id):
     return [counts.get(shelf, 0) for shelf in range(1, 6)]
 
 
-def deck_topics(deck_id):
-    rows = db.session.query(Card.topic).filter_by(deck_id=deck_id).distinct().order_by(Card.topic)
+def deck_topics(deck_id, user_id):
+    rows = db.session.query(Card.topic).filter(
+        Card.deck_id == deck_id, visible_to(user_id)
+    ).distinct().order_by(Card.topic)
     return [topic for (topic,) in rows]
+
+
+def visible_deck_cards(deck_id, user_id):
+    return db.session.query(Card).filter(
+        Card.deck_id == deck_id, visible_to(user_id)
+    ).order_by(Card.topic, Card.id).all()
 
 
 def fill_card_from_form(card, form):
@@ -237,7 +274,7 @@ def ready_decks():
     return render_template(
         "decks/ready.html",
         folders=READY_FOLDERS, folder=folder, folder_counts=folder_counts,
-        decks=decks, card_counts=count_cards([d.id for d in decks]), added_ids=added_ids,
+        decks=decks, card_counts=count_cards([d.id for d in decks], current_user.id), added_ids=added_ids,
     )
 
 
@@ -296,7 +333,7 @@ def my_decks():
         UserDeck.user_id == current_user.id
     ).all()
     rows.sort(key=my_decks_order)
-    card_counts = count_cards([deck.id for _, deck in rows])
+    card_counts = count_cards([deck.id for _, deck in rows], current_user.id)
     hidden_counts = count_hidden_cards(current_user.id)
     items = [
         {
@@ -326,7 +363,7 @@ def create_my_own():
 
         if form.method.data == "type":
             return redirect(url_for("decks.new_card", deck_id=deck.id))
-        return redirect(url_for("decks.card_maker", deck_id=deck.id, source=form.method.data))
+        return redirect(url_for("cardmaker.maker", deck_id=deck.id, source=form.method.data))
     return render_template("decks/create.html", form=form, today=today_local())
 
 
@@ -339,7 +376,7 @@ def deck_page(deck_id):
     today = today_local()
     expire_past_exams(current_user.id, today)
     user_deck = get_user_deck(deck.id)
-    all_cards = db.session.query(Card).filter_by(deck_id=deck.id).order_by(Card.topic, Card.id).all()
+    all_cards = visible_deck_cards(deck.id, current_user.id)
     hidden_ids = hidden_card_ids(current_user.id, deck.id)
     cards = [card for card in all_cards if card.id not in hidden_ids]
     hidden_cards = [card for card in all_cards if card.id in hidden_ids]
@@ -353,6 +390,7 @@ def deck_page(deck_id):
         show_hidden=request.args.get("show_hidden") == "1",
         user_deck=user_deck,
         can_edit=deck.owner_id == current_user.id,
+        can_add_cards=deck.owner_id == current_user.id or (deck.is_ready and user_deck is not None),
         badge=mode_badge(user_deck, today) if user_deck else None,
         exam_form=exam_form_for(user_deck) if user_deck else None,
         shelves=shelves,
@@ -407,23 +445,15 @@ def delete_deck(deck_id):
     return redirect(url_for("decks.my_decks"))
 
 
-@bp.get("/<int:deck_id>/maker")
-@login_required
-def card_maker(deck_id):
-    """AI Card Maker. Phase 5 replaces this placeholder."""
-    deck = own_deck_or_error(deck_id)
-    return render_template("decks/maker_placeholder.html", deck=deck)
-
-
 # ---------- Cards ----------
 
 @bp.route("/<int:deck_id>/cards/new", methods=["GET", "POST"])
 @login_required
 def new_card(deck_id):
-    deck = own_deck_or_error(deck_id)
+    deck = deck_for_new_cards_or_error(deck_id)
     form = CardForm()
     if form.validate_on_submit():
-        card = Card(deck_id=deck.id, source="manual")
+        card = new_card_for(deck, source="manual")
         fill_card_from_form(card, form)
         db.session.add(card)
         db.session.commit()
@@ -433,7 +463,7 @@ def new_card(deck_id):
         flash("Card saved.", "info")
         return redirect(url_for("decks.deck_page", deck_id=deck.id))
     return render_template(
-        "decks/card_form.html", deck=deck, form=form, card=None, topics=deck_topics(deck.id),
+        "decks/card_form.html", deck=deck, form=form, card=None, topics=deck_topics(deck.id, current_user.id),
         long_front=LONG_FRONT_CHARS, long_back=LONG_BACK_CHARS,
     )
 
@@ -441,8 +471,7 @@ def new_card(deck_id):
 @bp.route("/<int:deck_id>/cards/<int:card_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_card(deck_id, card_id):
-    deck = own_deck_or_error(deck_id)
-    card = deck_card_or_404(deck, card_id)
+    deck, card = editable_card_or_error(deck_id, card_id)
     form = CardForm(obj=card)
     if form.validate_on_submit():
         fill_card_from_form(card, form)
@@ -451,19 +480,22 @@ def edit_card(deck_id, card_id):
         flash("Card updated.", "info")
         return redirect(url_for("decks.deck_page", deck_id=deck.id) + f"#card-{card.id}")
     return render_template(
-        "decks/card_form.html", deck=deck, form=form, card=card, topics=deck_topics(deck.id),
+        "decks/card_form.html", deck=deck, form=form, card=card, topics=deck_topics(deck.id, current_user.id),
         long_front=LONG_FRONT_CHARS, long_back=LONG_BACK_CHARS,
     )
 
 
 def ready_deck_card_or_error(deck_id, card_id):
-    """A card in a ready deck that is in the student's list. Only these can be hidden."""
+    """A shared card in a ready deck that is in the student's list. Only these can be hidden."""
     deck = viewable_deck_or_404(deck_id)
     if not deck.is_ready:
         abort(403)  # own decks: delete the card instead
     if get_user_deck(deck.id) is None:
         abort(404)
-    return deck, deck_card_or_404(deck, card_id)
+    card = deck_card_or_404(deck, card_id)
+    if card.owner_id is not None:
+        abort(403)  # the student's own private card: delete it instead
+    return deck, card
 
 
 @bp.post("/<int:deck_id>/cards/<int:card_id>/hide")
@@ -502,8 +534,7 @@ def unhide_card(deck_id, card_id):
 @bp.post("/<int:deck_id>/cards/<int:card_id>/delete")
 @login_required
 def delete_card(deck_id, card_id):
-    deck = own_deck_or_error(deck_id)
-    card = deck_card_or_404(deck, card_id)
+    deck, card = editable_card_or_error(deck_id, card_id)
     db.session.delete(card)
     db.session.commit()
     flash("Card deleted.", "info")

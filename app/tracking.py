@@ -13,7 +13,7 @@ from flask_login import current_user, login_required
 from app import engine
 from app.decks import count_cards, count_hidden_cards, shelf_counts
 from app.models import (
-    Card, Deck, Progress, Review, UserDeck, db, local_date_of, local_day_start_utc, today_local,
+    Card, Deck, Progress, Review, UserDeck, db, local_date_of, local_day_start_utc, today_local, visible_to,
 )
 from app.planner import seen_cards_for, streak_to_show
 
@@ -27,7 +27,9 @@ def topic_mastery_rows(user_id):
     """Mastery % per topic (deck + topic name): cards on shelf 5 / all cards in the topic."""
     cards = db.session.query(Card.id, Card.deck_id, Card.topic, Deck.title).join(
         Deck, Deck.id == Card.deck_id
-    ).join(UserDeck, (UserDeck.deck_id == Card.deck_id) & (UserDeck.user_id == user_id)).all()
+    ).join(UserDeck, (UserDeck.deck_id == Card.deck_id) & (UserDeck.user_id == user_id)).filter(
+        visible_to(user_id)
+    ).all()
     progress = {
         card_id: (shelf, hidden)
         for card_id, shelf, hidden in db.session.query(Progress.card_id, Progress.shelf, Progress.hidden)
@@ -82,7 +84,7 @@ def deck_progress(user_id):
     decks = db.session.query(Deck).join(
         UserDeck, (UserDeck.deck_id == Deck.id) & (UserDeck.user_id == user_id)
     ).order_by(Deck.title).all()
-    totals = count_cards([deck.id for deck in decks])
+    totals = count_cards([deck.id for deck in decks], user_id)
     hidden = count_hidden_cards(user_id)
 
     rows = []

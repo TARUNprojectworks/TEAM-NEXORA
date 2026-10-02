@@ -20,7 +20,7 @@ from app import engine
 from app.decks import expire_past_exams
 from app.models import (
     Card, Deck, Progress, UserDeck, card_ids_reviewed_on, db, hidden_card_ids,
-    new_cards_started_today, today_local,
+    new_cards_started_today, today_local, visible_to,
 )
 
 bp = Blueprint("planner", __name__)
@@ -87,7 +87,7 @@ def study_candidates(user_id, today):
     """(seen, new) engine Candidates for every card in the student's decks, minus hidden ones."""
     rows = db.session.query(Card, UserDeck).join(
         UserDeck, (UserDeck.deck_id == Card.deck_id) & (UserDeck.user_id == user_id)
-    ).all()
+    ).filter(visible_to(user_id)).all()
     progress_by_card = {p.card_id: p for p in db.session.query(Progress).filter_by(user_id=user_id)}
 
     seen, new = [], []
@@ -202,6 +202,12 @@ def plan_groups(plan):
     return list(groups.values())
 
 
+def todays_weak_spot(today):
+    """The Weak Spot Fixer's box from earlier today (kept in the session), or None."""
+    box = session.get("weak_spot")
+    return box if box and box.get("date") == today.isoformat() else None
+
+
 def streak_to_show(user, today):
     """The saved streak is only updated on study days, so a missed day must show 0."""
     if user.last_study_date is None or user.last_study_date < today - timedelta(days=1):
@@ -237,6 +243,7 @@ def home():
         streak=streak_to_show(current_user, today),
         welcome_back=welcome_back_count(current_user, today),
         choices=SESSION_CHOICES,
+        weak_spot=todays_weak_spot(today),
     )
 
 
