@@ -77,12 +77,13 @@ def test_ready_page_lists_decks_in_chosen_folder(app, riya_client, ready_deck, r
     assert "Cell Biology" in page
     assert "DSA Basics" not in page
     assert "private deck" not in page
-    assert "Add to my decks" in page
+    assert ">Add</a>" in page
 
 
-def test_ready_page_without_folder_asks_to_choose(riya_client, ready_deck):
+def test_deck_library_opens_the_first_folder(riya_client, ready_deck):
     page = riya_client.get("/decks/ready").get_data(as_text=True)
-    assert "Choose a folder" in page
+    assert "Deck Library" in page
+    assert "Cell Biology" in page  # a Semester deck: the first folder is open
     assert "Semester" in page and "Placement" in page and "Competitive" in page
 
 
@@ -265,7 +266,7 @@ def test_exam_setting_needs_deck_in_my_list(riya_client, ready_deck):
 
 # ---------- Cards ----------
 
-def test_add_card_with_empty_topic_goes_to_general(app, riya_client, riya_deck):
+def test_add_card_with_empty_topic_uses_the_deck_name(app, riya_client, riya_deck):
     deck_id, _ = riya_deck
     response = riya_client.post(f"/decks/{deck_id}/cards/new", data={
         "question": "What is ATP?", "answer": "The cell's energy currency.", "topic": "", "importance": "high",
@@ -273,7 +274,7 @@ def test_add_card_with_empty_topic_goes_to_general(app, riya_client, riya_deck):
     assert response.headers["Location"].endswith(f"/decks/{deck_id}")
     with app.app_context():
         card = db.session.query(Card).filter_by(question="What is ATP?").one()
-        assert card.topic == "General"
+        assert card.topic == "My Notes"
         assert card.importance == "high"
         assert card.source == "manual"
 

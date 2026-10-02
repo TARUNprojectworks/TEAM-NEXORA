@@ -1,6 +1,7 @@
 {
   "title": "HR Interview",
   "folder": "placement",
+  "description": "How to answer the common HR questions in campus placement interviews.",
   "cards": [
     {"question": "How should you answer \"Tell me about yourself\"?", "answer": "In 60 to 90 seconds: present (degree, college), past (a key project or internship), future (why this role). Keep it about study and work.", "topic": "Introduction", "importance": "high"},
     {"question": "What structure works well for \"Tell me about a time when...\" questions?", "answer": "STAR: Situation, Task, Action, Result. Spend the most time on what you did and what happened.", "topic": "Introduction", "importance": "high"},

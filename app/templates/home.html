@@ -49,16 +49,28 @@
         <p class="plan-moved">{{ plan.moved }} {{ "card" if plan.moved == 1 else "cards" }} moved to tomorrow.</p>
       {% endif %}
 
-      {% if plan_finished %}
-        <p class="plan-done">Today's plan is done. You earned 10 bonus XP.</p>
+      {% if plan_finished and not cards_left %}
+        <div class="plan-finished">
+          <p class="plan-done">Done for today. You earned 10 bonus XP.</p>
+          <div class="actions-inline">
+            <a class="button" href="{{ url_for('study.start_revise') }}">Revise today's cards again</a>
+            <a class="button" href="{{ url_for('decks.my_decks') }}">Keep going</a>
+          </div>
+          <p class="field-hint">Revising uses Quick Revise: no XP and your progress doesn't change.
+            "Keep going" opens your decks for more Smart Study.</p>
+        </div>
       {% elif cards_left %}
         <a class="button button-primary" href="{{ url_for('study.start_plan') }}">
           {{ "Continue today's plan" if cards_done else "Start today's plan" }}
         </a>
       {% endif %}
     {% else %}
-      <p>Nothing to study today. Add a ready deck or make your own, and your plan shows up here.</p>
+      <p>Nothing to study today. Add a deck from the Deck Library or make your own, and your plan shows up here.</p>
     {% endif %}
+    <form method="post" action="{{ url_for('planner.refresh_plan') }}" class="refresh-plan">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="link-button">Refresh plan</button>
+    </form>
   </section>
 
   {% if weak_spot %}
@@ -67,7 +79,7 @@
 
   <div class="choices">
     <a class="choice" href="{{ url_for('decks.ready_decks') }}">
-      <span class="choice-title">Explore Ready Decks</span>
+      <span class="choice-title">Explore the Deck Library</span>
       <span class="choice-text">Semester, placement and competitive exam decks.</span>
     </a>
     <a class="choice" href="{{ url_for('decks.create_my_own') }}">

@@ -276,7 +276,7 @@ def test_finishing_the_plan_gives_10_xp_once(app, riya_client, riya):
         assert db.session.get(User, riya).xp == 2 + 2 + 10
     with riya_client.session_transaction() as state:
         assert state["study"]["stats"]["plan_finished"] is True
-    assert "Today's plan is done" in page_text(riya_client)
+    assert "Done for today" in page_text(riya_client)
 
     # A rebuilt plan on the same day doesn't pay out again.
     riya_client.post("/plan/length", data={"minutes": "40"})

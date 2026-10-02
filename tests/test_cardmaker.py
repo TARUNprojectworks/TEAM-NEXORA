@@ -4,6 +4,7 @@ import io
 from datetime import timedelta
 
 import pytest
+from pypdf import PdfWriter
 
 from app import storage
 from app.cardmaker import looks_like_term_lines, quick_split, remove_near_duplicates
@@ -16,7 +17,13 @@ HEIC = b"\x00\x00\x00\x18ftypheic" + b"0" * 200
 
 
 def pdf(pages):
-    return b"%PDF-1.4\n" + b"".join(b"1 0 obj << /Type /Page >> endobj\n" for _ in range(pages))
+    """A real PDF with this many blank pages."""
+    writer = PdfWriter()
+    for _ in range(pages):
+        writer.add_blank_page(width=300, height=300)
+    out = io.BytesIO()
+    writer.write(out)
+    return out.getvalue()
 
 
 # ---------- Quick split ----------
@@ -32,7 +39,7 @@ def test_quick_split_reads_term_lines(line, front, back):
     card = quick_split(line)[0]
     assert (card["question"], card["answer"]) == (front, back)
     assert card["source_line"] == line.strip()
-    assert card["topic"] == "General"
+    assert card["topic"] == ""  # filled with the deck's name when saved
 
 
 @pytest.mark.parametrize("line", [
@@ -88,7 +95,16 @@ def test_renamed_file_is_not_trusted():
 
 def test_pdf_page_count():
     assert storage.count_pdf_pages(pdf(3)) == 3
-    assert storage.count_pdf_pages(b"%PDF-1.5 << /Type /Pages /Kids [] /Count 12 >>") == 12
+    assert storage.count_pdf_pages(pdf(10)) == 10
+
+
+def test_pdf_with_exactly_10_pages_is_allowed():
+    assert storage.check_uploads([("ten.pdf", pdf(10))])[0][0] == "application/pdf"
+
+
+def test_broken_pdf_is_a_clear_error():
+    with pytest.raises(storage.UploadError, match="couldn't open that PDF"):
+        storage.check_uploads([("broken.pdf", b"%PDF-1.4 not really a pdf")])
 
 
 @pytest.mark.parametrize("uploads, message", [

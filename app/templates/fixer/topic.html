@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Fix {{ topic }} · Nexora Recall{% endblock %}
+{% block content %}
+<section class="summary">
+  <p class="deck-meta"><a href="{{ url_for('tracking.tracking_page') }}">My Progress</a> · {{ deck.title }}</p>
+  <h1>Fix: {{ topic }}</h1>
+  <div id="weak-spot" class="weak-spot-slot" aria-live="polite"
+       data-weak-spot-url="{{ url_for('fixer.fix_topic_now', deck_id=deck.id) }}" data-topic="{{ topic }}">
+    <p class="weak-spot-loading">Getting an explanation and practice cards…</p>
+  </div>
+  <div class="actions">
+    <a class="button" href="{{ url_for('tracking.tracking_page') }}">Back to My Progress</a>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/weakspot.js') }}"></script>
+{% endblock %}

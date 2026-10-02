@@ -182,6 +182,13 @@ def topic_stats(seen_cards):
     return stats
 
 
+def is_weak(entry):
+    """Does one topic's stats (from topic_stats) meet either Fixer rule right now?"""
+    if entry["open_misconceptions"] >= MISCONCEPTION_CARDS_TRIGGER:
+        return True
+    return entry["seen"] >= MIN_CARDS_SEEN and entry["weak"] / entry["seen"] >= WEAK_SCORE_TRIGGER
+
+
 def find_weak_topic(seen_cards):
     """The topic the Weak Spot Fixer should target, or None."""
     stats = topic_stats(seen_cards)

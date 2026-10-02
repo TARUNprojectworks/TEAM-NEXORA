@@ -18,5 +18,8 @@ google-genai==2.26.0
 google-cloud-storage==3.15.1
 google-cloud-secret-manager==2.30.0
 
+# Reading PDFs: strict page count for Card Maker uploads
+pypdf==6.19.0
+
 # Tests
 pytest==9.1.1

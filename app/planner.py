@@ -150,9 +150,13 @@ def chosen_minutes():
 
 
 def todays_plan(user_id, today):
-    """The plan for today, built the first time it is asked for each day."""
+    """The plan for today, built the first time it is asked for each day.
+
+    An empty plan is rebuilt each time, so a student who adds their first deck
+    (or new cards) later in the day gets a plan straight away.
+    """
     plan = session.get("plan")
-    if not plan or plan.get("date") != today.isoformat():
+    if not plan or plan.get("date") != today.isoformat() or not plan["card_ids"]:
         plan = build_plan(user_id, chosen_minutes(), today)
         session["plan"] = plan
     return plan
@@ -213,6 +217,20 @@ def todays_weak_spot(today):
     return box if box and box.get("date") == today.isoformat() else None
 
 
+def topic_is_open(user_id, deck_id, topic):
+    """Is this topic still weak right now (by the same rules that picked it)?"""
+    entry = engine.topic_stats(seen_cards_for(user_id, [deck_id])).get((deck_id, topic))
+    return entry is not None and engine.is_weak(entry)
+
+
+def open_weak_spot(user_id, today):
+    """Today's weak spot box for Home, but only while its topic is still weak."""
+    box = todays_weak_spot(today)
+    if box and topic_is_open(user_id, box["deck_id"], box["topic"]):
+        return box
+    return None
+
+
 def streak_to_show(user, today):
     """The saved streak is only updated on study days, so a missed day must show 0."""
     if user.last_study_date is None or user.last_study_date < today - timedelta(days=1):
@@ -248,8 +266,16 @@ def home():
         streak=streak_to_show(current_user, today),
         welcome_back=welcome_back_count(current_user, today),
         choices=SESSION_CHOICES,
-        weak_spot=todays_weak_spot(today),
+        weak_spot=open_weak_spot(current_user.id, today),
     )
+
+
+@bp.post("/plan/refresh")
+@login_required
+def refresh_plan():
+    """Build today's plan again (e.g. after adding a deck). Plan XP is still once a day."""
+    session["plan"] = build_plan(current_user.id, chosen_minutes(), today_local())
+    return redirect(url_for("planner.home"))
 
 
 @bp.post("/plan/length")

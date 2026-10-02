@@ -27,6 +27,16 @@
       <input type="hidden" name="exam_date" value="{{ target.exam_date }}">
     {% endif %}
 
+    {% if skipped %}
+      <section class="skipped-lines" aria-labelledby="skipped-heading">
+        <h2 id="skipped-heading">{{ skipped | length }} {{ "line" if skipped | length == 1 else "lines" }} skipped</h2>
+        <p class="field-hint">Quick split only reads lines like “term - meaning” or “term: meaning”. These weren't:</p>
+        <ul>{% for line in skipped %}<li>{{ line }}</li>{% endfor %}</ul>
+        <textarea name="skipped" hidden aria-hidden="true">{{ skipped | join("\n") }}</textarea>
+        <button type="submit" class="button" formaction="{{ url_for('cardmaker.add_ai_drafts') }}">Make these with AI</button>
+      </section>
+    {% endif %}
+
     <p class="draft-count" id="draft-count" aria-live="polite">{{ drafts | length }} {{ "card" if drafts | length == 1 else "cards" }}</p>
     <ol class="draft-list" id="draft-list">
       {% for draft in drafts %}
@@ -34,7 +44,7 @@
       {% endfor %}
     </ol>
     <template id="draft-template">
-      {% with draft = {"question": "", "answer": "", "topic": "", "importance": "medium", "source_line": ""} %}
+      {% with draft = {"question": "", "answer": "", "topic": "", "importance": "medium", "source_line": "", "source": "manual"} %}
         {% include "maker/_draft.html" %}
       {% endwith %}
     </template>

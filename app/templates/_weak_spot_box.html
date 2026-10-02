@@ -1,7 +1,7 @@
 {# The weak spot box. Needs `box`; `show_links` and `widget` are optional. #}
 <section class="weak-spot-box" aria-labelledby="weak-spot-heading">
   <h2 id="weak-spot-heading">Weak spot: <mark>{{ box.topic }}</mark></h2>
-  <p class="deck-meta">{{ box.deck_title }}</p>
+  <p class="deck-meta">From: {{ box.deck_title }}</p>
   {% if box.explanation %}<p class="weak-spot-text">{{ box.explanation }}</p>{% endif %}
   {% if box.note %}<p class="notice">{{ box.note }}</p>{% endif %}
 

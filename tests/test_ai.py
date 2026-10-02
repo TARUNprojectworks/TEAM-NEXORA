@@ -20,7 +20,7 @@ def test_clean_cards_fixes_missing_fields_and_drops_bad_ones():
         {"question": "Q2", "answer": "A2", "topic": "Cells", "importance": "high", "source_line": "line"},
     ])
     assert cards == [
-        {"question": "Q1", "answer": "A1", "topic": "General", "importance": "medium", "source_line": ""},
+        {"question": "Q1", "answer": "A1", "topic": "", "importance": "medium", "source_line": ""},
         {"question": "Q2", "answer": "A2", "topic": "Cells", "importance": "high", "source_line": "line"},
     ]
 
@@ -308,7 +308,9 @@ def finish_a_session(client, deck_id):
     with client.session_transaction() as state:
         card_id = state["study"]["current"]
     client.post("/study/answer", data={"card_id": card_id, "confident": "sure", "knew_it": "0"})
-    return client.get("/study/summary").get_data(as_text=True)
+    # The summary shows at once; the weak spot box is fetched afterwards (as weakspot.js does).
+    page = client.get("/study/summary").get_data(as_text=True)
+    return page + client.post("/study/weak-spot").get_json()["html"]
 
 
 def practice_cards(app, user_id):
@@ -343,7 +345,7 @@ def test_fixer_runs_once_per_topic_per_day(app, riya_client, riya):
     deck_id, card_ids = make_deck(app, riya)
     make_weak_topic(app, riya, deck_id, card_ids)
     finish_a_session(riya_client, deck_id)
-    riya_client.get("/study/summary")              # reload: same session
+    riya_client.post("/study/weak-spot")           # summary reloaded: same session
     page = finish_a_session(riya_client, deck_id)   # a second session the same day
     assert "Weak spot: <mark>Cells</mark>" in page
     assert len(practice_cards(app, riya)) == 3
@@ -413,7 +415,7 @@ def test_fixer_only_looks_at_the_deck_just_studied(app, riya_client, riya):
     page = finish_a_session(riya_client, cyber_id)
     assert "Weak spot:" not in page
     assert practice_cards(app, riya) == []
-    assert "Weak spot:" not in riya_client.get("/study/summary").get_data(as_text=True)  # reload too
+    assert riya_client.post("/study/weak-spot").get_json()["html"] == ""  # reload too
 
     # Studying Biology itself still finds its weak spot.
     assert "Weak spot: <mark>Cells</mark>" in finish_a_session(riya_client, biology_id)
@@ -428,6 +430,6 @@ def test_practice_session_does_not_start_another_fixer(app, riya_client, riya):
     with riya_client.session_transaction() as state:
         card_id = state["study"]["current"]
     riya_client.post("/study/answer", data={"card_id": card_id, "confident": "sure", "knew_it": "0"})
-    page = riya_client.get("/study/summary").get_data(as_text=True)
-    assert "Weak spot:" not in page
+    assert "Finding your weak spot" not in riya_client.get("/study/summary").get_data(as_text=True)
+    assert riya_client.post("/study/weak-spot").get_json()["html"] == ""
     assert len(practice_cards(app, riya)) == 3

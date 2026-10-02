@@ -12,7 +12,7 @@
   </label>
   <div class="draft-row">
     <label class="draft-field">Topic
-      <input type="text" name="topic" value="{{ draft.topic }}" maxlength="80">
+      <input type="text" name="topic" value="{{ draft.topic }}" maxlength="80" placeholder="Deck name">
     </label>
     <label class="draft-field">Importance
       <select name="importance">
@@ -23,6 +23,7 @@
     </label>
   </div>
   <input type="hidden" name="source_line" value="{{ draft.source_line }}">
+  <input type="hidden" name="source" value="{{ draft.source or 'manual' }}">
   {% if draft.source_line %}
     <p class="source-line">From your notes: “{{ draft.source_line }}”</p>
   {% endif %}

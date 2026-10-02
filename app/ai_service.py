@@ -103,7 +103,7 @@ def ai_enabled():
 
 # ---------- Checking what comes back ----------
 
-def clean_card(raw, default_topic="General"):
+def clean_card(raw, default_topic=""):
     """One card dict with every field present and sensible, or None if unusable."""
     if not isinstance(raw, dict):
         return None
@@ -121,7 +121,7 @@ def clean_card(raw, default_topic="General"):
     }
 
 
-def clean_cards(raw_cards, default_topic="General"):
+def clean_cards(raw_cards, default_topic=""):
     if not isinstance(raw_cards, list):
         raise AIError(COULD_NOT_READ)
     cards = [card for card in (clean_card(raw, default_topic) for raw in raw_cards) if card]
@@ -477,7 +477,7 @@ def cards_from_sentences(text):
             cards.append({
                 "question": f"What {verb} {lower_first_letter(term)}?",
                 "answer": rest[0].upper() + rest[1:] + ("" if rest.endswith(".") else "."),
-                "topic": "General", "importance": "medium", "source_line": sentence,
+                "topic": "", "importance": "medium", "source_line": sentence,
             })
     return cards
 
@@ -502,7 +502,7 @@ def reversed_card(card):
     return {
         "question": card["answer"],
         "answer": card["question"],
-        "topic": card.get("topic") or "General",
+        "topic": card.get("topic") or "",
         "importance": card.get("importance") or "medium",
         "source_line": "",
     }

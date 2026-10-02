@@ -11,16 +11,16 @@ from flask import Blueprint, jsonify, render_template
 from flask_login import current_user, login_required
 
 from app import engine
-from app.decks import count_cards, count_hidden_cards, shelf_counts
+from app.decks import SHELF_NAMES, count_cards, count_hidden_cards, shelf_counts
 from app.models import (
     Card, Deck, Progress, Review, UserDeck, db, local_date_of, local_day_start_utc, today_local, visible_to,
 )
-from app.planner import seen_cards_for, streak_to_show
+from app.planner import seen_cards_for, streak_to_show, weak_spot_deck_id
 
 bp = Blueprint("tracking", __name__, url_prefix="/tracking")
 
 CALENDAR_WEEKS = 8
-WEAKEST_SHOWN = 5
+MISCONCEPTIONS_SHOWN = 50
 
 
 def topic_mastery_rows(user_id):
@@ -52,31 +52,51 @@ def topic_mastery_rows(user_id):
     return sorted(rows, key=lambda row: (row["deck"].lower(), row["topic"].lower()))
 
 
-def weakest_topics(user_id):
-    """Topics with the most cards still on shelf 1-2, using the same numbers as the Fixer."""
-    seen = seen_cards_for(user_id)
-    stats = engine.topic_stats(seen)
-    target = engine.find_weak_topic(seen)
+def weak_spot_rows(user_id):
+    """Every weak topic: Open (weak right now, by the Fixer's rules) or Fixed (the Fixer made
+    practice cards for it and it isn't weak any more). Open ones first."""
+    stats = engine.topic_stats(seen_cards_for(user_id))
+    practice_deck_id = weak_spot_deck_id(user_id)
+    fixed_before = {topic for (topic,) in db.session.query(Card.topic).filter(
+        Card.deck_id == practice_deck_id, Card.source == "fixer").distinct()}
     deck_titles = dict(db.session.query(Deck.id, Deck.title).filter(Deck.id.in_([d for d, _ in stats])))
 
     rows = []
     for (deck_id, topic), entry in stats.items():
-        open_misconceptions = entry["open_misconceptions"]
-        if entry["seen"] < engine.MIN_CARDS_SEEN and open_misconceptions < engine.MISCONCEPTION_CARDS_TRIGGER:
-            continue
-        weak_score = entry["weak"] / entry["seen"]
-        if weak_score == 0 and open_misconceptions == 0:
+        if deck_id == practice_deck_id:
+            continue  # the practice cards themselves aren't a topic to fix
+        is_open = engine.is_weak(entry)
+        if not is_open and topic not in fixed_before:
             continue
         rows.append({
+            "deck_id": deck_id,
             "deck": deck_titles.get(deck_id, ""),
             "topic": topic,
-            "weak_percent": round(weak_score * 100),
+            "status": "Open" if is_open else "Fixed",
+            "weak_percent": round(entry["weak"] / entry["seen"] * 100),
             "seen": entry["seen"],
-            "open_misconceptions": open_misconceptions,
-            "is_target": (deck_id, topic) == target,
+            "open_misconceptions": entry["open_misconceptions"],
         })
-    rows.sort(key=lambda row: (not row["is_target"], -row["weak_percent"], -row["open_misconceptions"]))
-    return rows[:WEAKEST_SHOWN]
+    rows.sort(key=lambda row: (row["status"] != "Open", -row["weak_percent"], row["topic"].lower()))
+    return rows
+
+
+def misconception_cards(user_id):
+    """Cards the student was sure about but got wrong: still open ones first, then resolved."""
+    rows = db.session.query(Card, Progress, Deck.title).join(
+        Progress, Progress.card_id == Card.id
+    ).join(Deck, Deck.id == Card.deck_id).join(
+        UserDeck, (UserDeck.deck_id == Card.deck_id) & (UserDeck.user_id == user_id)
+    ).filter(
+        Progress.user_id == user_id, Progress.hidden.is_(False), Progress.misconception_count > 0,
+        visible_to(user_id),
+    ).all()
+    cards = [
+        {"card": card, "deck": title, "open": engine.is_open_misconception(p.misconception_count, p.shelf)}
+        for card, p, title in rows
+    ]
+    cards.sort(key=lambda row: (not row["open"], row["deck"].lower(), row["card"].id))
+    return cards[:MISCONCEPTIONS_SHOWN]
 
 
 def deck_progress(user_id):
@@ -141,10 +161,12 @@ def tracking_page():
     return render_template(
         "tracking.html",
         data=data,
-        weakest=weakest_topics(current_user.id),
+        weak_spots=weak_spot_rows(current_user.id),
+        misconceptions=misconception_cards(current_user.id),
         calendar=streak_calendar(current_user.id, today),
         streak=streak_to_show(current_user, today),
         resolved_shelf=engine.RESOLVED_SHELF,
+        shelf_names=SHELF_NAMES,
         has_reviews=db.session.query(Review.id).filter_by(user_id=current_user.id).count() > 0,
     )
 

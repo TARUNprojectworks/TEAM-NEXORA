@@ -1,6 +1,7 @@
 {
   "title": "GATE CS Operating Systems",
   "folder": "competitive",
+  "description": "Processes, scheduling, deadlocks and memory management for GATE CS.",
   "cards": [
     {"question": "What are the five states of a process?", "answer": "New, Ready, Running, Waiting (Blocked), Terminated.", "topic": "Processes", "importance": "high"},
     {"question": "What does a Process Control Block (PCB) hold?", "answer": "Process ID, state, program counter, CPU registers, scheduling info, memory-management info, and I/O status such as open files.", "topic": "Processes", "importance": "medium"},

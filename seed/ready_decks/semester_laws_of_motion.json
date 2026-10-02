@@ -1,6 +1,7 @@
 {
   "title": "Laws of Motion",
   "folder": "semester",
+  "description": "Newton's laws, momentum, friction and circular motion, with the formulas you need.",
   "cards": [
     {"question": "State Newton's first law of motion.", "answer": "A body stays at rest, or keeps moving in a straight line at constant speed, unless a net external force acts on it. It is also called the law of inertia.", "topic": "Newton's Laws", "importance": "high"},
     {"question": "What is the measure of a body's inertia?", "answer": "Its mass. More mass means more inertia.", "topic": "Newton's Laws", "importance": "medium"},

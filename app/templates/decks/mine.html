@@ -5,7 +5,7 @@
   <h1>My decks</h1>
   <div class="actions-inline">
     <a class="button button-primary" href="{{ url_for('decks.create_my_own') }}">Create my own</a>
-    <a class="button" href="{{ url_for('decks.ready_decks') }}">Explore ready decks</a>
+    <a class="button" href="{{ url_for('decks.ready_decks') }}">Explore the Deck Library</a>
   </div>
 </div>
 
@@ -51,6 +51,6 @@
 </ul>
 
 {% if items | length <= 1 %}
-  <p class="empty">You haven't added any decks yet. Explore ready decks or create your own.</p>
+  <p class="empty">You haven't added any decks yet. Explore the Deck Library or create your own.</p>
 {% endif %}
 {% endblock %}

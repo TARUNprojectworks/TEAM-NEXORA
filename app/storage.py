@@ -9,11 +9,12 @@ Photos and PDFs go to Gemini as files. A .txt file is read here and added to
 the notes text, so it is never stored.
 """
 
+import io
 import os
-import re
 import uuid
 
 from flask import current_app
+from pypdf import PdfReader
 
 PHOTO_LIMIT = 5
 PHOTO_MAX_BYTES = 5 * 1024 * 1024
@@ -55,17 +56,12 @@ def detect_type(filename, data):
 
 
 def count_pdf_pages(data):
-    """Best-effort page count without a PDF library.
-
-    Most PDFs list each page as "/Type /Page". Some compress that list, so we
-    also look at the page tree's "/Count". Returns 0 if we can't tell; Gemini
-    still reads the file, we just can't enforce the 10-page limit for it.
-    """
-    pages = len(re.findall(rb"/Type\s*/Page(?![a-zA-Z])", data))
-    if pages:
-        return pages
-    counts = [int(n) for n in re.findall(rb"/Type\s*/Pages\b[^>]*?/Count\s+(\d+)", data)]
-    return max(counts, default=0)
+    """The PDF's page count, read with pypdf. A PDF we can't open is an UploadError."""
+    try:
+        return len(PdfReader(io.BytesIO(data)).pages)
+    except Exception:
+        # Damaged or password-protected: Gemini couldn't read it either.
+        raise UploadError("We couldn't open that PDF. If it has a password, remove it and save it again.")
 
 
 def check_uploads(uploads):
