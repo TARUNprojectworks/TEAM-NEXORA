@@ -170,12 +170,12 @@ def notes_from_request():
     return "\n\n".join(t for t in texts if t), files
 
 
-def drafts_with_ai(text, files):
+def drafts_with_ai(text, files, topics):
     """Ask Gemini (or the stand-in). Falls back to Quick split if the AI call fails."""
     try:
         ai_service.use_ai_call(current_user, today_local())
         db.session.commit()
-        return ai_service.make_cards(text=text or None, files=files), None
+        return ai_service.make_cards(text=text or None, files=files, topics=topics), None
     except AILimitReached as error:
         fallback, message = quick_split(text), str(error)
     except Exception as error:
@@ -247,7 +247,9 @@ def make_drafts():
         if len(text.split()) > MAX_NOTE_WORDS:
             return render_maker("That's more than 3,000 words. Paste a shorter piece of notes.", 400)
         try:
-            drafts, note = drafts_with_ai(text, files)
+            deck = target_deck(target)
+            topics = sorted({c.topic for c in visible_deck_cards(deck.id, current_user.id)}) if deck else []
+            drafts, note = drafts_with_ai(text, files, topics)
         except AIError as ai_error:
             return render_maker(str(ai_error), 400)
         origin = "ai" if note is None else "manual"
