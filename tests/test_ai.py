@@ -69,7 +69,7 @@ def ai_on(app):
 
 
 def test_real_make_cards_validates_gemini_output(ai_on, monkeypatch):
-    monkeypatch.setattr(ai_service, "gemini_make_cards", lambda text, files: [
+    monkeypatch.setattr(ai_service, "gemini_make_cards", lambda text, files, topics: [
         {"question": "What is ATP?", "answer": "Energy currency.", "topic": "Cells", "importance": "high",
          "source_line": "ATP is the energy currency"}])
     with ai_on.app_context():
@@ -94,7 +94,7 @@ def test_real_find_resources_falls_back_when_grounding_fails(ai_on, monkeypatch)
 
 
 def test_failed_gemini_call_falls_back_to_quick_split_in_the_maker(ai_on, monkeypatch, client, make_user):
-    def broken(text, files):
+    def broken(text, files, topics):
         raise RuntimeError("Gemini timed out")
     monkeypatch.setattr(ai_service, "gemini_make_cards", broken)
     make_user()
@@ -102,6 +102,76 @@ def test_failed_gemini_call_falls_back_to_quick_split_in_the_maker(ai_on, monkey
     page = client.post("/maker/drafts", data={"target": "new", "new_title": "Bio", "has_exam": "no",
                                               "action": "ai", "notes": "Osmosis - water\nATP - energy"}).get_data(as_text=True)
     assert "split your lines with Quick split" in page
+
+
+def test_source_lines_not_in_typed_notes_are_blanked(ai_on, monkeypatch):
+    notes = "Osmosis: water moving across a membrane.\nATP: the energy currency of the cell."
+    monkeypatch.setattr(ai_service, "gemini_make_cards", lambda text, files, topics: [
+        {"question": "What is osmosis?", "answer": "Water moving across a membrane.", "topic": "Cells",
+         "importance": "high", "source_line": "osmosis:  WATER moving across a membrane"},   # same words: kept
+        {"question": "What is ATP?", "answer": "Energy currency.", "topic": "Cells",
+         "importance": "high", "source_line": "ATP powers muscles"}])                        # made up: blanked
+    with ai_on.app_context():
+        cards = ai_service.make_cards(text=notes)
+    assert cards[0]["source_line"] == "osmosis:  WATER moving across a membrane"
+    assert cards[1]["source_line"] == ""
+
+
+def test_existing_deck_topics_are_sent_to_gemini(ai_on, monkeypatch, client, make_user):
+    seen = {}
+
+    def capture(text, files, topics):
+        seen["topics"] = topics
+        return [{"question": "Q", "answer": "A", "topic": "Cells", "importance": "low", "source_line": ""}]
+    monkeypatch.setattr(ai_service, "gemini_make_cards", capture)
+    user_id = make_user()
+    with ai_on.app_context():
+        deck = Deck(title="Bio", folder="personal", owner_id=user_id)
+        db.session.add(deck)
+        deck.cards.extend([Card(question="Q1", answer="A", topic="Cells", owner_id=user_id),
+                           Card(question="Q2", answer="A", topic="Genetics", owner_id=user_id)])
+        db.session.flush()
+        db.session.add(UserDeck(user_id=user_id, deck_id=deck.id, mode="normal"))
+        db.session.commit()
+        deck_id = deck.id
+    client.post("/login", data={"email": "riya@example.com", "password": "password123"})
+    client.post("/maker/drafts", data={"target": str(deck_id), "notes": "Some notes", "action": "ai"})
+    assert seen["topics"] == ["Cells", "Genetics"]
+
+
+def test_explain_drops_markdown_bold(ai_on, monkeypatch):
+    monkeypatch.setattr(ai_service, "ask_gemini", lambda contents, **kwargs: SimpleNamespace(
+        text="Think of the **M** in **M**itochondria as **M**ighty."))
+    with ai_on.app_context():
+        assert ai_service.explain_card(SimpleNamespace(question="Q", answer="A")) == \
+            "Think of the M in Mitochondria as Mighty."
+
+
+def test_thinking_level_is_low_for_cards_and_minimal_for_short_replies():
+    cards = ai_service.generation_config(json_schema=ai_service.CARDS_SCHEMA)
+    search = ai_service.generation_config(search=True, thinking=ai_service.THINKING_FOR_SHORT_REPLIES)
+    assert cards.thinking_config.thinking_level.name == "LOW"
+    assert search.thinking_config.thinking_level.name == "MINIMAL"
+    assert search.response_json_schema is None  # never JSON schema together with Google Search
+    assert cards.automatic_function_calling.disable is True
+
+
+def test_gemini_client_is_shared_and_retries_once(app, monkeypatch):
+    # No real client here (that needs Google credentials): capture what we would pass to it.
+    from google import genai
+
+    made = []
+    monkeypatch.setattr(genai, "Client", lambda **kwargs: made.append(kwargs) or object())
+    ai_service.shared_client.cache_clear()
+    with app.app_context():
+        first, second = ai_service.gemini_client(), ai_service.gemini_client()
+    ai_service.shared_client.cache_clear()
+    assert first is second and len(made) == 1
+    options = made[0]["http_options"]
+    assert made[0]["vertexai"] is True
+    assert options.timeout == app.config["AI_TIMEOUT_SECONDS"] * 1000
+    assert options.retry_options.attempts == 2
+    assert {408, 429, 504} <= set(options.retry_options.http_status_codes)
 
 
 # ---------- Stand-ins (AI off) ----------

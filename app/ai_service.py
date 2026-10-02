@@ -24,6 +24,7 @@ import json
 import logging
 import re
 import time
+from functools import lru_cache
 from urllib.parse import quote_plus
 
 from flask import current_app
@@ -32,6 +33,13 @@ log = logging.getLogger("nexora.ai")
 
 COULD_NOT_READ = "Couldn't read that. Try a shorter piece of notes."
 TEMPERATURE = 0.3
+
+# How much Gemini "thinks" before answering. Measured on gemini-3.5-flash (2 Oct):
+# writing cards: default thinking took 13-17 s for a page of notes (over our 15 s limit),
+# LOW took 6-9 s with the same cards. Explain and link search: LOW about 3.5 s and 6.4 s,
+# MINIMAL about 1.4 s and 2.4 s. Note: gemini-3.8-flash doesn't accept MINIMAL.
+THINKING_FOR_CARDS = "LOW"
+THINKING_FOR_SHORT_REPLIES = "MINIMAL"
 MAX_DRAFTS = 25
 MAX_EXISTING_QUESTIONS = 100
 IMPORTANCE_LEVELS = ("high", "medium", "low")
@@ -76,6 +84,7 @@ def logged_call(feature, work):
     except Exception as error:
         log.warning("ai_call", extra={"fields": {
             "feature": feature, "ok": False, "error": type(error).__name__,
+            "status": getattr(error, "code", None),  # the HTTP status from Google, e.g. 429 or 504
             "latency_ms": round((time.perf_counter() - started) * 1000),
             "ai_enabled": ai_enabled(),
         }})
@@ -123,15 +132,21 @@ def clean_cards(raw_cards, default_topic="General"):
 
 # ---------- Public functions ----------
 
-def make_cards(text=None, files=None):
+def make_cards(text=None, files=None, topics=None):
     """Draft cards from notes text and/or files.
 
     files: [{"mime_type", "data": bytes}] on a laptop, or [{"mime_type", "uri": "gs://..."}] on GCP.
+    topics: the target deck's existing topics, so new cards reuse them.
     """
     files = files or []
     if not ai_enabled():
         return logged_call("make_cards", lambda: fake_make_cards(text, files))
-    return logged_call("make_cards", lambda: clean_cards(gemini_make_cards(text, files)))
+
+    def ask():
+        cards = clean_cards(gemini_make_cards(text, files, topics or []))
+        return keep_real_source_lines(cards, text) if text and not files else cards
+
+    return logged_call("make_cards", ask)
 
 
 def generate_more_cards(deck_title, topics, existing_cards, count):
@@ -212,29 +227,55 @@ FIX_SCHEMA = {
     "required": ["explanation", "follow_up_cards"],
 }
 
-CARD_RULES = (
-    "Rules for every card: one idea per card; the question is short and clear; the answer is "
-    "correct, short and in simple English; topic is a short chapter-style name; importance is "
-    "high for core exam ideas, medium for normal facts, low for side details."
-)
+CARD_RULES = """Rules for every card:
+- One idea per card. The question asks about exactly one thing and is short and clear.
+- Ask open questions (what, why, how, which). No yes/no questions.
+- Each card makes sense on its own, months later, without the notes. Never refer to the
+  source: no "in the notes", "in this study", "in this investigation", "in this scenario",
+  "according to the text". Name the subject instead.
+  Bad: "What is tshark used for in this investigation?"
+  Good: "What is tshark used for in network forensics?"
+- The answer is correct, in simple English, and short: ideally under 20 words.
+- topic is a short chapter-style name (1 to 4 words). Use 2 to 6 topics for the whole set and
+  reuse them across cards. Prefer the notes' own headings.
+- importance: high for core ideas a student must know for an exam, medium for normal facts,
+  low for side details."""
 
 
 def gemini_client():
+    config = current_app.config
+    return shared_client(config["GCP_PROJECT"], config["GCP_LOCATION"], config["AI_TIMEOUT_SECONDS"])
+
+
+@lru_cache(maxsize=4)
+def shared_client(project, location, timeout_seconds):
+    """One Gemini client per worker process, reused for every call.
+
+    Reusing it saves a Google login on each request. It also keeps the client
+    alive during the call: a client that is thrown away closes its connection.
+    """
     # Imported here so the app runs on a laptop without Google Cloud libraries set up.
     # Auth is the VM's service account (Application Default Credentials): no API keys.
     from google import genai
     from google.genai import types
 
-    config = current_app.config
     return genai.Client(
         vertexai=True,
-        project=config["GCP_PROJECT"],
-        location=config["GCP_LOCATION"],
-        http_options=types.HttpOptions(timeout=config["AI_TIMEOUT_SECONDS"] * 1000),
+        project=project,
+        location=location,
+        http_options=types.HttpOptions(
+            timeout=timeout_seconds * 1000,  # per attempt
+            # Gemini's response time has a long tail: most calls take ~5 s, but now and then one
+            # hangs past the deadline (we saw 21 s and 59 s). One quick retry on a timeout or
+            # "busy" reply almost always lands. Worst case for the student: two attempts.
+            retry_options=types.HttpRetryOptions(
+                attempts=2, initial_delay=0.5, max_delay=1.0, http_status_codes=[408, 429, 500, 502, 503, 504],
+            ),
+        ),
     )
 
 
-def generation_config(json_schema=None, search=False):
+def generation_config(json_schema=None, search=False, thinking=THINKING_FOR_CARDS):
     from google.genai import types
 
     safety = [
@@ -246,24 +287,28 @@ def generation_config(json_schema=None, search=False):
             types.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
         )
     ]
+    # We never let Gemini call our Python functions, so switch that SDK feature off.
+    no_function_calling = types.AutomaticFunctionCallingConfig(disable=True)
+    thinking_config = types.ThinkingConfig(thinking_level=types.ThinkingLevel[thinking])
     if search:
         # Grounding with Google Search: no JSON schema in the same call.
         return types.GenerateContentConfig(
-            temperature=TEMPERATURE, safety_settings=safety,
-            tools=[types.Tool(google_search=types.GoogleSearch())],
+            temperature=TEMPERATURE, safety_settings=safety, automatic_function_calling=no_function_calling,
+            thinking_config=thinking_config, tools=[types.Tool(google_search=types.GoogleSearch())],
         )
     return types.GenerateContentConfig(
-        temperature=TEMPERATURE, safety_settings=safety,
+        temperature=TEMPERATURE, safety_settings=safety, automatic_function_calling=no_function_calling,
+        thinking_config=thinking_config,
         response_mime_type="application/json" if json_schema else None,
         response_json_schema=json_schema,
     )
 
 
-def ask_gemini(contents, json_schema=None, search=False):
+def ask_gemini(contents, json_schema=None, search=False, thinking=THINKING_FOR_CARDS):
     response = gemini_client().models.generate_content(
         model=current_app.config["GEMINI_MODEL"],
         contents=contents,
-        config=generation_config(json_schema, search),
+        config=generation_config(json_schema, search, thinking),
     )
     return response
 
@@ -288,17 +333,37 @@ def file_parts(files):
     return parts
 
 
-def gemini_make_cards(text, files):
-    prompt = (
-        "You make flashcards for a student from their own study notes. "
-        f"Make up to {MAX_DRAFTS} cards covering the most useful ideas. {CARD_RULES} "
-        "source_line is the exact short line from the notes (or a short description of where on "
-        "the photo or page) that each card comes from. Use only what the notes say."
-    )
+def gemini_make_cards(text, files, topics):
+    prompt = f"""You make flashcards for a student from their own study notes (typed text, photos of
+handwritten pages, or PDFs).
+Make about one card per key idea, up to {MAX_DRAFTS} cards. Don't pad with trivial cards.
+{CARD_RULES}
+- source_line: copy the words from the notes that the card comes from, word for word, as written
+  (keep the student's spelling). Keep it short: one line or phrase, under 160 characters.
+- Use only what the notes say. Don't add facts that aren't there.
+- Handwriting: if a word or line is unclear, skip it rather than guess. Fix obvious spelling
+  mistakes in the question and answer (not in source_line). Expand a short form only when the
+  notes give its full name; otherwise keep it as written.
+- Skip personal details such as names, roll numbers, dates and email addresses: no cards about them."""
+    if topics:
+        prompt += "\nThe deck already uses these topics; reuse them where they fit: " + ", ".join(topics)
     contents = [prompt] + file_parts(files)
     if text:
         contents.append("Notes:\n" + text)
     return ask_gemini_json(contents, CARDS_SCHEMA)
+
+
+def squash(text):
+    return " ".join(re.sub(r"[^a-z0-9]+", " ", text.lower()).split())
+
+
+def keep_real_source_lines(cards, text):
+    """For typed notes we can check the quote: blank any source_line that isn't really in the notes."""
+    notes = squash(text)
+    for card in cards:
+        if card["source_line"] and squash(card["source_line"]) not in notes:
+            card["source_line"] = ""
+    return cards
 
 
 def gemini_generate_more(deck_title, topics, questions, count):
@@ -314,10 +379,13 @@ def gemini_generate_more(deck_title, topics, questions, count):
 def gemini_explain(question, answer):
     prompt = (
         "Explain this flashcard to a student in 3 or 4 short, plain sentences. Say why the answer "
-        "is right and give one simple way to remember it. No headings, no lists.\n"
+        "is right and give one simple way to remember it. Plain text only: no Markdown, no "
+        "asterisks, no headings, no lists.\n"
         f"Question: {question}\nAnswer: {answer}"
     )
-    text = (ask_gemini([prompt]).text or "").strip()
+    response = ask_gemini([prompt], thinking=THINKING_FOR_SHORT_REPLIES)
+    # We show it as plain text, so drop any Markdown bold that slips through.
+    text = (response.text or "").replace("**", "").strip()
     if not text:
         raise AIError("Couldn't explain this card right now. Try again in a minute.")
     return text[:1500]
@@ -339,7 +407,7 @@ def gemini_find_resources(topic):
         f"Find 3 to 5 good, free resources (articles or videos) for a student learning {topic}. "
         "Reply with one short sentence."
     )
-    response = ask_gemini([prompt], search=True)
+    response = ask_gemini([prompt], search=True, thinking=THINKING_FOR_SHORT_REPLIES)
     links = grounding_links(response)
     if not links:
         raise AIError("No links found.")

@@ -82,7 +82,8 @@
         <a class="button button-primary" href="{{ url_for('decks.new_card', deck_id=deck.id) }}">Add card</a>
         <a class="button" href="{{ url_for('cardmaker.maker', deck_id=deck.id) }}">AI Card Maker</a>
         {% if cards %}
-          <form method="post" action="{{ url_for('cardmaker.generate_more', deck_id=deck.id) }}" class="generate-more">
+          <form method="post" action="{{ url_for('cardmaker.generate_more', deck_id=deck.id) }}" class="generate-more"
+                data-wait="Making new cards...">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <label for="more-count" class="visually-hidden">How many new cards</label>
             <select name="count" id="more-count">
@@ -90,6 +91,7 @@
               <option value="10">10 cards</option>
             </select>
             <button type="submit" class="button">Generate more cards</button>
+            <span class="wait-status" role="status" aria-live="polite"></span>
           </form>
         {% endif %}
       </div>

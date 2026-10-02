@@ -54,7 +54,9 @@ class Config:
 
     # AI
     AI_ENABLED = env_bool("AI_ENABLED", False)
-    GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+    # Confirmed on Vertex AI on 2 Oct 2026 (location "global"). ai_service.py's thinking
+    # levels were measured on this model.
+    GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash")
     AI_DAILY_LIMIT = env_int("AI_DAILY_LIMIT", 20)
     AI_TIMEOUT_SECONDS = env_int("AI_TIMEOUT_SECONDS", 15)
 
@@ -67,7 +69,7 @@ class Config:
 
     # Google Cloud (only needed on the VM)
     GCP_PROJECT = os.environ.get("GCP_PROJECT", "")
-    GCP_LOCATION = os.environ.get("GCP_LOCATION", "asia-south1")
+    GCP_LOCATION = os.environ.get("GCP_LOCATION", "global")
     NOTES_BUCKET = os.environ.get("NOTES_BUCKET", "")
     BACKUP_BUCKET = os.environ.get("BACKUP_BUCKET", "")
     BQ_DATASET = os.environ.get("BQ_DATASET", "nexora")
