@@ -2,8 +2,10 @@
 explain it, give links, and add 3 practice cards.
 
 How it decides: engine.find_weak_topic() (open misconceptions only; the
-misconception topic wins). At most one Fixer per session, and at most one per
-topic per day, so studying twice doesn't pile up practice cards.
+misconception topic wins), looking only at the decks studied in the session
+that just ended, so a Cyber Security session never shows a Biology weak spot.
+At most one Fixer per session, and at most one per topic per day, so studying
+twice doesn't pile up practice cards.
 
 Practice cards go into the student's "Weak spot practice" deck with
 source='fixer', importance='high', on shelf 1 and due today, so the planner
@@ -71,9 +73,12 @@ def resources_for(user, topic, today):
     return ai_service.find_resources(topic)
 
 
-def run_after_session(user, today):
-    """Run the Fixer once at the end of a session. Returns (box, search widget html), or (None, None)."""
-    target = engine.find_weak_topic(seen_cards_for(user.id))
+def run_after_session(user, today, deck_ids):
+    """Run the Fixer once at the end of a session. Returns (box, search widget html), or (None, None).
+
+    deck_ids: the decks of the cards answered in that session.
+    """
+    target = engine.find_weak_topic(seen_cards_for(user.id, deck_ids))
     if target is None:
         return None, None
     deck_id, topic = target

@@ -403,3 +403,31 @@ def test_stand_in_makes_three_different_practice_cards_from_one_missed_card(app)
         fix = ai_service.fix_weak_spot("Cells", [{"question": "Where is rRNA made?", "answer": "In the nucleolus."}])
     questions = [card["question"] for card in fix["follow_up_cards"]]
     assert len(set(questions)) == 3
+
+
+def test_fixer_only_looks_at_the_deck_just_studied(app, riya_client, riya):
+    # Biology has a weak topic; the student studies a different deck.
+    biology_id, biology_cards = make_deck(app, riya, title="Biology")
+    make_weak_topic(app, riya, biology_id, biology_cards)
+    cyber_id, _ = make_deck(app, riya, topics=("Networks", "Networks", "Networks"), title="Cyber Security")
+    page = finish_a_session(riya_client, cyber_id)
+    assert "Weak spot:" not in page
+    assert practice_cards(app, riya) == []
+    assert "Weak spot:" not in riya_client.get("/study/summary").get_data(as_text=True)  # reload too
+
+    # Studying Biology itself still finds its weak spot.
+    assert "Weak spot: <mark>Cells</mark>" in finish_a_session(riya_client, biology_id)
+
+
+def test_practice_session_does_not_start_another_fixer(app, riya_client, riya):
+    deck_id, card_ids = make_deck(app, riya)
+    make_weak_topic(app, riya, deck_id, card_ids)
+    finish_a_session(riya_client, deck_id)
+    riya_client.get("/study/practice")
+    riya_client.get("/study/card")
+    with riya_client.session_transaction() as state:
+        card_id = state["study"]["current"]
+    riya_client.post("/study/answer", data={"card_id": card_id, "confident": "sure", "knew_it": "0"})
+    page = riya_client.get("/study/summary").get_data(as_text=True)
+    assert "Weak spot:" not in page
+    assert len(practice_cards(app, riya)) == 3
