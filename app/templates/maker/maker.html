@@ -8,7 +8,7 @@
   {% if error %}<p class="flash flash-error" role="alert">{{ error }}</p>{% endif %}
 
   <form method="post" action="{{ url_for('cardmaker.make_drafts') }}" enctype="multipart/form-data"
-        novalidate id="maker-form">
+        novalidate id="maker-form" data-wait="Making your cards. This can take up to 30 seconds...">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
     <section class="maker-step" aria-labelledby="step-target">
@@ -69,6 +69,7 @@
       <button type="submit" name="action" value="split" class="button">Quick split</button>
       <span class="field-hint">Quick split needs no AI: it turns “term - meaning” lines into cards.</span>
     </div>
+    <p class="wait-status" role="status" aria-live="polite"></p>
   </form>
 </section>
 {% endblock %}

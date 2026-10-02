@@ -9,6 +9,20 @@ document.addEventListener("submit", function (event) {
   }
 });
 
+// Forms with data-wait="..." show that message while the server works (AI calls can take
+// up to ~20 s), and ignore a second click so one request isn't sent twice.
+document.addEventListener("submit", function (event) {
+  const form = event.target;
+  if (!form.dataset.wait || event.defaultPrevented) return;
+  if (form.dataset.busy) {
+    event.preventDefault();
+    return;
+  }
+  form.dataset.busy = "true";
+  const status = form.querySelector(".wait-status");
+  if (status) status.textContent = form.dataset.wait;
+});
+
 // POST JSON with the CSRF token in a header, as Flask-WTF expects.
 // Returns the parsed JSON reply, or throws an Error with a readable message.
 async function postJSON(url, data) {

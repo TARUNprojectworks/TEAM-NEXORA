@@ -661,6 +661,9 @@ mark { background: var(--highlight); color: var(--ink); padding: 0 3px; }
 .generate-more { display: inline-flex; gap: 6px; align-items: center; margin: 0; }
 .generate-more select { padding: 9px 8px; border: 2px solid var(--ink); border-radius: var(--radius); background: var(--paper); font: inherit; }
 
+.wait-status { margin: 8px 0 0; color: var(--ink-soft); }
+.wait-status:empty { display: none; }
+
 /* ---------- Explain ---------- */
 
 .explain { margin-top: 16px; }
