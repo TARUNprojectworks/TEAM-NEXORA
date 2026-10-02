@@ -231,6 +231,12 @@ def update_session_after_answer(state, card_id, knew_it, confident, moved_up, xp
 
 # ---------- Routes ----------
 
+def decks_studied(state):
+    """The decks of the cards answered in this session."""
+    rows = db.session.query(Card.deck_id).filter(Card.id.in_(state["answered"])).distinct()
+    return [deck_id for (deck_id,) in rows]
+
+
 @bp.get("/<int:deck_id>")
 @login_required
 def start(deck_id):
@@ -400,12 +406,15 @@ def summary():
     state["current"] = None
     today = today_local()
     box, widget = None, None
-    if state["stats"]["studied"] and not state.get("fixer_done"):
+    if state["stats"]["studied"] and not state.get("fixer_done") and not state.get("card_ids"):
         # At most one Fixer per session: run it the first time the summary opens.
-        box, widget = fixer.run_after_session(current_user, today)
+        # It only looks at the decks studied in this session. Practice sessions
+        # (the Fixer's own cards) don't start another Fixer.
+        box, widget = fixer.run_after_session(current_user, today, decks_studied(state))
         state["fixer_done"] = True
-    elif state.get("fixer_done"):
-        box = fixer.todays_box(today)
+        state["fixer_box"] = box is not None
+    elif state.get("fixer_box"):
+        box = fixer.todays_box(today)  # summary reloaded: show this session's box again
     save_session(state)
     return render_template(
         "study/summary.html",

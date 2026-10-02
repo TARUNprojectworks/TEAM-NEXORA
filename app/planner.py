@@ -101,13 +101,18 @@ def study_candidates(user_id, today):
     return seen, new
 
 
-def seen_cards_for(user_id):
-    """(deck_id, topic, shelf, misconception_count) for every card the student has seen."""
+def seen_cards_for(user_id, deck_ids=None):
+    """(deck_id, topic, shelf, misconception_count) for every card the student has seen.
+
+    deck_ids: only these decks (the Fixer passes the decks of the session just finished).
+    """
     rows = db.session.query(Card.deck_id, Card.topic, Progress.shelf, Progress.misconception_count).join(
         Progress, Progress.card_id == Card.id
     ).join(
         UserDeck, (UserDeck.deck_id == Card.deck_id) & (UserDeck.user_id == user_id)
     ).filter(Progress.user_id == user_id, Progress.hidden.is_(False), Progress.last_seen.isnot(None))
+    if deck_ids is not None:
+        rows = rows.filter(Card.deck_id.in_(deck_ids))
     return rows.all()
 
 
