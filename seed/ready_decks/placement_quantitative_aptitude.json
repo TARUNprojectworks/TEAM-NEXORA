@@ -1,6 +1,7 @@
 {
   "title": "Quantitative Aptitude",
   "folder": "placement",
+  "description": "Percentages, interest, time and work, speed and ratio questions from placement tests.",
   "cards": [
     {"question": "What is 20% of 150?", "answer": "30. (150 × 20 / 100)", "topic": "Percentages", "importance": "low"},
     {"question": "15% of a number is 45. What is the number?", "answer": "300. (45 × 100 / 15)", "topic": "Percentages", "importance": "medium"},

@@ -32,7 +32,7 @@
 {% if user_deck and cards %}
   <div class="study-buttons">
     <a class="button button-primary" href="{{ url_for('study.start', deck_id=deck.id, style='smart') }}">Smart Study</a>
-    <a class="button" href="{{ url_for('study.start', deck_id=deck.id, style='free') }}">Free Practice</a>
+    <a class="button" href="{{ url_for('study.start', deck_id=deck.id, style='free') }}">Quick Revise</a>
   </div>
 {% endif %}
 
@@ -43,16 +43,23 @@
 {% if user_deck %}
   <section class="deck-section" aria-labelledby="shelves-heading">
     <h2 id="shelves-heading">Your card box</h2>
-    <p class="field-hint">Cards move up a shelf when you know them for sure. Shelf 5 means learned.</p>
     <div class="shelf-box">
       {% for count in shelves %}
-        <div class="shelf-slot{% if loop.index == 5 %} shelf-slot-learned{% endif %}">
+        <div class="shelf-slot shelf-{{ loop.index }}">
           <span class="shelf-count">{{ count }}</span>
-          <span class="shelf-name">Shelf {{ loop.index }}</span>
+          <span class="shelf-name">{{ shelf_names[loop.index0] }}</span>
         </div>
       {% endfor %}
     </div>
     <p class="deck-meta">Not studied yet: {{ not_studied }}</p>
+    <details class="how-it-works">
+      <summary>How this works</summary>
+      <p>Every card sits in one of five slots. Answer <strong>Know it</strong> and <strong>Sure</strong>
+        in Smart Study and it moves one slot to the right. <strong>Review again</strong> sends it back
+        to Learning. Cards come back for review after 0, 1, 3, 7 and 14 days, so Mastered cards only
+        come back every two weeks. In Exam mode, every card is reviewed before your exam date.
+        Quick Revise never moves cards.</p>
+    </details>
   </section>
 
   <section class="deck-section" id="exam" aria-labelledby="exam-heading">

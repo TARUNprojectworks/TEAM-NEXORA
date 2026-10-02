@@ -1,6 +1,7 @@
 {
   "title": "KEAM Chemistry",
   "folder": "competitive",
+  "description": "Atomic structure, bonding, equilibrium and organic basics for the KEAM entrance.",
   "cards": [
     {"question": "What is the value of Avogadro's number?", "answer": "6.022 × 10²³ particles per mole.", "topic": "Basic Concepts", "importance": "high"},
     {"question": "What volume does one mole of an ideal gas take up at STP?", "answer": "22.4 L at 273 K and 1 atm. (22.7 L if STP is taken as 273 K and 1 bar.)", "topic": "Basic Concepts", "importance": "high"},

@@ -8,10 +8,13 @@ Who can do what:
 - Someone else's deck or private card is a 404, so we don't reveal it exists.
 """
 
+import json
 import logging
 from datetime import date, timedelta
+from functools import lru_cache
+from pathlib import Path
 
-from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
+from flask import Blueprint, abort, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 from flask_wtf import FlaskForm
 from sqlalchemy import func
@@ -27,6 +30,8 @@ bp = Blueprint("decks", __name__, url_prefix="/decks")
 log = logging.getLogger("nexora.decks")
 
 READY_FOLDERS = {"semester": "Semester", "placement": "Placement", "competitive": "Competitive"}
+# What each shelf means to a student (shelf 1 to 5).
+SHELF_NAMES = ("Learning", "Getting there", "Good", "Strong", "Mastered")
 IMPORTANCE_CHOICES = [("high", "High"), ("medium", "Medium"), ("low", "Low")]
 MAX_EXAM_DAYS_AHEAD = 730  # two years; anything later is almost surely a typo
 
@@ -254,27 +259,79 @@ def first_error(form):
 
 # ---------- Ready decks ----------
 
+@lru_cache(maxsize=1)
+def ready_deck_descriptions():
+    """{deck title: one-line description}, read once from the seed JSON files.
+
+    The description isn't in the database (no schema change for a line of text);
+    it lives next to the deck's cards in seed/ready_decks/.
+    """
+    folder = Path(current_app.root_path).parent / "seed" / "ready_decks"
+    descriptions = {}
+    for path in folder.glob("*.json"):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            descriptions[data["title"]] = data.get("description", "")
+        except (OSError, ValueError, KeyError):
+            continue
+    return descriptions
+
+
+def library_cards(decks):
+    """For each deck: card count, its 3 biggest topics, a description and 3 preview cards."""
+    ids = [deck.id for deck in decks]
+    counts = count_cards(ids, current_user.id)
+    topic_rows = db.session.query(Card.deck_id, Card.topic, func.count(Card.id)).filter(
+        Card.deck_id.in_(ids), Card.owner_id.is_(None)
+    ).group_by(Card.deck_id, Card.topic).all()
+    descriptions = ready_deck_descriptions()
+    items = []
+    for deck in decks:
+        topics = sorted((row for row in topic_rows if row[0] == deck.id), key=lambda row: -row[2])
+        preview = db.session.query(Card).filter(
+            Card.deck_id == deck.id, Card.owner_id.is_(None)
+        ).order_by(Card.id).limit(3).all()
+        items.append({
+            "deck": deck,
+            "card_count": counts.get(deck.id, 0),
+            "topics": [topic for _, topic, _ in topics[:3]],
+            "description": descriptions.get(deck.title, ""),
+            "preview": preview,
+        })
+    return items
+
+
+def matches_search(item, query):
+    text = " ".join([item["deck"].title, item["description"], *item["topics"]]).lower()
+    return all(word in text for word in query.lower().split())
+
+
 @bp.get("/ready")
 @login_required
 def ready_decks():
+    """The Deck Library: folders of ready decks, with search. The first folder is open by default."""
+    query = request.args.get("q", "").strip()[:80]
     folder = request.args.get("folder")
     if folder not in READY_FOLDERS:
-        folder = None
+        folder = next(iter(READY_FOLDERS))
 
     folder_counts = dict(
         db.session.query(Deck.folder, func.count(Deck.id))
         .filter(Deck.is_ready.is_(True)).group_by(Deck.folder).all()
     )
-    decks = []
-    if folder:
-        decks = db.session.query(Deck).filter_by(is_ready=True, folder=folder).order_by(Deck.title).all()
+    decks = db.session.query(Deck).filter(Deck.is_ready.is_(True)).order_by(Deck.title)
+    if not query:
+        decks = decks.filter(Deck.folder == folder)
+    items = library_cards(decks.all())
+    if query:
+        items = [item for item in items if matches_search(item, query)]
     added_ids = {
         deck_id for (deck_id,) in db.session.query(UserDeck.deck_id).filter_by(user_id=current_user.id)
     }
     return render_template(
         "decks/ready.html",
-        folders=READY_FOLDERS, folder=folder, folder_counts=folder_counts,
-        decks=decks, card_counts=count_cards([d.id for d in decks], current_user.id), added_ids=added_ids,
+        folders=READY_FOLDERS, folder=None if query else folder, folder_counts=folder_counts,
+        items=items, added_ids=added_ids, query=query,
     )
 
 
@@ -394,6 +451,7 @@ def deck_page(deck_id):
         badge=mode_badge(user_deck, today) if user_deck else None,
         exam_form=exam_form_for(user_deck) if user_deck else None,
         shelves=shelves,
+        shelf_names=SHELF_NAMES,
         not_studied=len(cards) - sum(shelves),
         today=today,
     )

@@ -1,6 +1,7 @@
 {
   "title": "DSA Basics",
   "folder": "placement",
+  "description": "Arrays, sorting, trees and graphs: the complexity facts asked in coding interviews.",
   "cards": [
     {"question": "What is the time complexity of accessing an array element by index?", "answer": "O(1).", "topic": "Arrays and Lists", "importance": "medium"},
     {"question": "What is the time complexity of inserting at the head of a singly linked list?", "answer": "O(1). Only the head pointer changes.", "topic": "Arrays and Lists", "importance": "medium"},

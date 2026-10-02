@@ -1,6 +1,7 @@
 {
   "title": "Cell Biology",
   "folder": "semester",
+  "description": "Organelles, membranes and cell division: the cell chapter for Class 11-12 and first-year biology.",
   "cards": [
     {"question": "Who proposed the cell theory?", "answer": "Matthias Schleiden (plants, 1838) and Theodor Schwann (animals, 1839).", "topic": "Cell Theory", "importance": "medium"},
     {"question": "What did Rudolf Virchow add to the cell theory?", "answer": "That all cells arise from pre-existing cells: \"Omnis cellula e cellula\" (1855).", "topic": "Cell Theory", "importance": "high"},

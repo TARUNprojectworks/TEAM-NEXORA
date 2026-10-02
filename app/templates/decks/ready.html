@@ -1,8 +1,17 @@
 {% extends "base.html" %}
-{% block title %}Ready decks · Nexora Recall{% endblock %}
+{% block title %}Deck Library · Nexora Recall{% endblock %}
 {% block content %}
-<h1>Ready decks</h1>
-<p>Decks we prepared for you. Pick a folder, then add a deck to start studying it.</p>
+<div class="page-top">
+  <div>
+    <h1>Deck Library</h1>
+    <p class="deck-meta">Decks we prepared for you. Add one to start studying it.</p>
+  </div>
+  <form method="get" action="{{ url_for('decks.ready_decks') }}" class="library-search" role="search">
+    <label for="q" class="visually-hidden">Search decks</label>
+    <input type="search" id="q" name="q" value="{{ query }}" placeholder="Search decks or topics">
+    <button type="submit" class="button">Search</button>
+  </form>
+</div>
 
 <nav class="folder-tabs" aria-label="Folders">
   {% for key, label in folders.items() %}
@@ -13,23 +22,40 @@
   {% endfor %}
 </nav>
 
-{% if not folder %}
-  <p class="empty">Choose a folder above to see its decks.</p>
-{% elif not decks %}
-  <p class="empty">No decks in this folder yet. Try another folder.</p>
+{% if query %}
+  <p class="search-result">
+    {{ items | length }} {{ "deck" if items | length == 1 else "decks" }} for “{{ query }}”.
+    <a href="{{ url_for('decks.ready_decks') }}">Clear search</a>
+  </p>
+{% endif %}
+
+{% if not items %}
+  <p class="empty">{% if query %}No decks match that. Try a shorter word, like a subject or topic.{% else %}No decks in this folder yet. Try another folder.{% endif %}</p>
 {% else %}
-  <ul class="deck-list">
-    {% for deck in decks %}
-      <li class="deck-row">
-        <div class="deck-info">
-          <a class="deck-title" href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">{{ deck.title }}</a>
-          <span class="deck-meta">{{ card_counts.get(deck.id, 0) }} cards</span>
-        </div>
-        <div class="deck-actions">
+  <ul class="library-grid">
+    {% for item in items %}
+      {% set deck = item.deck %}
+      <li class="library-deck index-card">
+        <p class="card-header">{{ folders.get(deck.folder, "") }} · {{ item.card_count }} cards</p>
+        <h2 class="library-title"><a href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">{{ deck.title }}</a></h2>
+        {% if item.description %}<p class="library-description">{{ item.description }}</p>{% endif %}
+        {% if item.topics %}
+          <p class="library-topics">{% for topic in item.topics %}<span class="badge">{{ topic }}</span>{% endfor %}</p>
+        {% endif %}
+        <details class="library-preview">
+          <summary>Preview 3 cards</summary>
+          <ol>
+            {% for card in item.preview %}
+              <li><span class="preview-q">{{ card.question }}</span><span class="preview-a">{{ card.answer }}</span></li>
+            {% endfor %}
+          </ol>
+        </details>
+        <div class="library-actions">
           {% if deck.id in added_ids %}
-            <span class="badge badge-normal">In my decks</span>
+            <span class="badge badge-added">Added</span>
+            <a href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">Open</a>
           {% else %}
-            <a class="button" href="{{ url_for('decks.add_ready_deck', deck_id=deck.id) }}">Add to my decks</a>
+            <a class="button button-primary" href="{{ url_for('decks.add_ready_deck', deck_id=deck.id) }}">Add</a>
           {% endif %}
         </div>
       </li>

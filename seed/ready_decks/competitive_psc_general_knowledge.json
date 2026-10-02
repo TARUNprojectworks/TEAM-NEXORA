@@ -1,6 +1,7 @@
 {
   "title": "PSC General Knowledge",
   "folder": "competitive",
+  "description": "Kerala, the Indian Constitution and history: questions that come up often in Kerala PSC.",
   "cards": [
     {"question": "When was the state of Kerala formed?", "answer": "1 November 1956, under the States Reorganisation Act.", "topic": "Kerala", "importance": "high"},
     {"question": "How many districts does Kerala have?", "answer": "14.", "topic": "Kerala", "importance": "medium"},
