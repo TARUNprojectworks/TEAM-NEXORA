@@ -10,7 +10,7 @@ import time
 from flask import Flask, g, jsonify, render_template, request
 from flask_login import LoginManager, current_user
 from flask_wtf.csrf import CSRFError, CSRFProtect
-from sqlalchemy import text
+from sqlalchemy import inspect, text
 from sqlalchemy.exc import OperationalError
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -50,6 +50,7 @@ def create_app(test_config=None):
     register_error_pages(app)
     register_health_check(app)
     create_tables(app)
+    check_database_matches_models(app)
     return app
 
 
@@ -90,6 +91,33 @@ def create_tables(app):
             # Two Gunicorn workers can start at the same moment; if the other
             # one already created the tables, there is nothing left to do.
             db.session.rollback()
+
+
+class OldDatabaseError(RuntimeError):
+    """The database file was made by older code and is missing columns."""
+
+
+def missing_columns(app):
+    """Columns models.py expects that the database doesn't have, like 'cards.owner_id'."""
+    with app.app_context():
+        inspector = inspect(db.engine)
+        missing = []
+        for table in db.metadata.sorted_tables:
+            have = {column["name"] for column in inspector.get_columns(table.name)}
+            missing += [f"{table.name}.{column.name}" for column in table.columns if column.name not in have]
+        return missing
+
+
+def check_database_matches_models(app):
+    # create_all() makes missing tables but never adds columns to old ones.
+    # Without this check an old database fails later with a confusing
+    # "no such column" error on whatever page runs first.
+    missing = missing_columns(app)
+    if missing:
+        raise OldDatabaseError(
+            f"The database is older than the code (missing: {', '.join(missing)}). "
+            "On a laptop: delete instance/nexora.db, run python seed.py, then start the app again."
+        )
 
 
 def register_health_check(app):
