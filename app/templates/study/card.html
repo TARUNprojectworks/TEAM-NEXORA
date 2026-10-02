@@ -5,7 +5,7 @@
   <div class="study-top">
     <div>
       {% if not deck %}
-        <p class="deck-meta"><a href="{{ url_for('planner.home') }}">Today's plan</a> · {{ card.deck.title }}</p>
+        <p class="deck-meta"><a href="{{ url_for('planner.home') }}">{{ "Practice cards" if practice else "Today's plan" }}</a> · {{ card.deck.title }}</p>
       {% else %}
       <p class="deck-meta">
         <a href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">{{ deck.title }}</a>
@@ -81,7 +81,11 @@
     <p class="field-hint" id="confidence-hint">Pick Sure or Unsure first.</p>
   </form>
 
-  {# Phase 5 adds the "Explain this card" button here. #}
+  <section class="explain" id="explain-area" hidden aria-label="Explanation">
+    <button type="button" class="button" id="explain-button"
+            data-url="{{ url_for('study.explain', card_id=card.id) }}">Explain this card</button>
+    <p class="explanation" id="explanation" aria-live="polite"></p>
+  </section>
 
   <noscript><p class="flash flash-error">Turn on JavaScript to flip cards.</p></noscript>
 </section>

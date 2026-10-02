@@ -9,10 +9,32 @@
   const againButton = document.getElementById("again-button");
   const hint = document.getElementById("confidence-hint");
 
-  // The answer step appears after the first flip and then stays.
+  const explainArea = document.getElementById("explain-area");
+  const explainButton = document.getElementById("explain-button");
+  const explanation = document.getElementById("explanation");
+
+  // The answer step and Explain appear after the first flip and then stay.
   card.addEventListener("card-flipped", function () {
     form.hidden = false;
+    if (explainArea) explainArea.hidden = false;
   });
+
+  // Explain this card: the server returns plain text, shown with textContent (never as HTML).
+  if (explainButton) {
+    explainButton.addEventListener("click", function () {
+      explainButton.disabled = true;
+      explanation.textContent = "Getting an explanation...";
+      postJSON(explainButton.dataset.url)
+        .then(function (reply) {
+          explanation.textContent = reply.explanation;
+          explainButton.hidden = true;
+        })
+        .catch(function (error) {
+          explanation.textContent = error.message;
+          explainButton.disabled = false;
+        });
+    });
+  }
 
   function enableAnswerButtons() {
     knowButton.disabled = false;

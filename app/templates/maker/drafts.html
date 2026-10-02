@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Check your cards · Nexora Recall{% endblock %}
+{% block content %}
+<section class="maker">
+  <h1>Check your cards</h1>
+  <p>
+    {% if deck %}Adding to <strong>{{ deck.title }}</strong>{% if deck.is_ready %} as your private cards{% endif %}.
+    {% else %}New deck: <strong>{{ target.new_title }}</strong>.{% endif %}
+    Edit anything, remove what you don't want, then save. Nothing is saved yet.
+  </p>
+
+  {% if error %}<p class="flash flash-error" role="alert">{{ error }}</p>{% endif %}
+  {% if stand_in %}
+    <p class="notice">AI is off on this computer, so these drafts come from a simple stand-in, not Gemini.</p>
+  {% endif %}
+  {% if note %}<p class="notice">{{ note }}</p>{% endif %}
+
+  <form method="post" action="{{ url_for('cardmaker.save_drafts') }}" novalidate id="drafts-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="origin" value="{{ origin }}">
+    {% if deck %}
+      <input type="hidden" name="target" value="{{ deck.id }}">
+    {% else %}
+      <input type="hidden" name="target" value="new">
+      <input type="hidden" name="new_title" value="{{ target.new_title }}">
+      <input type="hidden" name="has_exam" value="{{ target.has_exam }}">
+      <input type="hidden" name="exam_date" value="{{ target.exam_date }}">
+    {% endif %}
+
+    <p class="draft-count" id="draft-count" aria-live="polite">{{ drafts | length }} {{ "card" if drafts | length == 1 else "cards" }}</p>
+    <ol class="draft-list" id="draft-list">
+      {% for draft in drafts %}
+        {% include "maker/_draft.html" %}
+      {% endfor %}
+    </ol>
+    <template id="draft-template">
+      {% with draft = {"question": "", "answer": "", "topic": "", "importance": "medium", "source_line": ""} %}
+        {% include "maker/_draft.html" %}
+      {% endwith %}
+    </template>
+
+    <p><button type="button" class="button" id="add-draft">Add a blank card</button></p>
+    <div class="actions">
+      <button type="submit" class="button button-primary">Save cards</button>
+      <a class="button" href="{{ url_for('cardmaker.maker', deck_id=deck.id) if deck else url_for('cardmaker.maker') }}">Start over</a>
+    </div>
+  </form>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/cardmaker.js') }}"></script>
+{% endblock %}

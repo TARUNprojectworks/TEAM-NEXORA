@@ -61,7 +61,9 @@
     {% endif %}
   </section>
 
-  {# Phase 5 adds the weak spot box here. #}
+  {% if weak_spot %}
+    {% with box = weak_spot, show_links = false %}{% include "_weak_spot_box.html" %}{% endwith %}
+  {% endif %}
 
   <div class="choices">
     <a class="choice" href="{{ url_for('decks.ready_decks') }}">

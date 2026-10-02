@@ -3,7 +3,9 @@
 {% block content %}
 <section class="summary">
   <h1>Session summary</h1>
-  {% if is_plan %}
+  {% if is_practice %}
+    <p class="deck-meta">Practice cards</p>
+  {% elif is_plan %}
     <p class="deck-meta">Today's plan</p>
   {% elif deck %}
     <p class="deck-meta">{{ deck.title }} · {{ "Smart Study" if style == "smart" else "Free Practice" }}</p>
@@ -30,8 +32,11 @@
     {% endif %}
   {% endif %}
 
-  {# Weak spot box: phase 5 fills this with the explanation, links and "Practice these 3 cards". #}
-  <section class="weak-spot-slot" id="weak-spot" aria-label="Weak spot"></section>
+  <div id="weak-spot">
+    {% if box %}
+      {% with show_links = true %}{% include "_weak_spot_box.html" %}{% endwith %}
+    {% endif %}
+  </div>
 
   <div class="actions">
     {% if deck %}

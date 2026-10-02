@@ -40,9 +40,9 @@ def test_loading_twice_does_not_duplicate(app):
     with app.app_context():
         added, _ = load_ready_decks(decks)
         assert len(added) == 8
-        added_again, skipped = load_ready_decks(decks)
+        added_again, updated = load_ready_decks(decks)
         assert added_again == []
-        assert len(skipped) == 8
+        assert updated == []
         assert db.session.query(Deck).filter_by(is_ready=True).count() == 8
         assert db.session.query(Card).count() == sum(len(d["cards"]) for d in decks)
 
@@ -156,3 +156,30 @@ def test_check_notes_are_listed():
         {"question": "Unsure one", "note": "CHECK: confirm the year"},
     ]}]
     assert cards_to_check(decks) == [("D", "Unsure one")]
+
+
+def test_seeding_again_adds_new_json_cards_to_existing_decks(app):
+    decks = read_all_deck_files()
+    with app.app_context():
+        load_ready_decks(decks)
+        biology = next(d for d in decks if d["title"] == "Cell Biology")
+        biology["cards"].append({"question": "What is a vacuole?", "answer": "A storage sac in the cell.",
+                                 "topic": "Cell Organelles", "importance": "low"})
+        added, updated = load_ready_decks(decks)
+        assert added == []
+        assert updated == [("Cell Biology", 1)]
+        card = db.session.query(Card).filter_by(question="What is a vacuole?").one()
+        assert card.owner_id is None
+
+
+def test_private_cards_do_not_block_a_json_card(app, make_user):
+    decks = read_all_deck_files()
+    riya = make_user()
+    with app.app_context():
+        load_ready_decks(decks)
+        biology_id = db.session.query(Deck.id).filter_by(title="Cell Biology").scalar()
+        db.session.add(Card(deck_id=biology_id, owner_id=riya, question="What is a vacuole?", answer="Mine", topic="T"))
+        db.session.commit()
+        next(d for d in decks if d["title"] == "Cell Biology")["cards"].append(
+            {"question": "What is a vacuole?", "answer": "A storage sac.", "topic": "T", "importance": "low"})
+        assert load_ready_decks(decks)[1] == [("Cell Biology", 1)]

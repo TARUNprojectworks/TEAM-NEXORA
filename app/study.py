@@ -3,6 +3,9 @@
 How a session works:
 - /study/<deck_id>?style=smart|free starts a session for one deck.
 - /study/plan starts Smart Study on exactly the cards in today's plan.
+- /study/practice starts Smart Study on the Weak Spot Fixer's practice cards.
+- /study/explain/<card_id> returns a short explanation (cached on the card).
+- When a session ends, the summary page runs the Weak Spot Fixer once.
 - /study/card shows the current card. /study/answer saves the answer and
   redirects back to /study/card for the next one (a plain form post, so
   there is no client-side state to get out of sync).
@@ -18,13 +21,15 @@ import logging
 import random
 from datetime import timedelta
 
-from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+from flask import Blueprint, flash, jsonify, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 
-from app import engine
+from app import ai_service, engine, fixer
+from app.ai_service import AIError, AILimitReached
 from app.decks import expire_past_exams, get_user_deck, mode_badge, viewable_deck_or_404
 from app.models import (
-    Card, Deck, Progress, Review, db, hidden_card_ids, new_cards_started_today, today_local, utc_now,
+    Card, Deck, Progress, Review, card_is_visible_to, db, hidden_card_ids, new_cards_started_today,
+    today_local, utc_now, visible_to,
 )
 from app.planner import PLAN_XP, award_plan_xp_if_finished, plan_cards_left, todays_plan
 
@@ -38,10 +43,11 @@ XP_REVIEW_AGAIN = 1
 
 # ---------- Session state (kept in the cookie: ids and numbers only) ----------
 
-def start_session(style, deck_id=None, plan=False):
+def start_session(style, deck_id=None, plan=False, card_ids=None):
     session["study"] = {
-        "deck_id": deck_id,  # one deck, or None when studying today's plan
+        "deck_id": deck_id,  # one deck, or None when studying today's plan or practice cards
         "plan": plan,
+        "card_ids": card_ids,  # a fixed list of cards (Fixer practice), or None
         "style": style,
         "seed": random.randrange(1_000_000),  # Free Practice order; a new seed = a new shuffle
         "answered": [],    # card ids answered at least once this session
@@ -77,7 +83,7 @@ def unanswered_cards(state):
     """Cards not answered yet this session, leaving out cards the student hid."""
     skip = set(state["answered"]) | hidden_card_ids(current_user.id, state["deck_id"])
     return db.session.query(Card).filter(
-        Card.deck_id == state["deck_id"], Card.id.notin_(skip)
+        Card.deck_id == state["deck_id"], Card.id.notin_(skip), visible_to(current_user.id)
     ).all()
 
 
@@ -123,7 +129,17 @@ def plan_queue(state, today):
     return [card_id for card_id in left if card_id not in state["answered"]]
 
 
+def fixed_queue(state):
+    """The session's fixed cards not answered yet, leaving out deleted or hidden ones."""
+    hidden = hidden_card_ids(current_user.id)
+    left = [card_id for card_id in state["card_ids"] if card_id not in state["answered"] and card_id not in hidden]
+    existing = {card_id for (card_id,) in db.session.query(Card.id).filter(Card.id.in_(left))}
+    return [card_id for card_id in left if card_id in existing]
+
+
 def queue_for(state, user_deck, today):
+    if state.get("card_ids"):
+        return fixed_queue(state)
     if state["plan"]:
         return plan_queue(state, today)
     if state["style"] == "smart":
@@ -134,8 +150,10 @@ def queue_for(state, user_deck, today):
 def session_card(state, card_id):
     """The card if it belongs to this session: the session's deck, or today's plan."""
     card = db.session.get(Card, card_id) if card_id else None
-    if card is None or get_user_deck(card.deck_id) is None:
+    if card is None or not card_is_visible_to(card, current_user.id) or get_user_deck(card.deck_id) is None:
         return None
+    if state.get("card_ids"):
+        return card if card.id in state["card_ids"] else None
     if state["plan"]:
         plan = session.get("plan") or {}
         return card if card.id in plan.get("card_ids", []) else None
@@ -243,6 +261,40 @@ def start_plan():
     return redirect(url_for("study.show_card"))
 
 
+@bp.get("/practice")
+@login_required
+def start_practice():
+    """Smart Study on the 3 practice cards the Weak Spot Fixer just made."""
+    box = fixer.todays_box(today_local())
+    if not box or not box["card_ids"]:
+        flash("No practice cards right now. Finish a study session to get some.", "info")
+        return redirect(url_for("planner.home"))
+    start_session("smart", card_ids=box["card_ids"])
+    return redirect(url_for("study.show_card"))
+
+
+@bp.post("/explain/<int:card_id>")
+@login_required
+def explain(card_id):
+    """A short explanation of a card. Cached on the card, so asking again is free."""
+    card = db.session.get(Card, card_id)
+    if card is None or not card_is_visible_to(card, current_user.id) or get_user_deck(card.deck_id) is None:
+        return jsonify(error="We couldn't find that card."), 404
+    if card.explanation:
+        return jsonify(explanation=card.explanation, cached=True)
+    try:
+        ai_service.use_ai_call(current_user, today_local())
+        db.session.commit()
+        card.explanation = ai_service.explain_card(card)
+    except AILimitReached as error:
+        return jsonify(error=str(error)), 429
+    except Exception as error:
+        message = str(error) if isinstance(error, AIError) else "Couldn't explain this card right now. Try again in a minute."
+        return jsonify(error=message), 502
+    db.session.commit()
+    return jsonify(explanation=card.explanation, cached=False)
+
+
 @bp.get("/card")
 @login_required
 def show_card():
@@ -250,7 +302,7 @@ def show_card():
     if not state:
         return redirect(url_for("decks.my_decks"))
     deck, user_deck = None, None
-    if not state["plan"]:
+    if state["deck_id"]:
         deck, user_deck = load_deck_for(state)
         if deck is None:
             session.pop("study", None)
@@ -275,6 +327,7 @@ def show_card():
         badge=mode_badge(user_deck, today) if user_deck else None,
         progress=session_progress(state, queue),
         coming_back=card.id in [entry[0] for entry in state["returns"]],
+        practice=bool(state.get("card_ids")),
     )
 
 
@@ -345,11 +398,22 @@ def summary():
         return redirect(url_for("decks.my_decks"))
     deck = db.session.get(Deck, state["deck_id"]) if state["deck_id"] else None
     state["current"] = None
+    today = today_local()
+    box, widget = None, None
+    if state["stats"]["studied"] and not state.get("fixer_done"):
+        # At most one Fixer per session: run it the first time the summary opens.
+        box, widget = fixer.run_after_session(current_user, today)
+        state["fixer_done"] = True
+    elif state.get("fixer_done"):
+        box = fixer.todays_box(today)
     save_session(state)
     return render_template(
         "study/summary.html",
         deck=deck if deck and (deck.is_ready or deck.owner_id == current_user.id) else None,
         is_plan=state["plan"],
+        is_practice=bool(state.get("card_ids")),
+        box=box,
+        widget=widget,
         style=state["style"],
         stats=state["stats"],
     )

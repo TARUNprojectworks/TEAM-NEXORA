@@ -2,9 +2,10 @@
 
 Run it with:  python seed.py
 
-Safe to run again: a ready deck whose title is already in the database is
-skipped, so nobody's progress on it is lost. To reload a deck after editing
-its JSON, delete instance/nexora.db and run this again.
+Safe to run again. A ready deck that is already in the database keeps its
+cards (so nobody's progress is lost); only cards from the JSON whose question
+isn't in the deck yet are added. Editing an existing card's answer in the JSON
+does not change the database: delete instance/nexora.db and seed again for that.
 
 Each JSON file looks like:
     {"title": "...", "folder": "semester" | "placement" | "competitive",
@@ -73,28 +74,45 @@ def cards_to_check(decks):
     ]
 
 
+def shared_card(card):
+    """A card from the JSON as a shared ready-deck card (owner_id stays empty)."""
+    return Card(
+        question=card["question"].strip(),
+        answer=card["answer"].strip(),
+        topic=card["topic"].strip(),
+        importance=card["importance"],
+        source="manual",
+        owner_id=None,
+    )
+
+
 def load_ready_decks(decks):
-    """Add ready decks that aren't in the database yet. Returns (added, skipped) titles."""
-    added, skipped = [], []
+    """Add new ready decks, and new cards to ready decks we already have.
+
+    Cards are matched on their question text. Returns (new deck titles,
+    [(title, number of cards added)] for decks that were already there).
+    """
+    added, updated = [], []
     for deck_data in decks:
-        exists = db.session.query(Deck.id).filter_by(is_ready=True, title=deck_data["title"]).first()
-        if exists:
-            skipped.append(deck_data["title"])
+        deck = db.session.query(Deck).filter_by(is_ready=True, title=deck_data["title"]).first()
+        if deck is None:
+            deck = Deck(title=deck_data["title"], folder=deck_data["folder"], is_ready=True, owner_id=None)
+            db.session.add(deck)
+            deck.cards.extend(shared_card(card) for card in deck_data["cards"])
+            added.append(deck_data["title"])
             continue
 
-        deck = Deck(title=deck_data["title"], folder=deck_data["folder"], is_ready=True, owner_id=None)
-        db.session.add(deck)
-        for card in deck_data["cards"]:
-            deck.cards.append(Card(
-                question=card["question"].strip(),
-                answer=card["answer"].strip(),
-                topic=card["topic"].strip(),
-                importance=card["importance"],
-                source="manual",
-            ))
-        added.append(deck_data["title"])
+        # Students' private cards don't count: only shared cards are matched.
+        have = {
+            question.strip() for (question,) in
+            db.session.query(Card.question).filter(Card.deck_id == deck.id, Card.owner_id.is_(None))
+        }
+        new_cards = [shared_card(card) for card in deck_data["cards"] if card["question"].strip() not in have]
+        deck.cards.extend(new_cards)
+        if new_cards:
+            updated.append((deck.title, len(new_cards)))
     db.session.commit()
-    return added, skipped
+    return added, updated
 
 
 # ---------- Demo students ----------
@@ -234,14 +252,14 @@ def main():
 
     app = create_app()
     with app.app_context():
-        added, skipped = load_ready_decks(decks)
+        added, updated = load_ready_decks(decks)
         demo_lines = [demo_summary(user) for user in create_demo_users(today_local())]
 
     total_cards = sum(len(deck["cards"]) for deck in decks)
     print(f"Read {len(decks)} decks with {total_cards} cards.")
     print(f"Added: {', '.join(added) or 'none'}")
-    if skipped:
-        print(f"Already there, skipped: {', '.join(skipped)}")
+    for title, count in updated:
+        print(f"Added {count} new {'card' if count == 1 else 'cards'} to {title}")
 
     for line in demo_lines:
         print(line)
