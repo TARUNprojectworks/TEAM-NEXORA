@@ -74,6 +74,7 @@ def load_secret_key(app):
 
 
 def register_blueprints(app):
+    from app.account import bp as account_bp
     from app.auth import bp as auth_bp
     from app.cardmaker import bp as cardmaker_bp
     from app.decks import bp as decks_bp
@@ -82,7 +83,7 @@ def register_blueprints(app):
     from app.study import bp as study_bp
     from app.tracking import bp as tracking_bp
 
-    for blueprint in (auth_bp, decks_bp, cardmaker_bp, study_bp, planner_bp, fixer_bp, tracking_bp):
+    for blueprint in (auth_bp, account_bp, decks_bp, cardmaker_bp, study_bp, planner_bp, fixer_bp, tracking_bp):
         app.register_blueprint(blueprint)
 
 
