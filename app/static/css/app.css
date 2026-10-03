@@ -853,3 +853,23 @@ mark { background: var(--highlight); color: var(--ink); padding: 0 3px; }
   /* flex: none: the older phone rule's 140px basis would become a height in this column. */
   .answer-buttons .choice-col .button { width: 100%; min-width: 0; flex: none; }
 }
+
+/* ---------- Today's plan: soft time bar (never stops the session) ---------- */
+
+.plan-timer { margin: -8px 0 4px; }
+.timer-track { height: 4px; background: var(--paper); border: 1px solid var(--line); border-radius: 2px; overflow: hidden; }
+.timer-fill { width: 0; height: 100%; background: var(--rule-blue); transition: width 1s linear; }
+.timer-text { margin: 2px 0 0; color: var(--ink-soft); font-size: 0.8125rem; }
+.timer-done {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin: 6px 0;
+  padding: 8px 12px;
+  background: var(--paper);
+  border-left: 3px solid var(--ink-soft);
+  border-radius: var(--radius);
+  font-size: 0.9375rem;
+}
+.timer-toggle { font-size: 0.8125rem; color: var(--ink-soft); text-decoration: underline; margin-bottom: 12px; }
