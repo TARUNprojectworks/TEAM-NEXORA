@@ -1,5 +1,12 @@
 {% extends "base.html" %}
-{% block title %}Study {{ deck.title if deck else "today's plan" }} · Nexora Recall{% endblock %}
+{% block title %}Study {{ deck.title if deck else "today's plan" }} · Nexora Notebook{% endblock %}
+{% block back %}
+  {% if deck %}
+    <a class="back-link" href="{{ url_for('decks.deck_page', deck_id=deck.id) }}" data-end-session>← Back</a>
+  {% else %}
+    <a class="back-link" href="{{ url_for('planner.home') }}" data-end-session>← Back</a>
+  {% endif %}
+{% endblock %}
 {% block content %}
 <section class="study">
   <div class="study-top">
@@ -26,7 +33,7 @@
           <button type="submit" class="button">Shuffle</button>
         </form>
       {% endif %}
-      <a class="button" href="{{ url_for('study.summary') }}">End session</a>
+      <a class="button" href="{{ url_for('study.summary') }}" data-end-session>End session</a>
     </div>
   </div>
 
@@ -42,38 +49,20 @@
     <p class="progress-text">{{ progress.done }} done · {{ progress.left }} {{ "card" if progress.left == 1 else "cards" }} left</p>
   </div>
 
-  {% if plan_timer %}
-    {# A soft time bar for today's plan. It never stops the session; plantimer.js keeps the clock
-       in sessionStorage so a reload doesn't reset it, and pauses it while the tab is hidden. #}
-    <div class="plan-timer" id="plan-timer" data-minutes="{{ plan_timer.minutes or '' }}"
-         data-total="{{ plan_timer.total }}" data-done="{{ plan_timer.done }}" data-date="{{ plan_timer.date }}">
-      <div class="timer-track" aria-hidden="true"><div class="timer-fill" id="timer-fill"></div></div>
-      <p class="timer-text" id="timer-text" aria-live="off"></p>
-    </div>
-    <p class="timer-done" id="timer-done" role="status" hidden>
-      <span id="timer-done-text"></span>
-      <a href="{{ url_for('study.summary') }}" class="button button-small">Stop here</a>
-      <button type="button" class="button button-small" id="keep-going">Keep going</button>
-    </p>
-    <button type="button" class="link-button timer-toggle" id="timer-toggle">Hide timer</button>
-  {% endif %}
-
   {% if coming_back %}
     <p class="coming-back">You missed this one earlier. Here it is once more.</p>
   {% endif %}
-
-  {% if last_tag %}<p class="answer-tag" id="answer-tag" role="status">{{ last_tag }}</p>{% endif %}
 
   <p class="think-hint" id="think-hint">Think of your answer first.</p>
 
   {# The card stays locked until the student says how confident they are (study.js unlocks it). #}
   <div class="flip-card" id="study-card" data-locked="true">
     <div class="flip-inner">
-      <div class="index-card card-face card-face-front" id="card-front">
+      <div class="index-card card-face card-face-front theme-{{ theme }}" id="card-front">
         <p class="card-header">{{ card.topic }}</p>
         <p class="card-text">{{ card.question }}</p>
       </div>
-      <div class="index-card card-face card-face-back" id="card-back" aria-hidden="true">
+      <div class="index-card card-face card-face-back theme-{{ theme }}" id="card-back" aria-hidden="true">
         <p class="card-header">Answer</p>
         <p class="card-text">{{ card.answer }}</p>
       </div>
@@ -89,7 +78,7 @@
     <div class="study-step" id="step-confidence" role="group" aria-label="How confident are you?">
       <div class="answer-buttons">
         <div class="choice-col">
-          <button type="button" class="button" id="confident-button" data-value="sure" aria-pressed="false">I'm confident</button>
+          <button type="button" class="button" id="confident-button" data-value="sure" aria-pressed="false">Confident</button>
           <span class="key-hint">1</span>
         </div>
         <div class="choice-col">
@@ -105,23 +94,35 @@
       <span class="key-hint">Space</span>
     </div>
 
-    {# Step 2, after the flip: did you get it right? #}
-    <div class="study-step" id="step-answer" role="group" aria-label="Did you get it right?" hidden>
-      <p class="you-said" id="you-said"></p>
-      <div class="answer-buttons">
+    {# Step 2, after the flip. The pair depends on step 1, but the engine still gets
+       confident = sure/unsure and knew_it = 1/0:
+         Confident: Got it right (shelf up) / Got it wrong (shelf 1, misconception)
+         Not sure:  I was close (stays)     / I didn't know it (shelf 1) #}
+    <div class="study-step" id="step-answer" role="group" aria-label="How did it go?" hidden
+         data-can-move-up="{{ 'true' if can_move_up else 'false' }}">
+      <div class="answer-buttons" data-pair="sure" hidden>
         <div class="choice-col">
-          <button type="submit" name="knew_it" value="1" class="button button-know" id="know-button">I got it right</button>
+          <button type="submit" name="knew_it" value="1" class="button button-know" data-tag="moved">Got it right</button>
           <span class="key-hint">1</span>
         </div>
         <div class="choice-col">
-          <button type="submit" name="knew_it" value="0" class="button" id="again-button">I missed it</button>
+          <button type="submit" name="knew_it" value="0" class="button" data-tag="misconception">Got it wrong</button>
+          <span class="key-hint">2</span>
+        </div>
+      </div>
+      <div class="answer-buttons" data-pair="unsure" hidden>
+        <div class="choice-col">
+          <button type="submit" name="knew_it" value="1" class="button button-know" data-tag="close">I was close</button>
+          <span class="key-hint">1</span>
+        </div>
+        <div class="choice-col">
+          <button type="submit" name="knew_it" value="0" class="button" data-tag="missed">I didn't know it</button>
           <span class="key-hint">2</span>
         </div>
       </div>
     </div>
-    <p class="misconception-note" id="misconception-note" role="status" hidden>
-      <mark>You were confident about this one.</mark> Tap Explain to see why.
-    </p>
+    <p class="answer-tag" id="answer-tag" role="status" hidden></p>
+    <button type="submit" name="knew_it" value="0" class="button button-primary" id="next-card" hidden>Next card</button>
   </form>
 
   <section class="explain" id="explain-area" hidden aria-label="Explanation">
@@ -132,9 +133,17 @@
 
   <noscript><p class="flash flash-error">Turn on JavaScript to flip cards.</p></noscript>
 </section>
+
+{# Asked before leaving through "End session" or "← Back" (study.js). #}
+<dialog class="confirm-dialog" id="end-dialog" aria-labelledby="end-dialog-text">
+  <p id="end-dialog-text">End this session? Your answers so far are saved.</p>
+  <div class="actions-inline">
+    <a class="button button-primary" id="end-confirm" href="{{ url_for('study.summary') }}">End</a>
+    <button type="button" class="button" id="end-cancel">Keep studying</button>
+  </div>
+</dialog>
 {% endblock %}
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/flip.js') }}"></script>
 <script src="{{ url_for('static', filename='js/study.js') }}"></script>
-<script src="{{ url_for('static', filename='js/plantimer.js') }}"></script>
 {% endblock %}

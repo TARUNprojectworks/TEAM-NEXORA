@@ -29,7 +29,7 @@ from flask_login import current_user, login_required
 
 from app import ai_service, engine, fixer
 from app.ai_service import AIError, AILimitReached
-from app.decks import SHELF_NAMES, expire_past_exams, get_user_deck, mode_badge, viewable_deck_or_404
+from app.decks import expire_past_exams, get_user_deck, mode_badge, viewable_deck_or_404
 from app.models import (
     Card, Deck, Progress, Review, card_is_visible_to, db, hidden_card_ids, new_cards_started_today,
     today_local, utc_now, visible_to,
@@ -57,7 +57,8 @@ def start_session(style, deck_id=None, plan=False, card_ids=None, revise=False):
         "answered": [],    # card ids answered at least once this session
         "returns": [],     # [card_id, cards_still_to_wait] for "Review again" cards
         "current": None,   # the card on screen, so a double submit can't answer twice
-        "stats": {"studied": 0, "moved_up": 0, "xp": 0, "misconceptions": 0, "plan_finished": False},
+        "stats": {"studied": 0, "right": 0, "missed": 0, "moved_up": 0, "xp": 0, "misconceptions": 0,
+                  "plan_finished": False},
     }
 
 
@@ -172,22 +173,13 @@ def pick_next_card(state, queue):
     return queue[0] if queue else None
 
 
-def plan_timer(state, today):
-    """Numbers for the soft time bar, shown only in today's plan sessions (plantimer.js runs the clock).
-
-    minutes is None for a "No limit" plan. Cards count the whole plan, including cards
-    answered earlier today in other sessions.
-    """
-    plan = session.get("plan")
-    if not state["plan"] or state.get("card_ids") or not plan:
-        return None
-    left = plan_cards_left(current_user.id, plan, today)
-    return {
-        "minutes": plan["minutes"],
-        "total": len(plan["card_ids"]),
-        "done": len(plan["card_ids"]) - len(left),
-        "date": plan["date"],
-    }
+def can_move_up(card, state):
+    """True when "Got it right" really moves this card up a shelf (Smart Study, below Mastered).
+    study.js uses it to choose the tag: "Moved up" or just "Got it."."""
+    if state["style"] != "smart":
+        return False
+    progress = db.session.get(Progress, (current_user.id, card.id))
+    return progress is None or progress.shelf < 5
 
 
 def session_progress(state, queue):
@@ -237,16 +229,6 @@ def update_progress(card, user_deck, knew_it, confident, today, now):
     return shelf_before, progress.shelf
 
 
-def shelf_tag(knew_it, shelf_before, shelf_after):
-    """The small note shown for a second after answering: "Moved to Good" and so on."""
-    name = SHELF_NAMES[shelf_after - 1]
-    if not knew_it:
-        return f"Back to {name}"
-    if shelf_after > shelf_before:
-        return f"Moved to {name}"
-    return f"Stays on {name}"
-
-
 def update_session_after_answer(state, card_id, knew_it, confident, moved_up, xp):
     if card_id not in state["answered"]:
         state["answered"].append(card_id)
@@ -255,6 +237,7 @@ def update_session_after_answer(state, card_id, knew_it, confident, moved_up, xp
     stats = state["stats"]
     stats["studied"] += 1
     stats["xp"] += xp
+    stats["right" if knew_it else "missed"] += 1
     if moved_up:
         stats["moved_up"] += 1
     if not knew_it and confident:
@@ -415,7 +398,6 @@ def show_card():
         return redirect(url_for("study.summary"))
 
     state["current"] = card.id
-    last_tag = state.pop("last_tag", None)  # shown once, on the card right after the answer
     save_session(state)
     return render_template(
         "study/card.html",
@@ -425,9 +407,9 @@ def show_card():
         badge=mode_badge(user_deck, today) if user_deck else None,
         progress=session_progress(state, queue),
         coming_back=card.id in [entry[0] for entry in state["returns"]],
-        last_tag=last_tag,
+        can_move_up=can_move_up(card, state),
         practice=bool(state.get("card_ids")),
-        plan_timer=plan_timer(state, today),
+        theme=current_user.card_theme,
     )
 
 
@@ -446,7 +428,7 @@ def answer():
     confidence = request.form.get("confident")
     knew = request.form.get("knew_it")
     if confidence not in ("sure", "unsure") or knew not in ("1", "0"):
-        flash("Pick I'm confident or Not sure first, then I got it right or I missed it.", "error")
+        flash("Pick Confident or Not sure first, then flip the card and say how it went.", "error")
         return redirect(url_for("study.show_card"))
 
     card = session_card(state, card_id)
@@ -458,11 +440,10 @@ def answer():
     confident = confidence == "sure"
     today, now = today_local(), utc_now()
 
-    moved_up, tag = False, None
+    moved_up = False
     if state["style"] == "smart":
         shelf_before, shelf_after = update_progress(card, user_deck, knew_it, confident, today, now)
         moved_up = shelf_after > shelf_before
-        tag = shelf_tag(knew_it, shelf_before, shelf_after)
     db.session.add(Review(user_id=current_user.id, card_id=card.id, knew_it=knew_it,
                           confident=confident, style=state["style"], reviewed_at=now))
     xp = 0 if state.get("revise") else reward_student(current_user, knew_it, today)
@@ -472,7 +453,6 @@ def answer():
         "style": state["style"], "knew_it": knew_it, "confident": confident, "moved_up": moved_up,
     }})
     update_session_after_answer(state, card.id, knew_it, confident, moved_up, xp)
-    state["last_tag"] = tag  # shown for a second on the next card (Smart Study only)
     if award_plan_xp_if_finished(current_user, today):
         state["stats"]["xp"] += PLAN_XP
         state["stats"]["plan_finished"] = True
