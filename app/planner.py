@@ -25,12 +25,12 @@ from app.models import (
 
 bp = Blueprint("planner", __name__)
 
-# Session lengths the student can pick, by form value. None = no limit.
-SESSION_CHOICES = {"15": 15, "25": 25, "40": 40, "none": None}
-DEFAULT_MINUTES = 25
-SECONDS_PER_CARD = 30
-# "No limit" still needs a ceiling: the plan lives in the session cookie (4 KB).
-# 150 cards is 75 minutes; anything above that moves to tomorrow.
+# Plan sizes the student can pick, in cards, by form value. None = all due cards.
+SESSION_CHOICES = {"20": 20, "50": 50, "all": None}
+DEFAULT_SIZE = 50
+SECONDS_PER_CARD = 30  # only for the "about N min" estimate on Home
+# "All" still needs a ceiling: the plan lives in the session cookie (4 KB).
+# Anything above 150 cards moves to tomorrow.
 NO_LIMIT_CARD_CAP = 150
 PLAN_XP = 10
 LONG_BREAK_DAYS = 3  # away this many days or more: show "Welcome back"
@@ -40,10 +40,8 @@ PlanChoice = namedtuple("PlanChoice", "cards moved_to_tomorrow")
 
 # ---------- Choosing the cards (plain Python, no database) ----------
 
-def card_limit(minutes):
-    if minutes is None:
-        return NO_LIMIT_CARD_CAP
-    return minutes * 60 // SECONDS_PER_CARD
+def card_limit(size):
+    return NO_LIMIT_CARD_CAP if size is None else size
 
 
 def is_weak_topic_card(candidate, weak_topic, weak_spot_deck_id):
@@ -60,9 +58,9 @@ def exam_decks_first(candidates):
     return sorted(candidates, key=lambda candidate: candidate.mode != "exam")
 
 
-def choose_plan_cards(due, new, minutes, new_allowance, today, weak_topic=None, weak_spot_deck_id=None):
+def choose_plan_cards(due, new, size, new_allowance, today, weak_topic=None, weak_spot_deck_id=None):
     """Pick today's cards. `due` are seen cards, `new` never-seen ones (engine Candidates)."""
-    limit = card_limit(minutes)
+    limit = card_limit(size)
 
     ranked_due = engine.rank_candidates(due, today)  # leaves out cards that aren't due
     weak = [c for c in ranked_due if is_weak_topic_card(c, weak_topic, weak_spot_deck_id)]
@@ -127,26 +125,26 @@ def due_card_count(user_id, today):
 
 # ---------- The plan in the session ----------
 
-def build_plan(user_id, minutes, today):
+def build_plan(user_id, size, today):
     expire_past_exams(user_id, today)  # a passed exam must not count as Exam mode
     seen, new = study_candidates(user_id, today)
     new_allowance = max(engine.NEW_CARDS_PER_DAY - new_cards_started_today(user_id, today), 0)
     choice = choose_plan_cards(
-        seen, new, minutes, new_allowance, today,
+        seen, new, size, new_allowance, today,
         weak_topic=engine.find_weak_topic(seen_cards_for(user_id)),
         weak_spot_deck_id=weak_spot_deck_id(user_id),
     )
     return {
         "date": today.isoformat(),
-        "minutes": minutes,
+        "size": size,
         "card_ids": [c.card.id for c in choice.cards],
         "moved": choice.moved_to_tomorrow,
     }
 
 
-def chosen_minutes():
-    minutes = session.get("plan_minutes", DEFAULT_MINUTES)
-    return minutes if minutes in SESSION_CHOICES.values() else DEFAULT_MINUTES
+def chosen_size():
+    size = session.get("plan_size", DEFAULT_SIZE)
+    return size if size in SESSION_CHOICES.values() else DEFAULT_SIZE
 
 
 def todays_plan(user_id, today):
@@ -156,8 +154,9 @@ def todays_plan(user_id, today):
     (or new cards) later in the day gets a plan straight away.
     """
     plan = session.get("plan")
-    if not plan or plan.get("date") != today.isoformat() or not plan["card_ids"]:
-        plan = build_plan(user_id, chosen_minutes(), today)
+    # A plan without "size" was built by an older version (minutes): build it again.
+    if not plan or plan.get("date") != today.isoformat() or not plan["card_ids"] or "size" not in plan:
+        plan = build_plan(user_id, chosen_size(), today)
         session["plan"] = plan
     return plan
 
@@ -274,16 +273,16 @@ def home():
 @login_required
 def refresh_plan():
     """Build today's plan again (e.g. after adding a deck). Plan XP is still once a day."""
-    session["plan"] = build_plan(current_user.id, chosen_minutes(), today_local())
+    session["plan"] = build_plan(current_user.id, chosen_size(), today_local())
     return redirect(url_for("planner.home"))
 
 
 @bp.post("/plan/length")
 @login_required
 def change_plan_length():
-    """Pick 15 / 25 / 40 minutes or No limit. Rebuilds today's plan."""
-    choice = request.form.get("minutes")
+    """Pick 20 / 50 / All cards. Rebuilds today's plan."""
+    choice = request.form.get("size")
     if choice in SESSION_CHOICES:
-        session["plan_minutes"] = SESSION_CHOICES[choice]
+        session["plan_size"] = SESSION_CHOICES[choice]
         session["plan"] = build_plan(current_user.id, SESSION_CHOICES[choice], today_local())
     return redirect(url_for("planner.home"))
