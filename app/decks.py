@@ -285,18 +285,19 @@ def ready_deck_descriptions():
 
 
 def library_cards(decks):
-    """For each deck: card count, its 3 biggest topics, a description and 3 preview cards."""
+    """For each deck: card count, its 3 biggest topics, a description and 3 preview cards.
+    Used by the Deck Library and My decks, which show decks with the same card layout."""
     ids = [deck.id for deck in decks]
     counts = count_cards(ids, current_user.id)
     topic_rows = db.session.query(Card.deck_id, Card.topic, func.count(Card.id)).filter(
-        Card.deck_id.in_(ids), Card.owner_id.is_(None)
+        Card.deck_id.in_(ids), visible_to(current_user.id)
     ).group_by(Card.deck_id, Card.topic).all()
     descriptions = ready_deck_descriptions()
     items = []
     for deck in decks:
         topics = sorted((row for row in topic_rows if row[0] == deck.id), key=lambda row: -row[2])
         preview = db.session.query(Card).filter(
-            Card.deck_id == deck.id, Card.owner_id.is_(None)
+            Card.deck_id == deck.id, visible_to(current_user.id)
         ).order_by(Card.id).limit(3).all()
         items.append({
             "deck": deck,
@@ -397,17 +398,12 @@ def my_decks():
         UserDeck.user_id == current_user.id
     ).all()
     rows.sort(key=my_decks_order)
-    card_counts = count_cards([deck.id for _, deck in rows], current_user.id)
     hidden_counts = count_hidden_cards(current_user.id)
-    items = [
-        {
-            "deck": deck,
-            "badge": mode_badge(user_deck, today),
-            "card_count": card_counts.get(deck.id, 0) - hidden_counts.get(deck.id, 0),
-            "hidden_count": hidden_counts.get(deck.id, 0),
-        }
-        for user_deck, deck in rows
-    ]
+    items = library_cards([deck for _, deck in rows])
+    for item, (user_deck, deck) in zip(items, rows):
+        item["badge"] = mode_badge(user_deck, today)
+        item["hidden_count"] = hidden_counts.get(deck.id, 0)
+        item["card_count"] -= item["hidden_count"]
     return render_template("decks/mine.html", items=items, folders=READY_FOLDERS)
 
 

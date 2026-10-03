@@ -32,15 +32,15 @@ def ids(choice):
 
 # ---------- Session length options ----------
 
-@pytest.mark.parametrize("minutes, cards", [(15, 30), (25, 50), (40, 80), (None, NO_LIMIT_CARD_CAP)])
-def test_card_limit_is_30_seconds_a_card(minutes, cards):
-    assert card_limit(minutes) == cards
+@pytest.mark.parametrize("size, cards", [(20, 20), (50, 50), (None, NO_LIMIT_CARD_CAP)])
+def test_card_limit_is_the_chosen_size(size, cards):
+    assert card_limit(size) == cards
 
 
-@pytest.mark.parametrize("minutes, planned", [(15, 30), (25, 50), (40, 80)])
-def test_each_time_option_fills_its_cards_and_moves_the_rest(minutes, planned):
+@pytest.mark.parametrize("size, planned", [(20, 20), (50, 50)])
+def test_each_size_fills_its_cards_and_moves_the_rest(size, planned):
     due = [candidate(i) for i in range(200)]
-    choice = choose_plan_cards(due, [], minutes, new_allowance=10, today=TODAY)
+    choice = choose_plan_cards(due, [], size, new_allowance=10, today=TODAY)
     assert len(choice.cards) == planned
     assert choice.moved_to_tomorrow == 200 - planned
 
@@ -62,7 +62,7 @@ def test_no_limit_still_stops_at_the_safety_cap():
 
 def test_cards_that_are_not_due_stay_out():
     due = [candidate(1), candidate(2, overdue=-3)]  # card 2 is due in 3 days
-    assert ids(choose_plan_cards(due, [], 25, 10, TODAY)) == [1]
+    assert ids(choose_plan_cards(due, [], 50, 10, TODAY)) == [1]
 
 
 # ---------- Order ----------
@@ -101,13 +101,13 @@ def test_new_cards_from_exam_decks_come_first():
         candidate(1, importance="high", new=True),                                 # normal deck
         candidate(2, deck_id=2, importance="low", mode="exam", exam_in=40, new=True),  # exam deck
     ]
-    assert ids(choose_plan_cards([], new, 25, 1, TODAY)) == [2]
+    assert ids(choose_plan_cards([], new, 50, 1, TODAY)) == [2]
 
 
 def test_new_cards_only_fill_the_room_left():
     due = [candidate(i) for i in range(48)]
     new = [candidate(100 + i, new=True) for i in range(10)]
-    choice = choose_plan_cards(due, new, 25, 10, TODAY)
+    choice = choose_plan_cards(due, new, 50, 10, TODAY)
     assert len(choice.cards) == 50
     assert ids(choice)[-2:] == [100, 101]
 
@@ -119,7 +119,7 @@ def test_overflow_keeps_exam_decks_first_and_moves_the_rest():
     # but when the plan overflows, Exam-mode decks keep their place.
     normal = [candidate(i, importance="high", shelf=1) for i in range(40)]
     exam = [candidate(100 + i, deck_id=2, importance="low", shelf=4, mode="exam", exam_in=30) for i in range(20)]
-    choice = choose_plan_cards(normal + exam, [], 15, 10, TODAY)
+    choice = choose_plan_cards(normal + exam, [], 30, 10, TODAY)
     assert ids(choice)[:20] == [100 + i for i in range(20)]
     assert len(choice.cards) == 30
     assert choice.moved_to_tomorrow == 30
@@ -128,7 +128,7 @@ def test_overflow_keeps_exam_decks_first_and_moves_the_rest():
 def test_without_overflow_priority_order_stays():
     normal = [candidate(1, importance="high", shelf=1)]
     exam = [candidate(2, deck_id=2, importance="low", shelf=4, mode="exam", exam_in=30)]
-    assert ids(choose_plan_cards(normal + exam, [], 25, 10, TODAY)) == [1, 2]
+    assert ids(choose_plan_cards(normal + exam, [], 50, 10, TODAY)) == [1, 2]
 
 
 def test_weak_topic_cards_stay_first_even_when_overflowing():
@@ -220,13 +220,27 @@ def test_changing_the_length_rebuilds_the_plan(app, riya_client, riya):
         set_progress(app, riya, card_id)
     assert len(plan_in_session(riya_client)["card_ids"]) == 40
 
-    riya_client.post("/plan/length", data={"minutes": "15"})
+    riya_client.post("/plan/length", data={"size": "20"})
     plan = plan_in_session(riya_client)
-    assert (plan["minutes"], len(plan["card_ids"]), plan["moved"]) == (15, 30, 10)
-    assert "10 cards moved to tomorrow." in riya_client.get("/home").get_data(as_text=True)
+    assert (plan["size"], len(plan["card_ids"]), plan["moved"]) == (20, 20, 20)
+    assert "20 cards moved to tomorrow." in riya_client.get("/home").get_data(as_text=True)
 
-    riya_client.post("/plan/length", data={"minutes": "none"})
-    assert plan_in_session(riya_client)["minutes"] is None
+    riya_client.post("/plan/length", data={"size": "all"})
+    assert plan_in_session(riya_client)["size"] is None
+
+
+def test_home_offers_20_50_and_all_cards(riya_client):
+    page = page_text(riya_client)
+    for button in ['name="size" value="20"', 'name="size" value="50"', 'name="size" value="all"']:
+        assert button in page
+    assert " min</button>" not in page and "No limit" not in page
+
+
+def test_an_old_minutes_plan_is_rebuilt(app, riya_client, riya):
+    add_deck(app, riya, cards=3)
+    with riya_client.session_transaction() as state:
+        state["plan"] = {"date": today_local().isoformat(), "minutes": 25, "card_ids": [999], "moved": 0}
+    assert plan_in_session(riya_client)["size"] == 50
 
 
 def test_hidden_cards_are_left_out_of_the_plan(app, riya_client, riya):
@@ -279,7 +293,7 @@ def test_finishing_the_plan_gives_10_xp_once(app, riya_client, riya):
     assert "Done for today" in page_text(riya_client)
 
     # A rebuilt plan on the same day doesn't pay out again.
-    riya_client.post("/plan/length", data={"minutes": "40"})
+    riya_client.post("/plan/length", data={"size": "20"})
     riya_client.get("/home")
     with app.app_context():
         assert db.session.get(User, riya).xp == 14

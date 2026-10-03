@@ -1,0 +1,20 @@
+{# Card theme picker with a live preview card. Needs `prefix` (unique on the page) and `next`.
+   Without JavaScript the Save button posts the form; with it, picking saves at once. #}
+{% set theme = current_user.card_theme or "index" %}
+<form method="post" action="{{ url_for('account.change_theme') }}" class="theme-picker" data-theme-picker
+      data-url="{{ url_for('account.change_theme') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="next" value="{{ next }}">
+  <fieldset class="theme-options">
+    <legend>Card theme</legend>
+    {% for value, label in theme_names.items() %}
+      <label class="option"><input type="radio" name="card_theme" value="{{ value }}" {% if value == theme %}checked{% endif %}> {{ label }}</label>
+    {% endfor %}
+  </fieldset>
+  <div class="index-card themed-card theme-{{ theme }} preview-card" aria-hidden="true">
+    <p class="card-header">Preview</p>
+    <p class="card-text">Which organelle makes most of the cell's ATP?</p>
+  </div>
+  <p class="theme-status" role="status" aria-live="polite"></p>
+  <noscript><button type="submit" class="button button-small">Save theme</button></noscript>
+</form>

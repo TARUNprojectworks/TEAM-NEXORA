@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Add {{ deck.title }} · Nexora Recall{% endblock %}
+{% block title %}Add {{ deck.title }} · Nexora Notebook{% endblock %}
+{% block back %}<a class="back-link" href="{{ url_for('decks.ready_decks', folder=deck.folder) }}">← Back</a>{% endblock %}
 {% block content %}
 <section class="narrow">
   <h1>Add {{ deck.title }}</h1>

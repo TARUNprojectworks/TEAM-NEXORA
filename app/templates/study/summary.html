@@ -1,5 +1,12 @@
 {% extends "base.html" %}
-{% block title %}Session summary · Nexora Recall{% endblock %}
+{% block title %}Session summary · Nexora Notebook{% endblock %}
+{% block back %}
+  {% if deck %}
+    <a class="back-link" href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">← Back</a>
+  {% else %}
+    <a class="back-link" href="{{ url_for('planner.home') }}">← Back</a>
+  {% endif %}
+{% endblock %}
 {% block content %}
 <section class="summary">
   <h1>Session summary</h1>
@@ -25,12 +32,13 @@
   {% else %}
     <dl class="summary-stats">
       <div><dt>Cards studied</dt><dd>{{ stats.studied }}</dd></div>
-      <div><dt>Moved up a shelf</dt><dd>{{ stats.moved_up }}</dd></div>
+      <div><dt>Got it right</dt><dd>{{ stats.right or 0 }}</dd></div>
+      <div><dt>Missed</dt><dd>{{ stats.missed or 0 }}</dd></div>
+      <div class="{{ 'stat-highlight' if stats.misconceptions }}"><dt>Misconceptions</dt><dd>{{ stats.misconceptions }}</dd></div>
       <div><dt>XP earned</dt><dd>{{ stats.xp }}</dd></div>
-      <div class="{{ 'stat-highlight' if stats.misconceptions }}"><dt>Misconceptions found</dt><dd>{{ stats.misconceptions }}</dd></div>
     </dl>
     {% if stats.misconceptions %}
-      <p class="field-hint">A misconception is a card you were confident about but missed. Those come back sooner.</p>
+      <p class="field-hint">A misconception is a card you were confident about but got wrong. Those come back sooner.</p>
     {% endif %}
   {% endif %}
 

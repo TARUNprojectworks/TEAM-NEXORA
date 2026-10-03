@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Home · Nexora Recall{% endblock %}
+{% block title %}Home · Nexora Notebook{% endblock %}
 {% block content %}
 <section class="home">
   <div class="home-top">
@@ -20,12 +20,12 @@
       <h2 id="plan-heading">Today's plan</h2>
       <form method="post" action="{{ url_for('planner.change_plan_length') }}" class="plan-length">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <span class="plan-length-label" id="plan-length-label">Time</span>
+        <span class="plan-length-label" id="plan-length-label">Cards</span>
         <div class="segmented" role="group" aria-labelledby="plan-length-label">
-          {% for value, minutes in choices.items() %}
-            <button type="submit" name="minutes" value="{{ value }}"
-                    aria-pressed="{{ 'true' if plan.minutes == minutes else 'false' }}">
-              {{ "No limit" if minutes is none else minutes ~ " min" }}
+          {% for value, size in choices.items() %}
+            <button type="submit" name="size" value="{{ value }}"
+                    aria-pressed="{{ 'true' if plan.size == size else 'false' }}">
+              {{ "All" if size is none else size }}
             </button>
           {% endfor %}
         </div>

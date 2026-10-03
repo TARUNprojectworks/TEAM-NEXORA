@@ -1,0 +1,31 @@
+{# One deck as an index card. My decks and the Deck Library both use it, so decks look the same
+   everywhere. The page puts its own buttons inside with {% call deck_card(item, folders) %}...{% endcall %}. #}
+{% macro deck_card(item, folders) %}
+  {% set deck = item.deck %}
+  <li class="library-deck index-card">
+    <p class="card-header">
+      {{ folders.get(deck.folder, "My own") }} · {{ item.card_count }} {{ "card" if item.card_count == 1 else "cards" }}
+      {% if item.hidden_count %} · {{ item.hidden_count }} hidden{% endif %}
+    </p>
+    <h2 class="library-title"><a href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">{{ deck.title }}</a></h2>
+    {% if deck.is_weak_spot %}
+      <p class="library-description">Practice cards for your weak topics are added here.</p>
+    {% elif item.description %}
+      <p class="library-description">{{ item.description }}</p>
+    {% endif %}
+    {% if item.topics %}
+      <p class="library-topics">{% for topic in item.topics %}<span class="badge">{{ topic }}</span>{% endfor %}</p>
+    {% endif %}
+    {% if item.preview %}
+      <details class="library-preview">
+        <summary>Preview {{ item.preview | length }} {{ "card" if item.preview | length == 1 else "cards" }}</summary>
+        <ol>
+          {% for card in item.preview %}
+            <li><span class="preview-q">{{ card.question }}</span><span class="preview-a">{{ card.answer }}</span></li>
+          {% endfor %}
+        </ol>
+      </details>
+    {% endif %}
+    <div class="library-actions">{{ caller() }}</div>
+  </li>
+{% endmacro %}

@@ -22,6 +22,7 @@ MODES = ("exam", "normal")
 IMPORTANCE_LEVELS = ("high", "medium", "low")
 CARD_SOURCES = ("manual", "ai", "fixer")
 STUDY_STYLES = ("smart", "free")
+CARD_THEMES = ("index", "clean", "night")  # Index card (default), Clean (plain white), Night (dark)
 
 WEAK_SPOT_DECK_TITLE = "Weak spot practice"
 DEFAULT_TOPIC = "General"
@@ -60,6 +61,8 @@ class User(UserMixin, db.Model):
     last_study_date = db.Column(db.Date)
     ai_calls_today = db.Column(db.Integer, nullable=False, default=0)
     ai_calls_date = db.Column(db.Date)
+    # One card look for all decks, chosen in the side menu or the card maker.
+    card_theme = db.Column(db.String(10), nullable=False, default="index", server_default="index")
     created_at = db.Column(db.DateTime, nullable=False, default=utc_now)
 
     owned_decks = db.relationship("Deck", back_populates="owner", cascade="all, delete-orphan")
@@ -155,6 +158,17 @@ class Review(db.Model):
     confident = db.Column(db.Boolean, nullable=False)
     style = db.Column(db.String(10), nullable=False, default="smart")  # smart | free
     reviewed_at = db.Column(db.DateTime, nullable=False, default=utc_now)
+
+
+class Feedback(db.Model):
+    """A note a student sends from the side menu. We read these after the demo."""
+
+    __tablename__ = "feedback"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    text = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=utc_now)
 
 
 def visible_to(user_id):

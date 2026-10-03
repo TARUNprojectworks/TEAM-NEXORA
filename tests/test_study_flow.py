@@ -5,7 +5,6 @@ from datetime import timedelta
 import pytest
 
 from app.models import Card, Deck, Progress, UserDeck, db, today_local
-from app.study import shelf_tag
 
 
 @pytest.fixture
@@ -90,17 +89,9 @@ def test_card_starts_locked_with_the_confidence_question(app, riya_client, riya)
     riya_client.get(f"/study/{own_deck(app, riya)}")
     page = riya_client.get("/study/card").get_data(as_text=True)
     assert 'data-locked="true"' in page
-    assert page.index('id="confident-button"') < page.index('id="flip-button"') < page.index('id="know-button"')
-
-
-@pytest.mark.parametrize("knew_it, before, after, text", [
-    (True, 2, 3, "Moved to Good"),
-    (True, 2, 2, "Stays on Getting there"),
-    (False, 4, 1, "Back to Learning"),
-    (False, 1, 1, "Back to Learning"),
-])
-def test_shelf_tag(knew_it, before, after, text):
-    assert shelf_tag(knew_it, before, after) == text
+    assert page.index('id="confident-button"') < page.index('id="flip-button"') < page.index('id="step-answer"')
+    for text in [">Confident<", ">Not sure<", ">Got it right<", ">Got it wrong<", ">I was close<", ">I didn't know it<"]:
+        assert text in page
 
 
 def answer_one(client, confident, knew_it):
@@ -111,60 +102,70 @@ def answer_one(client, confident, knew_it):
     return client.get("/study/card").get_data(as_text=True)
 
 
-def test_tag_shows_once_after_a_smart_answer(app, riya_client, riya):
+@pytest.mark.parametrize("confident, knew_it, shelf, misconceptions", [
+    ("sure", "1", 2, 0),    # Confident + Got it right: up a shelf
+    ("sure", "0", 1, 1),    # Confident + Got it wrong: shelf 1 and a misconception
+    ("unsure", "1", 1, 0),  # Not sure + I was close: stays
+    ("unsure", "0", 1, 0),  # Not sure + I didn't know it: shelf 1
+])
+def test_each_answer_pair_reaches_the_engine_unchanged(app, riya_client, riya, confident, knew_it, shelf, misconceptions):
     riya_client.get(f"/study/{own_deck(app, riya)}")
-    page = answer_one(riya_client, "sure", "1")
-    assert 'id="answer-tag"' in page and "Moved to Getting there" in page
-    assert 'id="answer-tag"' not in riya_client.get("/study/card").get_data(as_text=True)  # only once
+    answer_one(riya_client, confident, knew_it)
+    with app.app_context():
+        progress = db.session.query(Progress).one()
+        assert (progress.shelf, progress.misconception_count) == (shelf, misconceptions)
 
 
-def test_quick_revise_shows_no_tag_and_moves_nothing(app, riya_client, riya):
+def test_moved_up_tag_only_when_the_card_can_move_up(app, riya_client, riya):
+    deck_id = own_deck(app, riya, cards=1)
+    riya_client.get(f"/study/{deck_id}")
+    assert 'data-can-move-up="true"' in riya_client.get("/study/card").get_data(as_text=True)
+    with app.app_context():
+        card = db.session.query(Card).one()
+        db.session.add(Progress(user_id=riya, card_id=card.id, shelf=5, next_due=today_local(),
+                                wrong_count=0, misconception_count=0))
+        db.session.commit()
+    riya_client.get(f"/study/{deck_id}")
+    assert 'data-can-move-up="false"' in riya_client.get("/study/card").get_data(as_text=True)
+
+
+def test_quick_revise_moves_nothing_and_never_says_moved_up(app, riya_client, riya):
     deck_id = own_deck(app, riya)
     riya_client.get(f"/study/{deck_id}?style=free")
     page = answer_one(riya_client, "sure", "1")
-    assert 'id="answer-tag"' not in page
+    assert 'data-can-move-up="false"' in page
     with app.app_context():
         assert db.session.query(Progress).count() == 0
 
 
-# ---------- Today's plan: soft time bar ----------
+def test_end_session_and_back_ask_first(app, riya_client, riya):
+    deck_id = own_deck(app, riya)
+    riya_client.get(f"/study/{deck_id}")
+    page = riya_client.get("/study/card").get_data(as_text=True)
+    assert "End this session? Your answers so far are saved." in page
+    assert ">Keep studying<" in page and page.count("data-end-session") == 2
+    assert f'href="/decks/{deck_id}" data-end-session' in page
 
-def start_plan(client, minutes=None):
-    if minutes:
-        client.post("/plan/length", data={"minutes": minutes})
-    client.get("/home")
-    client.get("/study/plan")
-    return client.get("/study/card").get_data(as_text=True)
+
+def test_summary_shows_right_and_missed(app, riya_client, riya):
+    riya_client.get(f"/study/{own_deck(app, riya)}")
+    answer_one(riya_client, "sure", "1")
+    answer_one(riya_client, "sure", "0")
+    answer_one(riya_client, "unsure", "0")
+    page = riya_client.get("/study/summary").get_data(as_text=True)
+    order = ["Cards studied", "Got it right", "Missed", "Misconceptions", "XP earned", 'id="weak-spot"']
+    positions = [page.index(text) for text in order]
+    assert positions == sorted(positions)
+    with riya_client.session_transaction() as state:
+        stats = state["study"]["stats"]
+    assert (stats["studied"], stats["right"], stats["missed"], stats["misconceptions"]) == (3, 1, 2, 1)
 
 
-def test_plan_session_has_the_time_bar(app, riya_client, riya):
+# ---------- Today's plan: no time bar any more ----------
+
+def test_plan_session_has_no_time_bar(app, riya_client, riya):
     own_deck(app, riya)
-    page = start_plan(riya_client, "15")
-    assert 'id="plan-timer" data-minutes="15"' in page
-    assert 'data-total="3" data-done="0"' in page and "Hide timer" in page
-    assert "plantimer.js" in page
-
-
-def test_no_limit_plan_has_no_minutes(app, riya_client, riya):
-    own_deck(app, riya)
-    assert 'id="plan-timer" data-minutes=""' in start_plan(riya_client, "none")
-
-
-def test_cards_done_count_the_whole_plan(app, riya_client, riya):
-    own_deck(app, riya)
-    start_plan(riya_client)
-    page = answer_one(riya_client, "sure", "1")
-    assert 'data-total="3" data-done="1"' in page
-
-
-@pytest.mark.parametrize("style", ["smart", "free"])
-def test_no_time_bar_outside_todays_plan(app, riya_client, riya, style):
-    riya_client.get(f"/study/{own_deck(app, riya)}?style={style}")
-    assert 'id="plan-timer"' not in riya_client.get("/study/card").get_data(as_text=True)
-
-
-def test_no_time_bar_when_revising_the_plan(app, riya_client, riya):
-    own_deck(app, riya)
-    start_plan(riya_client)
-    riya_client.get("/study/revise")
-    assert 'id="plan-timer"' not in riya_client.get("/study/card").get_data(as_text=True)
+    riya_client.get("/home")
+    riya_client.get("/study/plan")
+    page = riya_client.get("/study/card").get_data(as_text=True)
+    assert "plan-timer" not in page and "plantimer.js" not in page

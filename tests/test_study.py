@@ -101,8 +101,8 @@ def test_study_page_has_flip_confidence_and_progress(app, riya_client, riya):
     deck_id, _ = make_study_deck(app, riya)
     riya_client.get(f"/study/{deck_id}")
     page = riya_client.get("/study/card").get_data(as_text=True)
-    for text in ["Think of your answer first.", "I'm confident", "Not sure", "Flip card", "I got it right",
-                 "I missed it", "End session", "progressbar", "3 cards left"]:
+    for text in ["Think of your answer first.", ">Confident<", "Not sure", "Flip card", "Got it right",
+                 "Got it wrong", "I was close", "I didn't know it", "End session", "progressbar", "3 cards left"]:
         assert text in page
 
 
@@ -252,13 +252,13 @@ def test_answer_needs_sure_or_unsure(app, riya_client, riya):
     riya_client.get(f"/study/{deck_id}")
     card_id = current_card(riya_client)
     response = riya_client.post("/study/answer", data={"card_id": card_id, "knew_it": "1"}, follow_redirects=True)
-    assert "Pick I&#39;m confident or Not sure first" in response.get_data(as_text=True)
+    assert "Pick Confident or Not sure first" in response.get_data(as_text=True)
     with app.app_context():
         assert db.session.query(Review).count() == 0
 
 
 def test_answer_rejected_without_csrf_token(tmp_path):
-    app = create_app({"SQLALCHEMY_DATABASE_URI": f"sqlite:///{tmp_path / 'csrf.db'}"})
+    app = create_app({"TESTING": True, "SQLALCHEMY_DATABASE_URI": f"sqlite:///{tmp_path / 'csrf.db'}"})
     client = app.test_client()
     with client.session_transaction() as state:
         state["_user_id"] = "1"
@@ -320,8 +320,9 @@ def test_summary_counts_the_session(app, riya_client, riya):
     answer(riya_client, knew_it=True, sure=True)    # moves up, +2 XP
     answer(riya_client, knew_it=True, sure=False)   # stays, +2 XP
     answer(riya_client, knew_it=True, sure=True)    # the missed card again: moves up, +2 XP
-    assert session_stats(riya_client) == {"studied": 4, "moved_up": 2, "xp": 7, "misconceptions": 1, "plan_finished": False}
+    assert session_stats(riya_client) == {"studied": 4, "right": 3, "missed": 1, "moved_up": 2, "xp": 7,
+                                          "misconceptions": 1, "plan_finished": False}
 
     page = riya_client.get("/study/summary").get_data(as_text=True)
-    for text in ["Cards studied", "Moved up a shelf", "XP earned", "Misconceptions found", 'id="weak-spot"']:
+    for text in ["Cards studied", "Got it right", "Missed", "Misconceptions", "XP earned", 'id="weak-spot"']:
         assert text in page

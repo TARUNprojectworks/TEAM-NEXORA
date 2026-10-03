@@ -65,3 +65,71 @@ async function postJSON(url, data) {
   }
   return reply;
 }
+
+// ----- Side menu (☰): a modal <dialog>, so focus stays inside and Esc closes it -----
+(function () {
+  const drawer = document.getElementById("drawer");
+  const openButton = document.getElementById("menu-button");
+  if (!drawer || !openButton) return;
+  function close() { drawer.close(); }
+  openButton.addEventListener("click", function () {
+    drawer.showModal();
+    openButton.setAttribute("aria-expanded", "true");
+  });
+  drawer.addEventListener("close", function () {
+    openButton.setAttribute("aria-expanded", "false");
+    openButton.focus();
+  });
+  document.getElementById("drawer-close").addEventListener("click", close);
+  drawer.addEventListener("click", function (event) {
+    if (event.target === drawer) close();  // a click on the dimmed page beside the menu
+  });
+})();
+
+// ----- Flash messages: close with ✕, or they fade on their own after 4 seconds -----
+(function () {
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  document.querySelectorAll(".flash-list .flash").forEach(function (flash) {
+    flash.querySelector(".flash-close").addEventListener("click", function () { flash.remove(); });
+    setTimeout(function () {
+      if (reduceMotion) { flash.remove(); return; }
+      flash.classList.add("is-fading");
+      setTimeout(function () { flash.remove(); }, 500);
+    }, 4000);
+  });
+})();
+
+// ----- Card theme pickers: the preview changes at once and the choice is saved -----
+document.querySelectorAll("[data-theme-picker]").forEach(function (picker) {
+  const status = picker.querySelector(".theme-status");
+  picker.addEventListener("change", function (event) {
+    const theme = event.target.value;
+    // Every preview on the page follows (the menu and the card maker can both be open).
+    document.querySelectorAll(".themed-card").forEach(function (card) {
+      card.classList.remove("theme-index", "theme-clean", "theme-night");
+      card.classList.add("theme-" + theme);
+    });
+    document.querySelectorAll('[data-theme-picker] input[value="' + theme + '"]').forEach(function (radio) {
+      radio.checked = true;
+    });
+    status.textContent = "Saving...";
+    postJSON(picker.dataset.url, { card_theme: theme })
+      .then(function () { status.textContent = "Saved. Your cards use this theme."; })
+      .catch(function (error) { status.textContent = error.message; });
+  });
+});
+
+// ----- Buttons with data-toggle="<id>" show or hide that section (e.g. the exam setting) -----
+document.querySelectorAll("[data-toggle]").forEach(function (button) {
+  const target = document.getElementById(button.dataset.toggle);
+  if (!target) return;
+  if (window.location.hash === "#" + target.id) {
+    target.hidden = false;
+    button.setAttribute("aria-expanded", "true");
+  }
+  button.addEventListener("click", function () {
+    target.hidden = !target.hidden;
+    button.setAttribute("aria-expanded", target.hidden ? "false" : "true");
+    if (!target.hidden) target.scrollIntoView({ block: "nearest" });
+  });
+});

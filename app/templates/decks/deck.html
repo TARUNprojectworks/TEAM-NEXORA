@@ -1,5 +1,7 @@
 {% extends "base.html" %}
-{% block title %}{{ deck.title }} · Nexora Recall{% endblock %}
+{% from "_icons.html" import icon %}
+{% block title %}{{ deck.title }} · Nexora Notebook{% endblock %}
+{% block back %}<a class="back-link" href="{{ url_for('decks.my_decks') if user_deck else url_for('decks.ready_decks', folder=deck.folder) }}">← Back</a>{% endblock %}
 {% block content %}
 <div class="page-top">
   <div>
@@ -14,13 +16,24 @@
       {% endif %}
     </p>
   </div>
-  <div class="actions-inline">
+  <div class="actions-inline icon-actions">
+    {% if user_deck %}
+      <button type="button" class="icon-button" data-toggle="exam" aria-controls="exam"
+              aria-expanded="{{ 'true' if open_exam else 'false' }}" aria-label="Exam setting" title="Exam setting">{{ icon("calendar") }}</button>
+    {% endif %}
     {% if can_edit and not deck.is_weak_spot %}
-      <a class="button" href="{{ url_for('decks.edit_deck', deck_id=deck.id) }}">Rename</a>
+      <a class="icon-button" href="{{ url_for('decks.edit_deck', deck_id=deck.id) }}" aria-label="Rename deck" title="Rename deck">{{ icon("pencil") }}</a>
       <form method="post" action="{{ url_for('decks.delete_deck', deck_id=deck.id) }}" class="inline-form"
             data-confirm="Delete this deck and all {{ cards | length }} cards? This can't be undone.">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button type="submit" class="button button-danger">Delete deck</button>
+        <button type="submit" class="icon-button icon-danger" aria-label="Delete deck" title="Delete deck">{{ icon("trash") }}</button>
+      </form>
+    {% endif %}
+    {% if deck.is_ready and user_deck %}
+      <form method="post" action="{{ url_for('decks.remove_ready_deck', deck_id=deck.id) }}" class="inline-form"
+            data-confirm="Remove this deck from your list? Your progress is kept if you add it again.">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="icon-button" aria-label="Remove from my decks" title="Remove from my decks">{{ icon("remove") }}</button>
       </form>
     {% endif %}
     {% if deck.is_ready and not user_deck %}
@@ -29,6 +42,7 @@
   </div>
 </div>
 
+{% set open_exam = user_deck and (exam_form.errors or (badge and badge[1] == "passed")) %}
 {% if user_deck and cards %}
   <div class="study-buttons">
     <a class="button button-primary" href="{{ url_for('study.start', deck_id=deck.id, style='smart') }}">Smart Study</a>
@@ -54,15 +68,16 @@
     <p class="deck-meta">Not studied yet: {{ not_studied }}</p>
     <details class="how-it-works">
       <summary>How this works</summary>
-      <p>Every card sits in one of five slots. Say <strong>I'm confident</strong> and then <strong>I got it right</strong>
-        in Smart Study and it moves one slot to the right. <strong>I missed it</strong> sends it back
-        to Learning. Cards come back for review after 0, 1, 3, 7 and 14 days, so Mastered cards only
+      <p>Every card sits in one of five slots. Say <strong>Confident</strong> and then <strong>Got it right</strong>
+        in Smart Study and it moves one slot to the right. <strong>I was close</strong> keeps it where it is.
+        <strong>Got it wrong</strong> or <strong>I didn't know it</strong> sends it back to Learning. Cards come back for review after 0, 1, 3, 7 and 14 days, so Mastered cards only
         come back every two weeks. In Exam mode, every card is reviewed before your exam date.
         Quick Revise never moves cards.</p>
     </details>
   </section>
 
-  <section class="deck-section" id="exam" aria-labelledby="exam-heading">
+  {# Opened by the calendar button at the top (app.js), or straight away from a "#exam" link. #}
+  <section class="deck-section" id="exam" aria-labelledby="exam-heading" {% if not open_exam %}hidden{% endif %}>
     <h2 id="exam-heading">Exam setting</h2>
     <form method="post" action="{{ url_for('decks.update_exam', deck_id=deck.id) }}" novalidate class="exam-form">
       {{ exam_form.hidden_tag() }}
@@ -71,13 +86,6 @@
       {% endwith %}
       <button type="submit" class="button">Save exam setting</button>
     </form>
-    {% if deck.is_ready %}
-      <form method="post" action="{{ url_for('decks.remove_ready_deck', deck_id=deck.id) }}" class="remove-form"
-            data-confirm="Remove this deck from your list? Your progress is kept if you add it again.">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button type="submit" class="link-button">Remove from my decks</button>
-      </form>
-    {% endif %}
   </section>
 {% endif %}
 
@@ -126,11 +134,11 @@
           </div>
           {% if can_edit or card.owner_id == current_user.id %}
             <div class="card-actions">
-              <a class="button" href="{{ url_for('decks.edit_card', deck_id=deck.id, card_id=card.id) }}">Edit</a>
+              <a class="icon-button" href="{{ url_for('decks.edit_card', deck_id=deck.id, card_id=card.id) }}" aria-label="Edit card" title="Edit card">{{ icon("pencil") }}</a>
               <form method="post" action="{{ url_for('decks.delete_card', deck_id=deck.id, card_id=card.id) }}"
                     class="inline-form" data-confirm="Delete this card? This can't be undone.">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="button button-danger">Delete</button>
+                <button type="submit" class="icon-button icon-danger" aria-label="Delete card" title="Delete card">{{ icon("trash") }}</button>
               </form>
             </div>
           {% elif deck.is_ready and user_deck %}
@@ -138,7 +146,7 @@
               <form method="post" action="{{ url_for('decks.hide_card', deck_id=deck.id, card_id=card.id) }}"
                     class="inline-form" data-confirm="Hide this card? You can show it again from this page.">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="button">Hide this card</button>
+                <button type="submit" class="icon-button" aria-label="Hide this card" title="Hide this card">{{ icon("eye-off") }}</button>
               </form>
             </div>
           {% endif %}
@@ -166,7 +174,7 @@
               <div class="card-actions">
                 <form method="post" action="{{ url_for('decks.unhide_card', deck_id=deck.id, card_id=card.id) }}" class="inline-form">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                  <button type="submit" class="button">Show this card again</button>
+                  <button type="submit" class="icon-button" aria-label="Show this card again" title="Show this card again">{{ icon("eye") }}</button>
                 </form>
               </div>
             </li>

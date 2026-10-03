@@ -28,6 +28,8 @@ import sys
 from datetime import timedelta
 from pathlib import Path
 
+from sqlalchemy import inspect
+
 from app import create_app, engine
 from app.models import (
     IMPORTANCE_LEVELS, Card, Deck, Progress, Review, User, UserDeck, create_weak_spot_deck, db,
@@ -243,6 +245,21 @@ def create_demo_users(today):
     return [user for user in created if user is not None]
 
 
+def prepare_database():
+    """Bring the database up to date with the migrations in migrations/.
+
+    A database made before we used migrations (by db.create_all) has the tables
+    but no alembic_version table: we mark it as migration 0001, then upgrade, so
+    nobody's data is lost.
+    """
+    from flask_migrate import stamp, upgrade
+
+    tables = inspect(db.engine).get_table_names()
+    if "users" in tables and "alembic_version" not in tables:
+        stamp(revision="0001")
+    upgrade()
+
+
 def main():
     try:
         decks = read_all_deck_files()
@@ -252,6 +269,7 @@ def main():
 
     app = create_app()
     with app.app_context():
+        prepare_database()
         added, updated = load_ready_decks(decks)
         demo_lines = [demo_summary(user) for user in create_demo_users(today_local())]
 

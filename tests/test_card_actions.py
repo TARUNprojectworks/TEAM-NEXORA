@@ -95,7 +95,7 @@ def test_delete_deck_from_my_decks_returns_to_my_decks(app, riya_client, riya):
 def test_ready_card_rows_offer_hide_not_delete(app, riya_client, riya):
     deck_id, card_ids = make_deck(app, riya, is_ready=True)
     page = riya_client.get(f"/decks/{deck_id}").get_data(as_text=True)
-    assert page.count(">Hide this card</button>") == len(card_ids)
+    assert page.count('aria-label="Hide this card"') == len(card_ids)
     for card_id in card_ids:
         assert f"/cards/{card_id}/edit" not in page
         assert f"/cards/{card_id}/delete" not in page

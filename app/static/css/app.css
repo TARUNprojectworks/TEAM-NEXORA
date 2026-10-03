@@ -1,4 +1,4 @@
-/* Nexora Recall: the look of real index cards on a study desk.
+/* Nexora Notebook: the look of real index cards on a study desk.
    Owner: frontend look. One accent only (highlighter yellow); green only for
    "Know it" and mastered. No gradient fills, no glass, no all-caps labels. */
 
@@ -759,7 +759,6 @@ mark { background: var(--highlight); color: var(--ink); padding: 0 3px; }
 
 /* ---------- Study, summary, plan and card maker additions ---------- */
 
-.misconception-note { margin: 10px 0 0; }
 .weak-spot-loading { margin: 24px 0; color: var(--ink-soft); }
 .refresh-plan { margin: 12px 0 0; }
 .refresh-plan .link-button { text-decoration: underline; color: var(--ink-soft); }
@@ -812,9 +811,8 @@ mark { background: var(--highlight); color: var(--ink); padding: 0 3px; }
 .button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
 .flip-card[data-locked="true"] { cursor: default; }
 .pick-first { margin: 10px 0 0; font-weight: 700; }
-.you-said { margin: 0 0 8px; color: var(--ink-soft); }
 
-/* "Moved to Good": a quiet tag that fades after about a second. */
+/* "Moved up" and the other notes shown for about a second after answering. */
 .answer-tag {
   display: inline-block;
   margin: 0 0 10px;
@@ -854,22 +852,131 @@ mark { background: var(--highlight); color: var(--ink); padding: 0 3px; }
   .answer-buttons .choice-col .button { width: 100%; min-width: 0; flex: none; }
 }
 
-/* ---------- Today's plan: soft time bar (never stops the session) ---------- */
+/* ---------- Header: menu button, logo ---------- */
 
-.plan-timer { margin: -8px 0 4px; }
-.timer-track { height: 4px; background: var(--paper); border: 1px solid var(--line); border-radius: 2px; overflow: hidden; }
-.timer-fill { width: 0; height: 100%; background: var(--rule-blue); transition: width 1s linear; }
-.timer-text { margin: 2px 0 0; color: var(--ink-soft); font-size: 0.8125rem; }
-.timer-done {
-  display: flex;
-  flex-wrap: wrap;
+.header-start { display: flex; align-items: center; gap: 8px; }
+.brand { display: inline-flex; align-items: center; gap: 8px; }
+.brand img { display: block; }
+
+/* ---------- Icon buttons (delete, rename, exam setting, remove, hide) ---------- */
+
+.icon-button {
+  display: inline-flex;
   align-items: center;
-  gap: 6px 10px;
-  margin: 6px 0;
-  padding: 8px 12px;
-  background: var(--paper);
-  border-left: 3px solid var(--ink-soft);
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--line);
   border-radius: var(--radius);
-  font-size: 0.9375rem;
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
 }
-.timer-toggle { font-size: 0.8125rem; color: var(--ink-soft); text-decoration: underline; margin-bottom: 12px; }
+.icon-button:hover { border-color: var(--ink); }
+.icon-button[aria-expanded="true"] { background: var(--ink); color: var(--paper); }
+.icon-danger { color: var(--error); }
+.icon-danger:hover { border-color: var(--error); }
+.icon { display: block; }
+.menu-button { border-color: transparent; background: transparent; }
+.icon-actions { gap: 8px; }
+.push-end { margin-left: auto; }
+.card-actions .icon-button + .inline-form, .card-actions .inline-form + .inline-form { margin-left: 4px; }
+
+/* ---------- Flash messages ---------- */
+
+.flash-list .flash { display: flex; align-items: flex-start; gap: 12px; transition: opacity 0.5s ease; }
+.flash-list .flash span { flex: 1; }
+.flash.is-fading { opacity: 0; }
+.flash-close {
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.flash-close .icon { width: 18px; height: 18px; }
+
+/* ---------- Side menu and dialogs ---------- */
+
+dialog::backdrop { background: rgba(28, 42, 57, 0.4); }
+
+.drawer {
+  margin: 0 auto 0 0;
+  width: min(360px, 100vw);
+  max-width: 100vw;
+  height: 100%;
+  max-height: 100%;
+  padding: 0;
+  border: 0;
+  background: var(--desk);
+  color: var(--ink);
+  box-shadow: var(--paper-shadow);
+}
+.drawer-inner { padding: 12px 16px 32px; }
+.drawer-top { display: flex; align-items: center; justify-content: space-between; }
+.drawer-top h2 { margin: 0; }
+.drawer-section { padding: 16px 0; border-top: 1px solid var(--line); }
+.drawer-section h3 { font-size: 1.0625rem; }
+.account-facts { margin: 0 0 12px; display: grid; gap: 4px; }
+.account-facts div { display: flex; gap: 8px; flex-wrap: wrap; }
+.account-facts dt { color: var(--ink-soft); min-width: 104px; }
+.account-facts dd { margin: 0; overflow-wrap: anywhere; }
+.drawer-form { margin-top: 8px; }
+.drawer-form summary, .maker-theme summary { cursor: pointer; text-decoration: underline; }
+.drawer-form form, .drawer-section form { display: grid; gap: 6px; margin-top: 8px; }
+.drawer-section textarea, .drawer-form input { width: 100%; }
+.drawer-section .button { justify-self: start; }
+
+.confirm-dialog {
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 20px;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: var(--paper-shadow);
+}
+.confirm-dialog p { margin: 0 0 16px; }
+
+/* ---------- Card themes: Index card (default), Clean and Night ---------- */
+
+.theme-options { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.theme-options legend { font-weight: 700; padding: 0; margin-bottom: 4px; }
+.preview-card { margin-top: 10px; min-height: 140px; }
+.preview-card .card-text { font-size: 1.0625rem; }
+.theme-status { min-height: 1.5em; margin: 6px 0 0; color: var(--ink-soft); font-size: 0.9375rem; }
+.maker-theme { margin-top: 24px; max-width: 420px; }
+
+.index-card.theme-clean { background-image: none; }
+.index-card.theme-clean::before { border-top: 1px solid var(--line); }
+
+.index-card.theme-night {
+  background-color: #1F2A36;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(var(--rule-gap) - 1px),
+    rgba(201, 221, 240, 0.12) calc(var(--rule-gap) - 1px),
+    rgba(201, 221, 240, 0.12) var(--rule-gap)
+  );
+  color: #E8EEF3;
+}
+.index-card.theme-night::before { border-top-color: rgba(224, 122, 122, 0.6); }
+.index-card.theme-night .card-header { color: #A9B8C6; }
+
+/* ---------- Study: answer notes, logo preview ---------- */
+
+.answer-tag.is-misconception { background: var(--highlight); border-color: var(--highlight); color: var(--ink); }
+#next-card { margin-top: 10px; }
+
+.logo-options { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.logo-option { padding-bottom: 16px; background-image: none; }
+.logo-sizes { display: flex; align-items: flex-end; gap: 20px; padding-top: 16px; }
+.logo-sample { margin: 16px 0 0; font-family: var(--font-ui); }
+
+@media (prefers-reduced-motion: reduce) {
+  .flash-list .flash { transition: none; }
+}
+.answer-form .answer-tag { display: block; width: fit-content; margin: 12px 0 0; font-size: 1rem; }

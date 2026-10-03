@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Check your cards · Nexora Recall{% endblock %}
+{% block title %}Check your cards · Nexora Notebook{% endblock %}
+{% block back %}<a class="back-link"
+     href="{{ url_for('decks.create_my_own', deck_id=deck.id) if deck else url_for('decks.create_my_own') }}">← Back</a>{% endblock %}
 {% block content %}
 <section class="maker">
-  <p class="back-row"><a class="back-link"
-     href="{{ url_for('decks.create_my_own', deck_id=deck.id) if deck else url_for('decks.create_my_own') }}">← Back</a></p>
   <h1>Check your cards</h1>
   <p>
     {% if deck %}Adding to <strong>{{ deck.title }}</strong>{% if deck.is_ready %} as your private cards{% endif %}.

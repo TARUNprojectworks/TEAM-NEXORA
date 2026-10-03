@@ -1,4 +1,4 @@
-# Nexora Recall
+# Nexora Notebook
 
 A flashcard app for students, built by Team Nexora for the Cognizant NPN GCP
 hackathon (Use Case 3). Flask + SQLite, runs on one Compute Engine VM.

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Fix {{ topic }} · Nexora Recall{% endblock %}
+{% block title %}Fix {{ topic }} · Nexora Notebook{% endblock %}
+{% block back %}<a class="back-link" href="{{ url_for('tracking.tracking_page') }}">← Back</a>{% endblock %}
 {% block content %}
 <section class="summary">
   <p class="deck-meta"><a href="{{ url_for('tracking.tracking_page') }}">My Progress</a> · {{ deck.title }}</p>

@@ -1,0 +1,18 @@
+{# Simple line icons drawn inline (no icon library, no |safe). Usage:
+     {% from "_icons.html" import icon %}
+     <button class="icon-button" aria-label="Delete deck" title="Delete deck">{{ icon("trash") }}</button>
+   Icon buttons always carry the same words as a tooltip (title) and for screen readers (aria-label). #}
+{% macro icon(name) -%}
+<svg class="icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+  {%- if name == "trash" -%}<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>
+  {%- elif name == "pencil" -%}<path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13 7l4 4"/>
+  {%- elif name == "calendar" -%}<rect x="4" y="5" width="16" height="15" rx="1"/><path d="M4 10h16M8 3v4M16 3v4"/>
+  {%- elif name == "remove" -%}<circle cx="12" cy="12" r="8"/><path d="M8 12h8"/>
+  {%- elif name == "eye-off" -%}<path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.5"/><path d="M4 4l16 16"/>
+  {%- elif name == "eye" -%}<path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.5"/>
+  {%- elif name == "menu" -%}<path d="M4 7h16M4 12h16M4 17h16"/>
+  {%- elif name == "close" -%}<path d="M6 6l12 12M18 6L6 18"/>
+  {%- endif -%}
+</svg>
+{%- endmacro %}

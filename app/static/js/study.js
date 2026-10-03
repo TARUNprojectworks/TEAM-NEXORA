@@ -1,10 +1,12 @@
 // Study page, in this order:
 //   1. read the question and think of the answer
-//   2. "I'm confident" or "Not sure"  (keys 1 / 2)   -> sent as confident = sure / unsure
-//   3. flip the card                  (Space)
-//   4. "I got it right" or "I missed it" (keys 1 / 2) -> sent as knew_it = 1 / 0
+//   2. "Confident" or "Not sure"  (keys 1 / 2)   -> sent as confident = sure / unsure
+//   3. flip the card              (Space)
+//   4. the answer pair for that choice (keys 1 / 2) -> sent as knew_it = 1 / 0
+//        Confident: "Got it right" / "Got it wrong"
+//        Not sure:  "I was close"  / "I didn't know it"
 // The engine gets exactly what it got before (Sure/Unsure, Know it/Review again);
-// only the order on screen changed, so confidence is given before seeing the answer.
+// only the words on screen depend on the first choice.
 (function () {
   const form = document.getElementById("answer-form");
   const card = document.getElementById("study-card");
@@ -17,17 +19,26 @@
   const flipRow = document.getElementById("flip-row");
   const stepConfidence = document.getElementById("step-confidence");
   const stepAnswer = document.getElementById("step-answer");
-  const youSaid = document.getElementById("you-said");
-  const knowButton = document.getElementById("know-button");
-  const againButton = document.getElementById("again-button");
-  const misconceptionNote = document.getElementById("misconception-note");
+  const tag = document.getElementById("answer-tag");
+  const nextCard = document.getElementById("next-card");
   const explainArea = document.getElementById("explain-area");
   const explainButton = document.getElementById("explain-button");
   const explanation = document.getElementById("explanation");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let flippedOnce = false;
+  let answered = false;
+
+  // The short note shown for about a second after answering.
+  const TAGS = {
+    moved: stepAnswer.dataset.canMoveUp === "true" ? "Moved up" : "Got it.",
+    misconception: "You were confident about this one. Tap Explain.",
+    close: "Almost there. You'll see it again soon.",
+    missed: "No problem. This one comes back soon.",
+  };
 
   // ----- Step 2: confidence, before the flip -----
   function chooseConfidence(button) {
+    if (flippedOnce) return;
     confidentInput.value = button.dataset.value;
     [confidentButton, unsureButton].forEach(function (b) {
       b.setAttribute("aria-pressed", b === button ? "true" : "false");
@@ -44,46 +55,80 @@
     pickFirst.hidden = false;
   });
 
-  // ----- Step 4: after the first flip, ask if they got it right -----
+  function visiblePair() {
+    return stepAnswer.querySelector('[data-pair="' + confidentInput.value + '"]');
+  }
+
+  // ----- Step 4: after the first flip, show the pair that matches the first choice -----
   card.addEventListener("card-flipped", function () {
     if (flippedOnce) return;
     flippedOnce = true;
     stepConfidence.hidden = true;
-    youSaid.textContent = "You said: " + (confidentInput.value === "sure" ? "I'm confident" : "Not sure");
     stepAnswer.hidden = false;
+    visiblePair().hidden = false;
     if (explainArea) explainArea.hidden = false;
   });
 
-  // Confident + missed is a misconception. Stop once on this card so the student
-  // can tap Explain; pressing "I missed it" (now "Next card") again moves on.
-  let misconceptionShown = false;
+  // Show the tag for about a second, then send the answer. "Got it wrong" (a misconception)
+  // waits instead, so the student can tap Explain; "Next card" sends it.
   form.addEventListener("submit", function (event) {
-    const confident = confidentInput.value === "sure";
-    if (event.submitter !== againButton || !confident || misconceptionShown) return;
+    const button = event.submitter;
+    if (!button || !button.dataset.tag || answered) return;
     event.preventDefault();
-    misconceptionShown = true;
-    misconceptionNote.hidden = false;
-    againButton.textContent = "Next card";
-    if (explainButton && !explainButton.hidden) explainButton.focus();
+    answered = true;
+    stepAnswer.querySelectorAll("button").forEach(function (b) { b.disabled = true; });
+    tag.textContent = TAGS[button.dataset.tag];
+    tag.classList.toggle("is-misconception", button.dataset.tag === "misconception");
+    tag.hidden = false;
+    if (button.dataset.tag === "misconception") {
+      stepAnswer.hidden = true;
+      nextCard.hidden = false;
+      if (explainButton && !explainButton.hidden) explainButton.focus();
+      return;
+    }
+    const knewIt = button.value;
+    setTimeout(function () {
+      // A plain hidden input, because a button disabled above isn't sent with the form.
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = "knew_it";
+      input.value = knewIt;
+      form.appendChild(input);
+      form.submit();
+    }, reduceMotion ? 600 : 1000);
   });
 
   // ----- Keys: 1 / 2 press whichever pair is showing -----
   document.addEventListener("keydown", function (event) {
     if (event.ctrlKey || event.metaKey || event.altKey) return;
     if (event.key !== "1" && event.key !== "2") return;
+    if (document.querySelector("dialog[open]")) return;
     const first = event.key === "1";
     if (!flippedOnce) {
       chooseConfidence(first ? confidentButton : unsureButton);
-    } else {
-      form.requestSubmit(first ? knowButton : againButton);
+    } else if (!answered) {
+      const buttons = visiblePair().querySelectorAll("button");
+      form.requestSubmit(buttons[first ? 0 : 1]);
     }
   });
 
-  // ----- The small "Moved to Good" tag from the last answer fades after about a second -----
-  const tag = document.getElementById("answer-tag");
-  if (tag) {
-    setTimeout(function () { tag.classList.add("is-fading"); }, 1000);
-    setTimeout(function () { tag.hidden = true; }, 1400);
+  // ----- End session / Back: ask first -----
+  const endDialog = document.getElementById("end-dialog");
+  if (endDialog) {
+    const endConfirm = document.getElementById("end-confirm");
+    document.addEventListener("click", function (event) {
+      const link = event.target.closest("a[data-end-session]");
+      if (!link) return;
+      event.preventDefault();
+      // "End" goes where the clicked link was going (summary, or the deck for Back).
+      endConfirm.href = link.href;
+      endDialog.showModal();
+      document.getElementById("end-cancel").focus();
+    });
+    document.getElementById("end-cancel").addEventListener("click", function () { endDialog.close(); });
+    endDialog.addEventListener("click", function (event) {
+      if (event.target === endDialog) endDialog.close();  // click on the backdrop
+    });
   }
 
   // ----- Explain this card: plain text from the server, shown with textContent -----

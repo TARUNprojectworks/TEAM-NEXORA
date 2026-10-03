@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Create my own · Nexora Recall{% endblock %}
+{% block title %}Create my own · Nexora Notebook{% endblock %}
+{% block back %}{% if deck %}<a class="back-link" href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">← Back</a>{% else %}<a class="back-link" href="{{ url_for('planner.home') }}">← Back</a>{% endif %}{% endblock %}
 {% block content %}
 <section class="narrow create-own">
   {% if deck %}

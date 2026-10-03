@@ -304,4 +304,6 @@ def test_study_page_has_the_misconception_note(app, riya_client, riya):
     deck_id, _ = make_deck(app, riya)
     riya_client.get(f"/study/{deck_id}")
     page = text(riya_client, "/study/card")
-    assert "You were confident about this one." in page and "Tap Explain to see why." in page
+    assert 'data-tag="misconception"' in page and 'id="explain-button"' in page
+    script = riya_client.get("/static/js/study.js").get_data(as_text=True)
+    assert "You were confident about this one. Tap Explain." in script
