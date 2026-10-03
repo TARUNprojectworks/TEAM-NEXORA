@@ -183,14 +183,14 @@ def test_my_decks_hides_other_students_decks(app, riya_client, arjun):
 # ---------- Create my own ----------
 
 def test_create_my_own_then_type_cards(app, riya_client, riya):
-    response = riya_client.post("/decks/new", data={"title": "Organic Chemistry", "method": "type", "has_exam": "no"})
+    response = riya_client.post("/decks/new", data={"title": "Organic Chemistry", "method": "write", "has_exam": "no"})
     with app.app_context():
         deck = db.session.query(Deck).filter_by(title="Organic Chemistry").one()
         assert deck.owner_id == riya
         assert deck.folder == "personal"
         assert not deck.is_ready
         assert db.session.get(UserDeck, (riya, deck.id)).mode == "normal"
-    assert response.headers["Location"].endswith(f"/decks/{deck.id}/cards/new")
+    assert response.headers["Location"].endswith(f"/decks/{deck.id}/cards/new?back=options")
 
 
 def test_create_my_own_with_paste_goes_to_card_maker(app, riya_client):
@@ -199,13 +199,13 @@ def test_create_my_own_with_paste_goes_to_card_maker(app, riya_client):
 
 
 def test_create_my_own_needs_a_name(riya_client):
-    response = riya_client.post("/decks/new", data={"title": "", "method": "type", "has_exam": "no"})
+    response = riya_client.post("/decks/new", data={"title": "", "method": "write", "has_exam": "no"})
     assert "Give your deck a name" in response.get_data(as_text=True)
 
 
-def test_create_page_offers_type_cards_first(riya_client):
+def test_create_page_offers_write_paste_upload_in_order(riya_client):
     page = riya_client.get("/decks/new").get_data(as_text=True)
-    assert page.index("Type cards") < page.index("Paste notes") < page.index("Upload photo")
+    assert page.index("Write cards") < page.index("Paste notes") < page.index("Upload notes")
 
 
 # ---------- Deck page ----------
