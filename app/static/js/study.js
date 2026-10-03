@@ -1,25 +1,92 @@
-// Study page: after the flip, pick Sure / Unsure, then Know it / Review again.
-// Keys: S = Sure, U = Unsure, 1 = Know it, 2 = Review again.
+// Study page, in this order:
+//   1. read the question and think of the answer
+//   2. "I'm confident" or "Not sure"  (keys 1 / 2)   -> sent as confident = sure / unsure
+//   3. flip the card                  (Space)
+//   4. "I got it right" or "I missed it" (keys 1 / 2) -> sent as knew_it = 1 / 0
+// The engine gets exactly what it got before (Sure/Unsure, Know it/Review again);
+// only the order on screen changed, so confidence is given before seeing the answer.
 (function () {
   const form = document.getElementById("answer-form");
   const card = document.getElementById("study-card");
   if (!form || !card) return;
 
+  const confidentInput = document.getElementById("confident-input");
+  const confidentButton = document.getElementById("confident-button");
+  const unsureButton = document.getElementById("unsure-button");
+  const pickFirst = document.getElementById("pick-first");
+  const flipRow = document.getElementById("flip-row");
+  const stepConfidence = document.getElementById("step-confidence");
+  const stepAnswer = document.getElementById("step-answer");
+  const youSaid = document.getElementById("you-said");
   const knowButton = document.getElementById("know-button");
   const againButton = document.getElementById("again-button");
-  const hint = document.getElementById("confidence-hint");
-
+  const misconceptionNote = document.getElementById("misconception-note");
   const explainArea = document.getElementById("explain-area");
   const explainButton = document.getElementById("explain-button");
   const explanation = document.getElementById("explanation");
+  let flippedOnce = false;
 
-  // The answer step and Explain appear after the first flip and then stay.
+  // ----- Step 2: confidence, before the flip -----
+  function chooseConfidence(button) {
+    confidentInput.value = button.dataset.value;
+    [confidentButton, unsureButton].forEach(function (b) {
+      b.setAttribute("aria-pressed", b === button ? "true" : "false");
+    });
+    card.dataset.locked = "false";
+    pickFirst.hidden = true;
+    flipRow.hidden = false;
+    document.getElementById("flip-button").focus();
+  }
+  confidentButton.addEventListener("click", function () { chooseConfidence(confidentButton); });
+  unsureButton.addEventListener("click", function () { chooseConfidence(unsureButton); });
+
+  card.addEventListener("flip-blocked", function () {
+    pickFirst.hidden = false;
+  });
+
+  // ----- Step 4: after the first flip, ask if they got it right -----
   card.addEventListener("card-flipped", function () {
-    form.hidden = false;
+    if (flippedOnce) return;
+    flippedOnce = true;
+    stepConfidence.hidden = true;
+    youSaid.textContent = "You said: " + (confidentInput.value === "sure" ? "I'm confident" : "Not sure");
+    stepAnswer.hidden = false;
     if (explainArea) explainArea.hidden = false;
   });
 
-  // Explain this card: the server returns plain text, shown with textContent (never as HTML).
+  // Confident + missed is a misconception. Stop once on this card so the student
+  // can tap Explain; pressing "I missed it" (now "Next card") again moves on.
+  let misconceptionShown = false;
+  form.addEventListener("submit", function (event) {
+    const confident = confidentInput.value === "sure";
+    if (event.submitter !== againButton || !confident || misconceptionShown) return;
+    event.preventDefault();
+    misconceptionShown = true;
+    misconceptionNote.hidden = false;
+    againButton.textContent = "Next card";
+    if (explainButton && !explainButton.hidden) explainButton.focus();
+  });
+
+  // ----- Keys: 1 / 2 press whichever pair is showing -----
+  document.addEventListener("keydown", function (event) {
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+    if (event.key !== "1" && event.key !== "2") return;
+    const first = event.key === "1";
+    if (!flippedOnce) {
+      chooseConfidence(first ? confidentButton : unsureButton);
+    } else {
+      form.requestSubmit(first ? knowButton : againButton);
+    }
+  });
+
+  // ----- The small "Moved to Good" tag from the last answer fades after about a second -----
+  const tag = document.getElementById("answer-tag");
+  if (tag) {
+    setTimeout(function () { tag.classList.add("is-fading"); }, 1000);
+    setTimeout(function () { tag.hidden = true; }, 1400);
+  }
+
+  // ----- Explain this card: plain text from the server, shown with textContent -----
   if (explainButton) {
     explainButton.addEventListener("click", function () {
       explainButton.disabled = true;
@@ -35,50 +102,4 @@
         });
     });
   }
-
-  function enableAnswerButtons() {
-    knowButton.disabled = false;
-    againButton.disabled = false;
-    hint.hidden = true;
-  }
-
-  form.querySelectorAll('input[name="confident"]').forEach(function (radio) {
-    radio.addEventListener("change", enableAnswerButtons);
-  });
-
-  function chooseConfidence(value) {
-    form.querySelector('input[name="confident"][value="' + value + '"]').checked = true;
-    enableAnswerButtons();
-  }
-
-  // Sure + Review again is a misconception. Stop once on this card so the student
-  // can tap Explain; pressing Review again (now "Next card") a second time moves on.
-  const misconceptionNote = document.getElementById("misconception-note");
-  let misconceptionShown = false;
-  form.addEventListener("submit", function (event) {
-    const sure = form.querySelector('input[name="confident"][value="sure"]').checked;
-    if (event.submitter !== againButton || !sure || misconceptionShown || !misconceptionNote) return;
-    event.preventDefault();
-    misconceptionShown = true;
-    misconceptionNote.hidden = false;
-    againButton.firstChild.textContent = "Next card ";
-    if (explainButton && !explainButton.hidden) explainButton.focus();
-  });
-
-  function answer(button) {
-    if (button.disabled) {
-      hint.textContent = "Pick Sure or Unsure first (S or U).";
-      return;
-    }
-    form.requestSubmit(button);
-  }
-
-  document.addEventListener("keydown", function (event) {
-    if (form.hidden || event.ctrlKey || event.metaKey || event.altKey) return;
-    const key = event.key.toLowerCase();
-    if (key === "s") chooseConfidence("sure");
-    else if (key === "u") chooseConfidence("unsure");
-    else if (key === "1") answer(knowButton);
-    else if (key === "2") answer(againButton);
-  });
 })();

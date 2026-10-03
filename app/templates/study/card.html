@@ -43,10 +43,15 @@
   </div>
 
   {% if coming_back %}
-    <p class="coming-back">You marked this one "Review again". Here it is once more.</p>
+    <p class="coming-back">You missed this one earlier. Here it is once more.</p>
   {% endif %}
 
-  <div class="flip-card" id="study-card">
+  {% if last_tag %}<p class="answer-tag" id="answer-tag" role="status">{{ last_tag }}</p>{% endif %}
+
+  <p class="think-hint" id="think-hint">Think of your answer first.</p>
+
+  {# The card stays locked until the student says how confident they are (study.js unlocks it). #}
+  <div class="flip-card" id="study-card" data-locked="true">
     <div class="flip-inner">
       <div class="index-card card-face card-face-front" id="card-front">
         <p class="card-header">{{ card.topic }}</p>
@@ -59,32 +64,47 @@
     </div>
   </div>
 
-  <div class="flip-row">
-    <button type="button" class="button" id="flip-button" aria-controls="study-card">Flip card</button>
-    <span class="key-hint">Space</span>
-  </div>
-
-  <form method="post" action="{{ url_for('study.answer') }}" class="answer-form" id="answer-form" hidden>
+  <form method="post" action="{{ url_for('study.answer') }}" class="answer-form" id="answer-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="card_id" value="{{ card.id }}">
+    <input type="hidden" name="confident" id="confident-input" value="">
 
-    <fieldset class="confidence">
-      <legend>How sure were you?</legend>
-      <label class="pill"><input type="radio" name="confident" value="sure"> Sure <span class="key-hint">S</span></label>
-      <label class="pill"><input type="radio" name="confident" value="unsure"> Unsure <span class="key-hint">U</span></label>
-    </fieldset>
-
-    <div class="answer-buttons">
-      <button type="submit" name="knew_it" value="1" class="button button-know" id="know-button" disabled>
-        Know it <span class="key-hint">1</span>
-      </button>
-      <button type="submit" name="knew_it" value="0" class="button" id="again-button" disabled>
-        Review again <span class="key-hint">2</span>
-      </button>
+    {# Step 1, before the flip: how confident are you? #}
+    <div class="study-step" id="step-confidence" role="group" aria-label="How confident are you?">
+      <div class="answer-buttons">
+        <div class="choice-col">
+          <button type="button" class="button" id="confident-button" data-value="sure" aria-pressed="false">I'm confident</button>
+          <span class="key-hint">1</span>
+        </div>
+        <div class="choice-col">
+          <button type="button" class="button" id="unsure-button" data-value="unsure" aria-pressed="false">Not sure</button>
+          <span class="key-hint">2</span>
+        </div>
+      </div>
     </div>
-    <p class="field-hint" id="confidence-hint">Pick Sure or Unsure first.</p>
+    <p class="pick-first" id="pick-first" role="status" hidden>Pick one first.</p>
+
+    <div class="flip-row" id="flip-row" hidden>
+      <button type="button" class="button button-primary" id="flip-button" aria-controls="study-card">Flip card</button>
+      <span class="key-hint">Space</span>
+    </div>
+
+    {# Step 2, after the flip: did you get it right? #}
+    <div class="study-step" id="step-answer" role="group" aria-label="Did you get it right?" hidden>
+      <p class="you-said" id="you-said"></p>
+      <div class="answer-buttons">
+        <div class="choice-col">
+          <button type="submit" name="knew_it" value="1" class="button button-know" id="know-button">I got it right</button>
+          <span class="key-hint">1</span>
+        </div>
+        <div class="choice-col">
+          <button type="submit" name="knew_it" value="0" class="button" id="again-button">I missed it</button>
+          <span class="key-hint">2</span>
+        </div>
+      </div>
+    </div>
     <p class="misconception-note" id="misconception-note" role="status" hidden>
-      <mark>You were sure about this one.</mark> Tap Explain to see why.
+      <mark>You were confident about this one.</mark> Tap Explain to see why.
     </p>
   </form>
 
