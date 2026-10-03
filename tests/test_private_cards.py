@@ -131,7 +131,7 @@ def test_shared_cards_stay_read_only_and_private_cards_cannot_be_hidden(app, riy
 
 
 def test_cards_in_own_decks_belong_to_their_owner(app, riya_client, riya):
-    riya_client.post("/decks/new", data={"title": "My Notes", "method": "type", "has_exam": "no"})
+    riya_client.post("/decks/new", data={"title": "My Notes", "method": "write", "has_exam": "no"})
     with app.app_context():
         deck_id = db.session.query(Deck.id).filter_by(title="My Notes").scalar()
     add_private_card(riya_client, deck_id, question="Own deck Q")

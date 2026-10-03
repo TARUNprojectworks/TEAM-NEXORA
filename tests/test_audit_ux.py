@@ -223,7 +223,7 @@ def test_each_draft_keeps_its_own_source_and_empty_topics_use_the_deck_name(app,
 
 
 def test_typed_card_without_topic_uses_the_deck_name(app, riya_client, riya):
-    riya_client.post("/decks/new", data={"title": "Physics", "method": "type", "has_exam": "no"})
+    riya_client.post("/decks/new", data={"title": "Physics", "method": "write", "has_exam": "no"})
     with app.app_context():
         deck_id = db.session.query(Deck.id).filter_by(title="Physics").scalar()
     riya_client.post(f"/decks/{deck_id}/cards/new", data={"question": "Q", "answer": "A", "importance": "medium"})
@@ -304,4 +304,4 @@ def test_study_page_has_the_misconception_note(app, riya_client, riya):
     deck_id, _ = make_deck(app, riya)
     riya_client.get(f"/study/{deck_id}")
     page = text(riya_client, "/study/card")
-    assert "You were sure about this one." in page and "Tap Explain to see why." in page
+    assert "You were confident about this one." in page and "Tap Explain to see why." in page

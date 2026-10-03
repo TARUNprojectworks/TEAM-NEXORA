@@ -101,7 +101,8 @@ def test_study_page_has_flip_confidence_and_progress(app, riya_client, riya):
     deck_id, _ = make_study_deck(app, riya)
     riya_client.get(f"/study/{deck_id}")
     page = riya_client.get("/study/card").get_data(as_text=True)
-    for text in ["Flip card", "Sure", "Unsure", "Know it", "Review again", "End session", "progressbar", "3 cards left"]:
+    for text in ["Think of your answer first.", "I'm confident", "Not sure", "Flip card", "I got it right",
+                 "I missed it", "End session", "progressbar", "3 cards left"]:
         assert text in page
 
 
@@ -251,7 +252,7 @@ def test_answer_needs_sure_or_unsure(app, riya_client, riya):
     riya_client.get(f"/study/{deck_id}")
     card_id = current_card(riya_client)
     response = riya_client.post("/study/answer", data={"card_id": card_id, "knew_it": "1"}, follow_redirects=True)
-    assert "Pick Sure or Unsure first" in response.get_data(as_text=True)
+    assert "Pick I&#39;m confident or Not sure first" in response.get_data(as_text=True)
     with app.app_context():
         assert db.session.query(Review).count() == 0
 

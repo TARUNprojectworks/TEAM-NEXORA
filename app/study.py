@@ -29,7 +29,7 @@ from flask_login import current_user, login_required
 
 from app import ai_service, engine, fixer
 from app.ai_service import AIError, AILimitReached
-from app.decks import expire_past_exams, get_user_deck, mode_badge, viewable_deck_or_404
+from app.decks import SHELF_NAMES, expire_past_exams, get_user_deck, mode_badge, viewable_deck_or_404
 from app.models import (
     Card, Deck, Progress, Review, card_is_visible_to, db, hidden_card_ids, new_cards_started_today,
     today_local, utc_now, visible_to,
@@ -206,7 +206,7 @@ def reward_student(user, knew_it, today):
 # ---------- Saving an answer ----------
 
 def update_progress(card, user_deck, knew_it, confident, today, now):
-    """Smart Study only. Returns True if the card moved up a shelf."""
+    """Smart Study only. Returns (shelf before, shelf after)."""
     progress = db.session.get(Progress, (current_user.id, card.id))
     if progress is None:
         # First time this student answers this card.
@@ -216,7 +216,17 @@ def update_progress(card, user_deck, knew_it, confident, today, now):
     shelf_before = progress.shelf
     exam_date = user_deck.exam_date if user_deck.mode == "exam" else None
     engine.apply_answer(progress, knew_it, confident, today, user_deck.mode, exam_date, seen_at=now)
-    return progress.shelf > shelf_before
+    return shelf_before, progress.shelf
+
+
+def shelf_tag(knew_it, shelf_before, shelf_after):
+    """The small note shown for a second after answering: "Moved to Good" and so on."""
+    name = SHELF_NAMES[shelf_after - 1]
+    if not knew_it:
+        return f"Back to {name}"
+    if shelf_after > shelf_before:
+        return f"Moved to {name}"
+    return f"Stays on {name}"
 
 
 def update_session_after_answer(state, card_id, knew_it, confident, moved_up, xp):
@@ -387,6 +397,7 @@ def show_card():
         return redirect(url_for("study.summary"))
 
     state["current"] = card.id
+    last_tag = state.pop("last_tag", None)  # shown once, on the card right after the answer
     save_session(state)
     return render_template(
         "study/card.html",
@@ -396,6 +407,7 @@ def show_card():
         badge=mode_badge(user_deck, today) if user_deck else None,
         progress=session_progress(state, queue),
         coming_back=card.id in [entry[0] for entry in state["returns"]],
+        last_tag=last_tag,
         practice=bool(state.get("card_ids")),
     )
 
@@ -415,7 +427,7 @@ def answer():
     confidence = request.form.get("confident")
     knew = request.form.get("knew_it")
     if confidence not in ("sure", "unsure") or knew not in ("1", "0"):
-        flash("Pick Sure or Unsure first, then Know it or Review again.", "error")
+        flash("Pick I'm confident or Not sure first, then I got it right or I missed it.", "error")
         return redirect(url_for("study.show_card"))
 
     card = session_card(state, card_id)
@@ -427,9 +439,11 @@ def answer():
     confident = confidence == "sure"
     today, now = today_local(), utc_now()
 
-    moved_up = False
+    moved_up, tag = False, None
     if state["style"] == "smart":
-        moved_up = update_progress(card, user_deck, knew_it, confident, today, now)
+        shelf_before, shelf_after = update_progress(card, user_deck, knew_it, confident, today, now)
+        moved_up = shelf_after > shelf_before
+        tag = shelf_tag(knew_it, shelf_before, shelf_after)
     db.session.add(Review(user_id=current_user.id, card_id=card.id, knew_it=knew_it,
                           confident=confident, style=state["style"], reviewed_at=now))
     xp = 0 if state.get("revise") else reward_student(current_user, knew_it, today)
@@ -439,6 +453,7 @@ def answer():
         "style": state["style"], "knew_it": knew_it, "confident": confident, "moved_up": moved_up,
     }})
     update_session_after_answer(state, card.id, knew_it, confident, moved_up, xp)
+    state["last_tag"] = tag  # shown for a second on the next card (Smart Study only)
     if award_plan_xp_if_finished(current_user, today):
         state["stats"]["xp"] += PLAN_XP
         state["stats"]["plan_finished"] = True

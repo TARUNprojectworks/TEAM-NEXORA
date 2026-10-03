@@ -2,6 +2,8 @@
 {% block title %}Check your cards · Nexora Recall{% endblock %}
 {% block content %}
 <section class="maker">
+  <p class="back-row"><a class="back-link"
+     href="{{ url_for('decks.create_my_own', deck_id=deck.id) if deck else url_for('decks.create_my_own') }}">← Back</a></p>
   <h1>Check your cards</h1>
   <p>
     {% if deck %}Adding to <strong>{{ deck.title }}</strong>{% if deck.is_ready %} as your private cards{% endif %}.
@@ -15,7 +17,8 @@
   {% endif %}
   {% if note %}<p class="notice">{{ note }}</p>{% endif %}
 
-  <form method="post" action="{{ url_for('cardmaker.save_drafts') }}" novalidate id="drafts-form">
+  <form method="post" action="{{ url_for('cardmaker.save_drafts') }}" novalidate id="drafts-form"
+        data-unsaved="You have unsaved cards. Leave anyway?" {% if drafts %}data-dirty="true"{% endif %}>
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="origin" value="{{ origin }}">
     {% if deck %}

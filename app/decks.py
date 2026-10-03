@@ -30,6 +30,13 @@ bp = Blueprint("decks", __name__, url_prefix="/decks")
 log = logging.getLogger("nexora.decks")
 
 READY_FOLDERS = {"semester": "Semester", "placement": "Placement", "competitive": "Competitive"}
+# The three ways to add cards, in this order (Create My Own).
+ADD_METHODS = (
+    ("write", "Write cards", "Type each card yourself: front, back, topic."),
+    ("paste", "Paste notes", "Paste text and let AI or Quick split make the cards."),
+    ("upload", "Upload notes", "Photos of handwritten notes, a PDF or a .txt file."),
+)
+
 # What each shelf means to a student (shelf 1 to 5).
 SHELF_NAMES = ("Learning", "Getting there", "Good", "Strong", "Mastered")
 IMPORTANCE_CHOICES = [("high", "High"), ("medium", "Medium"), ("low", "Low")]
@@ -73,8 +80,8 @@ class NewDeckForm(ExamForm):
     ])
     method = RadioField(
         "How do you want to add cards?",
-        choices=[("type", "Type cards"), ("paste", "Paste notes"), ("photo", "Upload photo")],
-        default="type",
+        choices=[(value, label) for value, label, _ in ADD_METHODS],
+        default="write",
     )
 
 
@@ -404,9 +411,27 @@ def my_decks():
     return render_template("decks/mine.html", items=items, folders=READY_FOLDERS)
 
 
+def add_cards_url(deck_id, method):
+    """The screen for one way of adding cards. Each has a Back link to the three options."""
+    if method == "write":
+        return url_for("decks.new_card", deck_id=deck_id, back="options")
+    return url_for("cardmaker.maker", deck_id=deck_id, mode=method)
+
+
 @bp.route("/new", methods=["GET", "POST"])
 @login_required
 def create_my_own():
+    """Create My Own: name the deck and pick Write / Paste / Upload.
+
+    With ?deck_id=, the deck already exists (the student came Back from a screen),
+    so we show just the three options for it instead of making another deck.
+    """
+    if request.args.get("deck_id", "").isdigit():
+        deck = deck_for_new_cards_or_error(int(request.args["deck_id"]))
+        return render_template(
+            "decks/create.html", deck=deck, methods=ADD_METHODS,
+            screen_urls={value: add_cards_url(deck.id, value) for value, _, _ in ADD_METHODS},
+        )
     form = NewDeckForm()
     if form.validate_on_submit():
         deck = Deck(owner_id=current_user.id, title=form.title.data.strip(), folder="personal")
@@ -418,10 +443,8 @@ def create_my_own():
         db.session.commit()
         log.info("deck_created", extra={"fields": {"deck_id": deck.id, "mode": user_deck.mode}})
 
-        if form.method.data == "type":
-            return redirect(url_for("decks.new_card", deck_id=deck.id))
-        return redirect(url_for("cardmaker.maker", deck_id=deck.id, source=form.method.data))
-    return render_template("decks/create.html", form=form, today=today_local())
+        return redirect(add_cards_url(deck.id, form.method.data))
+    return render_template("decks/create.html", form=form, deck=None, methods=ADD_METHODS, today=today_local())
 
 
 # ---------- Deck page ----------
@@ -517,7 +540,7 @@ def new_card(deck_id):
         db.session.commit()
         if "save_next" in request.form:
             flash("Card saved. Add the next one.", "info")
-            return redirect(url_for("decks.new_card", deck_id=deck.id))
+            return redirect(url_for("decks.new_card", deck_id=deck.id, back=request.args.get("back")))
         flash("Card saved.", "info")
         return redirect(url_for("decks.deck_page", deck_id=deck.id))
     return render_template(

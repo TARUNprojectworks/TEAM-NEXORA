@@ -538,8 +538,8 @@ def fake_fix_weak_spot(topic, wrong_cards):
     follow_up = variants[:3]
     explanation = (
         f"You keep missing cards in {topic}. Go slower on these: read the question, say your answer "
-        "out loud, then check it against the back. Start with the cards you felt sure about but got "
-        "wrong, because those are ideas you've learned the wrong way. The three practice cards below "
+        "out loud, then check it against the back. Start with the cards you felt confident about but "
+        "missed, because those are ideas you've learned the wrong way. The three practice cards below "
         "ask the same ideas from a different side."
     )
     return {"explanation": explanation, "follow_up_cards": clean_cards(follow_up, topic)}

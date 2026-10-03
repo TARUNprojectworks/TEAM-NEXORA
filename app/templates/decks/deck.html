@@ -54,8 +54,8 @@
     <p class="deck-meta">Not studied yet: {{ not_studied }}</p>
     <details class="how-it-works">
       <summary>How this works</summary>
-      <p>Every card sits in one of five slots. Answer <strong>Know it</strong> and <strong>Sure</strong>
-        in Smart Study and it moves one slot to the right. <strong>Review again</strong> sends it back
+      <p>Every card sits in one of five slots. Say <strong>I'm confident</strong> and then <strong>I got it right</strong>
+        in Smart Study and it moves one slot to the right. <strong>I missed it</strong> sends it back
         to Learning. Cards come back for review after 0, 1, 3, 7 and 14 days, so Mastered cards only
         come back every two weeks. In Exam mode, every card is reviewed before your exam date.
         Quick Revise never moves cards.</p>
@@ -87,7 +87,7 @@
     {% if can_add_cards %}
       <div class="actions-inline">
         <a class="button button-primary" href="{{ url_for('decks.new_card', deck_id=deck.id) }}">Add card</a>
-        <a class="button" href="{{ url_for('cardmaker.maker', deck_id=deck.id) }}">AI Card Maker</a>
+        <a class="button" href="{{ url_for('decks.create_my_own', deck_id=deck.id) }}">Paste or upload notes</a>
         {% if cards %}
           <form method="post" action="{{ url_for('cardmaker.generate_more', deck_id=deck.id) }}" class="generate-more"
                 data-wait="Making new cards...">

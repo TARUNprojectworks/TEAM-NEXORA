@@ -104,7 +104,7 @@
 
   <section class="track-section" aria-labelledby="misconceptions-heading">
     <h2 id="misconceptions-heading">Misconceptions</h2>
-    <p class="field-hint">Cards you were sure about but got wrong. One counts as resolved once it's back on Good ({{ resolved_shelf }}) or higher.</p>
+    <p class="field-hint">Cards you were confident about but missed. One counts as resolved once it's back on Good ({{ resolved_shelf }}) or higher.</p>
     <dl class="summary-stats">
       <div class="{{ 'stat-highlight' if data.misconceptions.open }}"><dt>Open</dt><dd>{{ data.misconceptions.open }}</dd></div>
       <div><dt>Resolved</dt><dd>{{ data.misconceptions.resolved }}</dd></div>
@@ -133,7 +133,7 @@
         {% endfor %}
       </ul>
     {% else %}
-      <p class="empty">No misconceptions yet. They appear when you answer Sure and then Review again.</p>
+      <p class="empty">No misconceptions yet. They appear when you say I'm confident and then I missed it.</p>
     {% endif %}
   </section>
 </section>

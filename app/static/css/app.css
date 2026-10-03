@@ -25,6 +25,9 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
+/* The hidden attribute always hides, even when a class sets display (flex, inline-block...). */
+[hidden] { display: none !important; }
+
 html { font-size: 100%; }
 
 body {
@@ -798,3 +801,55 @@ mark { background: var(--highlight); color: var(--ink); padding: 0 3px; }
   border-bottom: 1px solid var(--line);
 }
 .misconception-card { flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 2px; align-items: flex-start; }
+
+/* ---------- Study flow: confidence first, then flip, then right/missed ---------- */
+
+.think-hint { margin: 0 0 10px; color: var(--ink-soft); }
+.study-step { margin-top: 16px; }
+.choice-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.choice-col .key-hint { opacity: 0.6; }
+.answer-buttons .choice-col .button { min-width: 160px; }
+.button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.flip-card[data-locked="true"] { cursor: default; }
+.pick-first { margin: 10px 0 0; font-weight: 700; }
+.you-said { margin: 0 0 8px; color: var(--ink-soft); }
+
+/* "Moved to Good": a quiet tag that fades after about a second. */
+.answer-tag {
+  display: inline-block;
+  margin: 0 0 10px;
+  padding: 2px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+  transition: opacity 0.4s ease;
+}
+.answer-tag.is-fading { opacity: 0; }
+
+/* Create My Own: three ways to add cards. */
+.add-options { display: grid; gap: 10px; margin-top: 8px; }
+.add-option {
+  display: block;
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+.add-option:hover { background: #F2F5F7; }
+.back-row { margin: 0 0 8px; }
+.back-link { text-decoration: none; font-weight: 700; }
+.back-link:hover { text-decoration: underline; }
+
+@media (max-width: 600px) {
+  .answer-buttons .choice-col { flex: 1 1 140px; }
+  /* flex: none: the older phone rule's 140px basis would become a height in this column. */
+  .answer-buttons .choice-col .button { width: 100%; min-width: 0; flex: none; }
+}
