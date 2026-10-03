@@ -25,6 +25,9 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
+/* The hidden attribute always hides, even when a class sets display (flex, inline-block...). */
+[hidden] { display: none !important; }
+
 html { font-size: 100%; }
 
 body {
@@ -847,5 +850,6 @@ mark { background: var(--highlight); color: var(--ink); padding: 0 3px; }
 
 @media (max-width: 600px) {
   .answer-buttons .choice-col { flex: 1 1 140px; }
-  .answer-buttons .choice-col .button { width: 100%; min-width: 0; }
+  /* flex: none: the older phone rule's 140px basis would become a height in this column. */
+  .answer-buttons .choice-col .button { width: 100%; min-width: 0; flex: none; }
 }
