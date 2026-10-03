@@ -9,15 +9,16 @@ import time
 
 from flask import Flask, g, jsonify, render_template, request
 from flask_login import LoginManager, current_user
+from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFError, CSRFProtect
 from sqlalchemy import inspect, text
-from sqlalchemy.exc import OperationalError
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from app.config import Config, load_secret_key_from_secret_manager
 from app.models import User, db
 
 csrf = CSRFProtect()
+migrate = Migrate()
 login_manager = LoginManager()
 log = logging.getLogger("nexora")
 
@@ -40,6 +41,9 @@ def create_app(test_config=None):
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
     db.init_app(app)
+    # render_as_batch: SQLite can't ALTER most things in place; Alembic copies the table instead.
+    migrate.init_app(app, db, render_as_batch=True,
+                     directory=os.path.join(os.path.dirname(app.root_path), "migrations"))
     csrf.init_app(app)
     login_manager.init_app(app)
     login_manager.login_view = "auth.login"
@@ -49,8 +53,9 @@ def create_app(test_config=None):
     register_request_logging(app)
     register_error_pages(app)
     register_health_check(app)
-    create_tables(app)
-    check_database_matches_models(app)
+    if app.config.get("TESTING"):
+        create_tables(app)  # tests use a fresh database each time
+    register_database_check(app)
     return app
 
 
@@ -82,42 +87,48 @@ def register_blueprints(app):
 
 
 def create_tables(app):
-    # No migrations in this project: if models.py changes, delete
-    # instance/nexora.db and run seed.py again.
+    """Tests only. Real databases are built and changed by migrations: flask db upgrade."""
     with app.app_context():
-        try:
-            db.create_all()
-        except OperationalError:
-            # Two Gunicorn workers can start at the same moment; if the other
-            # one already created the tables, there is nothing left to do.
-            db.session.rollback()
+        db.create_all()
 
 
-class OldDatabaseError(RuntimeError):
-    """The database file was made by older code and is missing columns."""
+OLD_DATABASE_MESSAGE = "The database is older than the code. Run: flask db upgrade"
 
 
 def missing_columns(app):
-    """Columns models.py expects that the database doesn't have, like 'cards.owner_id'."""
+    """Tables or columns models.py expects that the database doesn't have, like 'cards.owner_id'."""
     with app.app_context():
         inspector = inspect(db.engine)
+        tables = set(inspector.get_table_names())
         missing = []
         for table in db.metadata.sorted_tables:
+            if table.name not in tables:
+                missing.append(table.name)
+                continue
             have = {column["name"] for column in inspector.get_columns(table.name)}
             missing += [f"{table.name}.{column.name}" for column in table.columns if column.name not in have]
         return missing
 
 
-def check_database_matches_models(app):
-    # create_all() makes missing tables but never adds columns to old ones.
-    # Without this check an old database fails later with a confusing
-    # "no such column" error on whatever page runs first.
-    missing = missing_columns(app)
-    if missing:
-        raise OldDatabaseError(
-            f"The database is older than the code (missing: {', '.join(missing)}). "
-            "On a laptop: delete instance/nexora.db, run python seed.py, then start the app again."
-        )
+def register_database_check(app):
+    """Before the first web request, check the database matches the code.
+
+    Not at start-up: `flask db upgrade` itself must be able to run on an old or
+    empty database. Without this check an old database fails later with a
+    confusing "no such column" error on whatever page runs first.
+    """
+    state = {"checked": False}
+
+    @app.before_request
+    def check_database_once():
+        if state["checked"] or request.path == "/health":
+            return None
+        missing = missing_columns(app)
+        if missing:
+            log.error("old_database", extra={"fields": {"missing": missing[:10]}})
+            return render_template("error.html", message=OLD_DATABASE_MESSAGE), 503
+        state["checked"] = True
+        return None
 
 
 def register_health_check(app):
