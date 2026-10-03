@@ -1,51 +1,347 @@
 {% extends "base.html" %}
-{% from "decks/_deck_card.html" import deck_card %}
+{% from "_icons.html" import icon %}
 {% block title %}Deck Library · Nexora Notebook{% endblock %}
-{% block back %}<a class="back-link" href="{{ url_for('planner.home') }}">← Back</a>{% endblock %}
+
+{% block head %}
+<style>
+/* ── Deck Library page ── */
+
+/* Hero banner */
+.library-hero {
+  position: relative;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 28px 32px;
+  margin-bottom: 28px;
+  overflow: hidden;
+}
+.library-hero::before {
+  content: "";
+  position: absolute;
+  right: -40px; top: -40px;
+  width: 220px; height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(201,221,240,0.35) 0%, transparent 70%);
+  pointer-events: none;
+}
+.library-hero-inner {
+  position: relative; z-index: 1;
+  display: flex; flex-wrap: wrap; align-items: center;
+  justify-content: space-between; gap: 16px 24px;
+}
+.library-hero-text h1 { font-size: 2rem; margin-bottom: 4px; }
+.library-hero-text p  { color: var(--ink-soft); margin: 0; max-width: 50ch; }
+
+/* Search box */
+.library-searchbox {
+  display: flex; gap: 0;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  overflow: hidden;
+  flex: 1 1 280px; max-width: 400px;
+}
+.library-searchbox input {
+  flex: 1; min-width: 0;
+  padding: 10px 14px;
+  border: 0; outline: none;
+  background: transparent;
+  color: var(--ink); font: inherit; font-size: 1rem;
+}
+.library-searchbox input::placeholder { color: var(--ink-soft); }
+.library-searchbox button {
+  padding: 10px 16px;
+  border: 0; border-left: 2px solid var(--ink);
+  background: var(--ink); color: var(--paper);
+  font: inherit; font-weight: 700; cursor: pointer;
+  transition: background 0.12s ease;
+}
+.library-searchbox button:hover { background: #2C3E52; }
+
+/* Folder tabs — premium pill style */
+.lib-tabs {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-bottom: 24px;
+}
+.lib-tab {
+  display: inline-flex; flex-direction: column; align-items: flex-start;
+  padding: 10px 18px;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 700;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  cursor: pointer;
+}
+.lib-tab:hover { border-color: var(--ink-soft); background: #F5F7F9; }
+.lib-tab[aria-current="page"] {
+  border-color: var(--ink);
+  background: var(--ink); color: var(--paper);
+  box-shadow: 0 2px 8px rgba(28,42,57,0.18);
+}
+.lib-tab-count {
+  display: block; font-size: 0.8125rem; font-weight: 400;
+  opacity: 0.65; margin-top: 2px;
+}
+.lib-tab[aria-current="page"] .lib-tab-count { opacity: 0.8; }
+
+/* Search result line */
+.search-result-bar {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 20px; color: var(--ink-soft); font-size: 0.9375rem;
+}
+.search-result-bar strong { color: var(--ink); }
+.search-clear { color: var(--ink); font-weight: 700; text-decoration: underline; }
+
+/* Library grid */
+.library-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(295px, 1fr));
+  gap: 20px;
+}
+
+/* Individual library card */
+.lib-card {
+  position: relative;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 22px 22px 18px;
+  display: flex; flex-direction: column; gap: 10px;
+  transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+  overflow: hidden;
+}
+.lib-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--lib-accent, var(--rule-blue));
+  border-radius: 10px 10px 0 0;
+}
+.lib-card:hover {
+  box-shadow: 0 8px 28px rgba(28,42,57,0.11);
+  transform: translateY(-2px);
+  border-color: rgba(28,42,57,0.18);
+}
+
+/* Folder accent colours */
+.lib-card[data-folder="semester"]    { --lib-accent: #5F7A91; }
+.lib-card[data-folder="placement"]   { --lib-accent: #C07A36; }
+.lib-card[data-folder="competitive"] { --lib-accent: #8B4EA8; }
+
+/* Added overlay badge */
+.lib-card-added-mark {
+  position: absolute; top: 14px; right: 16px;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 100px;
+  background: #EAF6EE; color: #2E6B45;
+  border: 1px solid #A8D8BB;
+  font-size: 0.78125rem; font-weight: 700;
+}
+
+/* Folder label */
+.lib-card-folder {
+  font-size: 0.8125rem; color: var(--ink-soft); font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+
+/* Title */
+.lib-card-title {
+  font-size: 1.1875rem; font-weight: 700; margin: 0;
+  line-height: 1.3;
+}
+.lib-card-title a { text-decoration: none; color: var(--ink); }
+.lib-card-title a:hover { text-decoration: underline; }
+
+/* Description */
+.lib-card-desc { margin: 0; font-size: 0.9375rem; color: var(--ink-soft); line-height: 1.45; }
+
+/* Card count */
+.lib-card-count { font-size: 0.875rem; color: var(--ink-soft); }
+.lib-card-count strong { color: var(--ink); }
+
+/* Topics */
+.lib-card-topics { display: flex; flex-wrap: wrap; gap: 5px; }
+.lib-card-topic {
+  padding: 2px 9px; border-radius: 4px;
+  background: #EEF2F5; color: var(--ink-soft);
+  font-size: 0.78125rem; font-weight: 600;
+}
+
+/* Preview */
+.lib-card-preview { font-size: 0.875rem; }
+.lib-card-preview summary { cursor: pointer; color: var(--ink-soft); text-decoration: underline; }
+.lib-card-preview ol { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; }
+.lib-card-preview .preview-q { font-weight: 700; color: var(--ink); display: block; }
+.lib-card-preview .preview-a { color: var(--ink-soft); display: block; }
+
+/* Actions */
+.lib-card-actions {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: auto; padding-top: 12px; border-top: 1px solid var(--line);
+}
+.lib-add-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 18px; border-radius: 6px;
+  border: 2px solid var(--ink);
+  background: var(--ink); color: var(--paper);
+  font: inherit; font-weight: 700; font-size: 0.9375rem;
+  text-decoration: none; cursor: pointer;
+  transition: background 0.12s ease;
+}
+.lib-add-btn:hover { background: #2C3E52; }
+.lib-open-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--paper); color: var(--ink);
+  font: inherit; font-weight: 700; font-size: 0.9375rem;
+  text-decoration: none; cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.lib-open-btn:hover { background: #F2F5F7; border-color: var(--ink-soft); }
+
+/* Empty state */
+.library-empty {
+  text-align: center; padding: 56px 24px;
+  background: var(--paper); border: 2px dashed var(--line); border-radius: 10px;
+}
+.library-empty p { color: var(--ink-soft); max-width: 40ch; margin: 8px auto 0; }
+
+@media (max-width: 600px) {
+  .library-hero { padding: 20px; }
+  .library-hero-text h1 { font-size: 1.5rem; }
+  .library-cards-grid { grid-template-columns: 1fr; }
+  .lib-tabs { gap: 4px; }
+  .lib-tab { padding: 8px 12px; font-size: 0.9375rem; }
+}
+</style>
+{% endblock %}
+
+{% block back %}<a class="back-link" href="{{ url_for('decks.my_decks') }}">← My Decks</a>{% endblock %}
+
 {% block content %}
-<div class="page-top">
-  <div>
-    <h1>Deck Library</h1>
-    <p class="deck-meta">Decks we prepared for you. Add one to start studying it.</p>
+{# ── Hero ── #}
+<div class="library-hero">
+  <div class="library-hero-inner">
+    <div class="library-hero-text">
+      <h1>Deck Library</h1>
+      <p>Ready-made decks for semester exams, placements and competitive exams. Add one to start studying.</p>
+    </div>
+
+    <form method="get" action="{{ url_for('decks.ready_decks') }}" role="search" style="display:contents;">
+      <div class="library-searchbox">
+        <label for="q" class="visually-hidden">Search decks</label>
+        <input type="search" id="q" name="q" value="{{ query }}" placeholder="Search decks or topics…" autocomplete="off">
+        <button type="submit">Search</button>
+      </div>
+    </form>
   </div>
-  <form method="get" action="{{ url_for('decks.ready_decks') }}" class="library-search" role="search">
-    <label for="q" class="visually-hidden">Search decks</label>
-    <input type="search" id="q" name="q" value="{{ query }}" placeholder="Search decks or topics">
-    <button type="submit" class="button">Search</button>
-  </form>
 </div>
 
-<nav class="folder-tabs" aria-label="Folders">
+{# ── Folder tabs ── #}
+{% if not query %}
+<nav class="lib-tabs" aria-label="Folders">
   {% for key, label in folders.items() %}
-    <a class="folder-tab" href="{{ url_for('decks.ready_decks', folder=key) }}"
+    <a class="lib-tab" href="{{ url_for('decks.ready_decks', folder=key) }}"
        {% if key == folder %}aria-current="page"{% endif %}>
-      {{ label }} <span class="count">{{ folder_counts.get(key, 0) }} {{ "deck" if folder_counts.get(key, 0) == 1 else "decks" }}</span>
+      {{ label }}
+      <span class="lib-tab-count">{{ folder_counts.get(key, 0) }} {{ "deck" if folder_counts.get(key, 0) == 1 else "decks" }}</span>
     </a>
   {% endfor %}
 </nav>
-
-{% if query %}
-  <p class="search-result">
-    {{ items | length }} {{ "deck" if items | length == 1 else "decks" }} for “{{ query }}”.
-    <a href="{{ url_for('decks.ready_decks') }}">Clear search</a>
-  </p>
 {% endif %}
 
+{# ── Search result bar ── #}
+{% if query %}
+<div class="search-result-bar">
+  <span><strong>{{ items | length }}</strong> {{ "deck" if items | length == 1 else "decks" }} for "<strong>{{ query }}</strong>"</span>
+  <a class="search-clear" href="{{ url_for('decks.ready_decks') }}">Clear search</a>
+</div>
+{% endif %}
+
+{# ── Deck grid ── #}
 {% if not items %}
-  <p class="empty">{% if query %}No decks match that. Try a shorter word, like a subject or topic.{% else %}No decks in this folder yet. Try another folder.{% endif %}</p>
+<div class="library-empty">
+  <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin:0 auto 12px;display:block;opacity:0.35;">
+    <circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/>
+  </svg>
+  <h2 style="margin:0 0 6px;">
+    {% if query %}No decks match that{% else %}No decks here yet{% endif %}
+  </h2>
+  <p>
+    {% if query %}Try a shorter word, like a subject or topic.{% else %}Check another folder.{% endif %}
+  </p>
+</div>
 {% else %}
-  <ul class="library-grid">
-    {% for item in items %}
-      {% set deck = item.deck %}
-      {% call deck_card(item, folders) %}
-        {% if deck.id in added_ids %}
-          <span class="badge badge-added">Added</span>
-          <a href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">Open</a>
-        {% else %}
-          <a class="button button-primary" href="{{ url_for('decks.add_ready_deck', deck_id=deck.id) }}">Add</a>
-        {% endif %}
-      {% endcall %}
-    {% endfor %}
-  </ul>
+<ul class="library-cards-grid" role="list">
+  {% for item in items %}
+  {% set deck = item.deck %}
+  <li class="lib-card" data-folder="{{ deck.folder }}">
+
+    {# "Added" indicator #}
+    {% if deck.id in added_ids %}
+      <span class="lib-card-added-mark" aria-label="Already in your decks">✓ Added</span>
+    {% endif %}
+
+    {# Folder label #}
+    <span class="lib-card-folder">{{ folders.get(deck.folder, "Library") }}</span>
+
+    {# Title #}
+    <h2 class="lib-card-title">
+      <a href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">{{ deck.title }}</a>
+    </h2>
+
+    {# Description #}
+    {% if item.description %}
+      <p class="lib-card-desc">{{ item.description }}</p>
+    {% endif %}
+
+    {# Card count #}
+    <p class="lib-card-count">
+      <strong>{{ item.card_count }}</strong> {{ "card" if item.card_count == 1 else "cards" }}
+    </p>
+
+    {# Topics #}
+    {% if item.topics %}
+    <div class="lib-card-topics">
+      {% for topic in item.topics %}
+        <span class="lib-card-topic">{{ topic }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {# Preview #}
+    {% if item.preview %}
+    <details class="lib-card-preview">
+      <summary>Preview {{ item.preview | length }} {{ "card" if item.preview | length == 1 else "cards" }}</summary>
+      <ol>
+        {% for card in item.preview %}
+          <li>
+            <span class="preview-q">{{ card.question }}</span>
+            <span class="preview-a">{{ card.answer }}</span>
+          </li>
+        {% endfor %}
+      </ol>
+    </details>
+    {% endif %}
+
+    {# Actions #}
+    <div class="lib-card-actions">
+      {% if deck.id in added_ids %}
+        <a class="lib-open-btn" href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">Open deck</a>
+        <a class="lib-open-btn" href="{{ url_for('study.start', deck_id=deck.id) }}" style="margin-left:auto;">Study now</a>
+      {% else %}
+        <a class="lib-add-btn" href="{{ url_for('decks.add_ready_deck', deck_id=deck.id) }}">+ Add to my decks</a>
+        <a class="lib-open-btn" href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">Preview</a>
+      {% endif %}
+    </div>
+  </li>
+  {% endfor %}
+</ul>
 {% endif %}
 {% endblock %}

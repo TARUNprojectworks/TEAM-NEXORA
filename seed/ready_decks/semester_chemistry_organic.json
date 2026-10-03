@@ -1,0 +1,27 @@
+{
+  "title": "Class 12 Chemistry — Organic",
+  "folder": "semester",
+  "description": "Reaction mechanisms, named reactions and functional groups for Class 12 and JEE/NEET organic chemistry.",
+  "cards": [
+    {"question": "What is Markovnikov's rule?", "answer": "In addition of HX to an unsymmetrical alkene, the hydrogen adds to the carbon already bearing more hydrogens (the major product).", "topic": "Alkenes", "importance": "high"},
+    {"question": "What reagent converts an alkene to a diol (1,2-diol)?", "answer": "Cold, dilute KMnO4 (Baeyer's test) performs syn-dihydroxylation to give a vicinal diol.", "topic": "Alkenes", "importance": "high"},
+    {"question": "What is ozonolysis?", "answer": "Treatment of an alkene with O3 followed by Zn/H2O. Cleaves the double bond to give aldehydes or ketones.", "topic": "Alkenes", "importance": "high"},
+    {"question": "What is the Lucas test?", "answer": "Distinguishes primary, secondary and tertiary alcohols. Reagent: anhydrous ZnCl2 + conc. HCl. Tertiary: immediate turbidity; secondary: turbidity in 5 min; primary: no turbidity at room temperature.", "topic": "Alcohols", "importance": "high"},
+    {"question": "What is the Victor Meyer test?", "answer": "Distinguishes primary, secondary and tertiary alcohols by colour: primary → red, secondary → blue, tertiary → colourless. Uses phosphorus halide, silver nitrite and hydroxylamine.", "topic": "Alcohols", "importance": "medium"},
+    {"question": "What is Fehling's test and what does it detect?", "answer": "Blue Fehling's solution (Cu2+ in tartrate) is reduced to brick-red Cu2O precipitate by aliphatic aldehydes. Does not react with aromatic aldehydes or ketones.", "topic": "Aldehydes & Ketones", "importance": "high"},
+    {"question": "What is Tollens' test?", "answer": "Silver mirror test. Tollens' reagent (ammoniacal AgNO3) is reduced to silver metal by any aldehyde. A silver mirror forms on the flask.", "topic": "Aldehydes & Ketones", "importance": "high"},
+    {"question": "What is the iodoform test?", "answer": "Methyl ketones (CH3COR) and ethanol give a yellow precipitate of iodoform (CHI3) with I2/NaOH.", "topic": "Aldehydes & Ketones", "importance": "high"},
+    {"question": "What happens when an ester is treated with aqueous NaOH?", "answer": "Saponification: the ester is hydrolysed to give the sodium salt of the acid (soap) and alcohol. The reaction is irreversible.", "topic": "Carboxylic Acids & Derivatives", "importance": "high"},
+    {"question": "What is Hofmann rearrangement?", "answer": "Primary amide + Br2 + KOH → primary amine with one fewer carbon. The carbonyl carbon is lost as CO2.", "topic": "Nitrogen Compounds", "importance": "high"},
+    {"question": "What is Sandmeyer's reaction?", "answer": "A diazonium salt reacts with CuCl/CuBr to give aryl chloride/bromide, or with CuCN to give aryl nitrile.", "topic": "Nitrogen Compounds", "importance": "high"},
+    {"question": "What is Hinsberg's test?", "answer": "Distinguishes primary, secondary and tertiary amines using benzenesulphonyl chloride. Primary → soluble sulphonamide in NaOH; secondary → insoluble sulphonamide; tertiary → no reaction.", "topic": "Nitrogen Compounds", "importance": "medium"},
+    {"question": "What is electrophilic aromatic substitution (EAS)?", "answer": "Benzene's π electrons attack an electrophile (E+) to form a carbocation intermediate (arenium ion), then loss of H+ restores aromaticity.", "topic": "Aromatic Compounds", "importance": "high"},
+    {"question": "Give two ortho/para directors and two meta directors.", "answer": "o/p directors: −OH, −NH2, −OR, −R (electron-donating). m directors: −NO2, −CN, −COOH, −SO3H (electron-withdrawing).", "topic": "Aromatic Compounds", "importance": "high"},
+    {"question": "What is the Cannizzaro reaction?", "answer": "Aldehydes without an α-hydrogen undergo disproportionation in strong base: one molecule is oxidised to the carboxylate, another is reduced to the alcohol.", "topic": "Aldehydes & Ketones", "importance": "medium"},
+    {"question": "What is Clemmensen reduction?", "answer": "Reduces a carbonyl group (C=O) to CH2 using zinc amalgam and conc. HCl. Used when the molecule is acid-stable.", "topic": "Aldehydes & Ketones", "importance": "medium"},
+    {"question": "What is Wolff-Kishner reduction?", "answer": "Reduces a carbonyl group to CH2 using hydrazine and base (KOH) at high temperature. Used when the molecule is base-stable.", "topic": "Aldehydes & Ketones", "importance": "medium"},
+    {"question": "What is the difference between SN1 and SN2 reactions?", "answer": "SN1: two-step, carbocation intermediate, favoured by tertiary substrates, racemisation. SN2: one-step bimolecular, backside attack, favoured by primary substrates, inversion.", "topic": "Mechanisms", "importance": "high"},
+    {"question": "Why is phenol more acidic than ethanol?", "answer": "The phenoxide ion is stabilised by resonance with the benzene ring (negative charge delocalised). Ethoxide has no such stabilisation.", "topic": "Alcohols", "importance": "high"},
+    {"question": "What is Kolbe's reaction?", "answer": "Sodium phenoxide + CO2 under pressure at 125°C gives salicylate (sodium salt of salicylic acid). Used to make aspirin.", "topic": "Alcohols", "importance": "medium"}
+  ]
+}

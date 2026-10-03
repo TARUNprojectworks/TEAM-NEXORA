@@ -253,6 +253,11 @@ def home():
     plan = todays_plan(current_user.id, today)
     award_plan_xp_if_finished(current_user, today)
     cards_left = plan_cards_left(current_user.id, plan, today)
+
+    # Top 3 weak topics for the home page preview
+    from app.tracking import weak_spot_rows
+    weak_preview = weak_spot_rows(current_user.id)[:3]
+
     return render_template(
         "home.html",
         user=current_user,
@@ -266,7 +271,9 @@ def home():
         welcome_back=welcome_back_count(current_user, today),
         choices=SESSION_CHOICES,
         weak_spot=open_weak_spot(current_user.id, today),
+        weak_preview=weak_preview,
     )
+
 
 
 @bp.post("/plan/refresh")

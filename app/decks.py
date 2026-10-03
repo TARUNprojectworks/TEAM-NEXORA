@@ -476,6 +476,41 @@ def deck_page(deck_id):
     )
 
 
+@bp.get("/<int:deck_id>/cards")
+@login_required
+def deck_cards(deck_id):
+    """Dedicated card-list page for a deck: search, filter and sort without leaving the app."""
+    deck = viewable_deck_or_404(deck_id)
+    today = today_local()
+    expire_past_exams(current_user.id, today)
+    user_deck = get_user_deck(deck.id)
+    all_cards = visible_deck_cards(deck.id, current_user.id)
+    hidden_ids = hidden_card_ids(current_user.id, deck.id)
+    cards = [card for card in all_cards if card.id not in hidden_ids]
+    hidden_cards = [card for card in all_cards if card.id in hidden_ids]
+
+    # Per-card progress for shelf labels
+    progress_map = {
+        p.card_id: p
+        for p in db.session.query(Progress).filter_by(user_id=current_user.id)
+    }
+
+    return render_template(
+        "decks/cards.html",
+        deck=deck,
+        cards=cards,
+        hidden_cards=hidden_cards,
+        show_hidden=request.args.get("show_hidden") == "1",
+        user_deck=user_deck,
+        can_edit=deck.owner_id == current_user.id,
+        can_add_cards=deck.owner_id == current_user.id or (deck.is_ready and user_deck is not None),
+        badge=mode_badge(user_deck, today) if user_deck else None,
+        shelf_names=SHELF_NAMES,
+        progress_map=progress_map,
+    )
+
+
+
 @bp.post("/<int:deck_id>/exam")
 @login_required
 def update_exam(deck_id):

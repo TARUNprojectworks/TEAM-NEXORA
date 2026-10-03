@@ -76,6 +76,44 @@ a { color: var(--ink); text-underline-offset: 2px; }
 .site-nav a { text-decoration: none; padding: 4px 0; }
 .site-nav a:hover { text-decoration: underline; }
 
+/* "Hi Name" in header */
+.header-username {
+  font-size: 0.9375rem; color: var(--ink-soft);
+  padding-left: 8px; border-left: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+/* Streak + XP pills in header */
+.header-user-stats {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.hus-item {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  font-size: 0.8125rem; font-weight: 600;
+  background: var(--paper);
+  white-space: nowrap;
+}
+.hus-streak { color: #D97706; border-color: #F5D99A; background: #FFFBEB; }
+.hus-xp     { color: #2B6CB0; border-color: #BEE3F8; background: #EBF2FB; }
+.hus-action {
+  text-decoration: none;
+  color: #4A5A6B; border-color: #C9D6E3; background: #fff;
+  cursor: pointer; border: 1px solid #C9D6E3;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+.hus-action:hover { background: #EBF2FB; color: #2B6CB0; border-color: #A8BFDA; }
+.hus-logout { font: inherit; }
+.hus-logout:hover { background: #FFF5F5; color: #C53030; border-color: #FEB2B2; }
+
+@media (max-width: 760px) {
+  .header-username { display: none; }
+  .header-user-stats { display: none; }
+}
+
+
 .inline-form { display: inline; margin: 0; }
 
 .link-button {

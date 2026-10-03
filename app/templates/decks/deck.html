@@ -1,188 +1,341 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
-{% block title %}{{ deck.title }} · Nexora Notebook{% endblock %}
+{% block title %}{{ deck.title }} · Nexora Recall{% endblock %}
 {% block back %}<a class="back-link" href="{{ url_for('decks.my_decks') if user_deck else url_for('decks.ready_decks', folder=deck.folder) }}">← Back</a>{% endblock %}
+
+{% block head %}
+<style>
+/* ── Deck overview page ── */
+body { background: #EDF1F7; }
+.page { max-width: 860px; }
+
+.deck-overview-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-bottom: 48px;
+}
+
+/* ── Hero card ── */
+.do-hero {
+  background: #fff;
+  border: 1px solid #D6DFE8;
+  border-radius: 12px;
+  padding: 24px 28px;
+  box-shadow: 0 1px 4px rgba(28,42,57,0.05);
+}
+.do-hero-top {
+  display: flex; flex-wrap: wrap; align-items: flex-start;
+  justify-content: space-between; gap: 12px 16px;
+  margin-bottom: 16px;
+}
+.do-hero-title { margin: 0 0 6px; font-size: 1.75rem; font-weight: 700; color: #1C2A39; }
+.do-hero-meta  { margin: 0; font-size: 0.9375rem; color: #6B7F93; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+.do-badge {
+  display: inline-block; padding: 3px 10px; border-radius: 6px;
+  font-size: 0.8125rem; font-weight: 700;
+}
+.badge-normal { background: #EBF2FB; color: #2B6CB0; }
+.badge-exam   { background: #FFF8E6; color: #B7791F; }
+.badge-passed { background: #E8EFF7; color: #6B7F93; }
+
+.do-icon-actions { display: flex; align-items: center; gap: 6px; }
+
+/* Study buttons */
+.do-study-row {
+  display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px;
+}
+.btn-primary-lg {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 24px; border-radius: 8px;
+  background: #2B6CB0; color: #fff;
+  font: inherit; font-size: 0.9375rem; font-weight: 700;
+  text-decoration: none; border: 0; cursor: pointer;
+  transition: background 0.15s ease;
+}
+.btn-primary-lg:hover { background: #1E4E8C; }
+.btn-outline-lg {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 22px; border-radius: 8px;
+  border: 1.5px solid #C9D6E3;
+  background: #fff; color: #1C2A39;
+  font: inherit; font-size: 0.9375rem; font-weight: 700;
+  text-decoration: none; cursor: pointer;
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+.btn-outline-lg:hover { border-color: #2B6CB0; background: #EBF2FB; color: #2B6CB0; }
+
+/* Section card */
+.do-section {
+  background: #fff;
+  border: 1px solid #D6DFE8;
+  border-radius: 12px;
+  padding: 22px 24px;
+  box-shadow: 0 1px 4px rgba(28,42,57,0.05);
+}
+.do-section h2 {
+  margin: 0 0 16px;
+  font-size: 1rem; font-weight: 700; color: #1C2A39;
+}
+
+/* Card box shelves */
+.shelf-box-new {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.shelf-slot-new {
+  text-align: center;
+  padding: 14px 8px;
+  border: 1px solid #D6DFE8;
+  border-radius: 10px;
+  background: #F5F8FC;
+}
+.shelf-count-new {
+  display: block; font-size: 1.375rem; font-weight: 700; color: #1C2A39; line-height: 1.1;
+}
+.shelf-name-new {
+  display: block; font-size: 0.75rem; color: #6B7F93; margin-top: 4px; line-height: 1.3;
+}
+/* Shelf colour accents */
+.shelf-slot-new.s1 { border-top: 3px solid #E53E3E; }
+.shelf-slot-new.s2 { border-top: 3px solid #D97706; }
+.shelf-slot-new.s3 { border-top: 3px solid #2B6CB0; }
+.shelf-slot-new.s4 { border-top: 3px solid #6B46C1; }
+.shelf-slot-new.s5 { border-top: 3px solid #2D7D46; }
+.shelf-slot-new.active .shelf-count-new { color: #2B6CB0; }
+
+.not-studied-row {
+  font-size: 0.9375rem; color: #6B7F93; margin-bottom: 12px;
+}
+.not-studied-row strong { color: #1C2A39; }
+
+/* How this works */
+.how-details { font-size: 0.875rem; color: #6B7F93; }
+.how-details summary {
+  cursor: pointer; color: #2B6CB0; font-weight: 600;
+  list-style: none; display: inline-flex; align-items: center; gap: 4px;
+}
+.how-details summary::-webkit-details-marker { display: none; }
+.how-details p { margin: 10px 0 0; line-height: 1.55; }
+
+/* Your Cards panel */
+.do-cards-panel {
+  display: flex; flex-wrap: wrap; align-items: center;
+  justify-content: space-between; gap: 14px 24px;
+}
+.do-cards-info { flex: 1; min-width: 0; }
+.do-cards-count { font-size: 1.875rem; font-weight: 700; color: #1C2A39; line-height: 1; margin-bottom: 4px; }
+.do-cards-label { font-size: 0.9375rem; color: #6B7F93; margin: 0 0 12px; }
+.btn-view-cards {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 26px; border-radius: 8px;
+  background: #2B6CB0; color: #fff;
+  font: inherit; font-size: 1rem; font-weight: 700;
+  text-decoration: none; border: 0; cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+  box-shadow: 0 2px 8px rgba(43,108,176,0.22);
+  white-space: nowrap;
+}
+.btn-view-cards:hover { background: #1E4E8C; transform: translateY(-1px); }
+
+/* Card action mini-buttons */
+.do-card-actions {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; padding-top: 16px;
+  border-top: 1px solid #E8EFF7;
+}
+.btn-action-sm {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 8px 16px; border-radius: 7px;
+  border: 1.5px solid #C9D6E3;
+  background: #fff; color: #1C2A39;
+  font: inherit; font-size: 0.875rem; font-weight: 600;
+  text-decoration: none; cursor: pointer;
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+.btn-action-sm:hover { border-color: #2B6CB0; background: #EBF2FB; color: #2B6CB0; }
+
+/* Exam section */
+.do-exam-section {
+  background: #fff;
+  border: 1px solid #D6DFE8;
+  border-radius: 12px;
+  padding: 22px 24px;
+  box-shadow: 0 1px 4px rgba(28,42,57,0.05);
+}
+.do-exam-section h2 { margin: 0 0 16px; font-size: 1rem; font-weight: 700; color: #1C2A39; }
+
+@media (max-width: 580px) {
+  .shelf-box-new { grid-template-columns: repeat(3, 1fr); }
+  .do-hero { padding: 18px; }
+  .do-hero-title { font-size: 1.375rem; }
+  .do-section { padding: 16px; }
+}
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="page-top">
-  <div>
-    <h1>{{ deck.title }}</h1>
-    <p class="deck-meta">
-      {{ cards | length }} {{ "card" if cards | length == 1 else "cards" }}
-      {% if hidden_cards %} · {{ hidden_cards | length }} hidden{% endif %}
-      {% if deck.is_ready %} · Ready deck, read-only{% endif %}
-      {% if badge %}
-        {% set text, kind = badge %}
-        · <span class="badge badge-{{ kind }}">{{ text }}</span>
-      {% endif %}
-    </p>
-  </div>
-  <div class="actions-inline icon-actions">
-    {% if user_deck %}
-      <button type="button" class="icon-button" data-toggle="exam" aria-controls="exam"
-              aria-expanded="{{ 'true' if open_exam else 'false' }}" aria-label="Exam setting" title="Exam setting">{{ icon("calendar") }}</button>
-    {% endif %}
-    {% if can_edit and not deck.is_weak_spot %}
-      <a class="icon-button" href="{{ url_for('decks.edit_deck', deck_id=deck.id) }}" aria-label="Rename deck" title="Rename deck">{{ icon("pencil") }}</a>
-      <form method="post" action="{{ url_for('decks.delete_deck', deck_id=deck.id) }}" class="inline-form"
-            data-confirm="Delete this deck and all {{ cards | length }} cards? This can't be undone.">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button type="submit" class="icon-button icon-danger" aria-label="Delete deck" title="Delete deck">{{ icon("trash") }}</button>
-      </form>
-    {% endif %}
-    {% if deck.is_ready and user_deck %}
-      <form method="post" action="{{ url_for('decks.remove_ready_deck', deck_id=deck.id) }}" class="inline-form"
-            data-confirm="Remove this deck from your list? Your progress is kept if you add it again.">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button type="submit" class="icon-button" aria-label="Remove from my decks" title="Remove from my decks">{{ icon("remove") }}</button>
-      </form>
-    {% endif %}
-    {% if deck.is_ready and not user_deck %}
-      <a class="button button-primary" href="{{ url_for('decks.add_ready_deck', deck_id=deck.id) }}">Add to my decks</a>
-    {% endif %}
-  </div>
-</div>
-
 {% set open_exam = user_deck and (exam_form.errors or (badge and badge[1] == "passed")) %}
-{% if user_deck and cards %}
-  <div class="study-buttons">
-    <a class="button button-primary" href="{{ url_for('study.start', deck_id=deck.id, style='smart') }}">Smart Study</a>
-    <a class="button" href="{{ url_for('study.start', deck_id=deck.id, style='free') }}">Quick Revise</a>
-  </div>
-{% endif %}
+<div class="deck-overview-wrap">
 
-{% if deck.is_weak_spot %}
-  <p class="deck-note">The Weak Spot Fixer adds practice cards for your weakest topic here. You can add your own too.</p>
-{% endif %}
+  {# ── Hero: title + meta + study buttons ── #}
+  <div class="do-hero">
+    <div class="do-hero-top">
+      <div>
+        <h1 class="do-hero-title">{{ deck.title }}</h1>
+        <p class="do-hero-meta">
+          <span>{{ cards | length }} {{ "card" if cards | length == 1 else "cards" }}</span>
+          {% if hidden_cards %}<span>· {{ hidden_cards | length }} hidden</span>{% endif %}
+          {% if deck.is_ready %}<span>· Ready deck</span><span>· Read-only</span>{% endif %}
+          {% if badge %}
+            {% set text, kind = badge %}
+            <span class="do-badge badge-{{ kind }}">{{ text }}</span>
+          {% endif %}
+        </p>
+      </div>
 
-{% if user_deck %}
-  <section class="deck-section" aria-labelledby="shelves-heading">
-    <h2 id="shelves-heading">Your card box</h2>
-    <div class="shelf-box">
-      {% for count in shelves %}
-        <div class="shelf-slot shelf-{{ loop.index }}">
-          <span class="shelf-count">{{ count }}</span>
-          <span class="shelf-name">{{ shelf_names[loop.index0] }}</span>
-        </div>
-      {% endfor %}
+      <div class="do-icon-actions">
+        {% if user_deck %}
+          <button type="button" class="icon-button" data-toggle="exam" aria-controls="exam"
+                  aria-expanded="{{ 'true' if open_exam else 'false' }}" aria-label="Exam setting" title="Exam setting">{{ icon("calendar") }}</button>
+        {% endif %}
+        {% if can_edit and not deck.is_weak_spot %}
+          <a class="icon-button" href="{{ url_for('decks.edit_deck', deck_id=deck.id) }}" aria-label="Rename deck" title="Rename deck">{{ icon("pencil") }}</a>
+          <form method="post" action="{{ url_for('decks.delete_deck', deck_id=deck.id) }}" class="inline-form"
+                data-confirm="Delete this deck and all {{ cards | length }} cards? This can't be undone.">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="icon-button icon-danger" aria-label="Delete deck" title="Delete deck">{{ icon("trash") }}</button>
+          </form>
+        {% endif %}
+        {% if deck.is_ready and user_deck %}
+          <form method="post" action="{{ url_for('decks.remove_ready_deck', deck_id=deck.id) }}" class="inline-form"
+                data-confirm="Remove this deck from your list? Your progress is kept if you add it again.">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="icon-button" aria-label="Remove from my decks" title="Remove from my decks">{{ icon("remove") }}</button>
+          </form>
+        {% endif %}
+        {% if deck.is_ready and not user_deck %}
+          <a class="btn-primary-lg" href="{{ url_for('decks.add_ready_deck', deck_id=deck.id) }}">Add to my decks</a>
+        {% endif %}
+      </div>
     </div>
-    <p class="deck-meta">Not studied yet: {{ not_studied }}</p>
-    <details class="how-it-works">
-      <summary>How this works</summary>
-      <p>Every card sits in one of five slots. Say <strong>Confident</strong> and then <strong>Got it right</strong>
-        in Smart Study and it moves one slot to the right. <strong>I was close</strong> keeps it where it is.
-        <strong>Got it wrong</strong> or <strong>I didn't know it</strong> sends it back to Learning. Cards come back for review after 0, 1, 3, 7 and 14 days, so Mastered cards only
-        come back every two weeks. In Exam mode, every card is reviewed before your exam date.
-        Quick Revise never moves cards.</p>
-    </details>
-  </section>
 
-  {# Opened by the calendar button at the top (app.js), or straight away from a "#exam" link. #}
-  <section class="deck-section" id="exam" aria-labelledby="exam-heading" {% if not open_exam %}hidden{% endif %}>
+    {% if user_deck and cards %}
+    <div class="do-study-row">
+      <a class="btn-primary-lg" href="{{ url_for('study.start', deck_id=deck.id, style='smart') }}">
+        <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 3 14 8 5 13 5 3"/></svg>
+        Smart Study
+      </a>
+      <a class="btn-outline-lg" href="{{ url_for('study.start', deck_id=deck.id, style='free') }}">Quick Revise</a>
+    </div>
+    {% endif %}
+
+    {% if deck.is_weak_spot %}
+      <p class="deck-note" style="margin-top:12px;">The Weak Spot Fixer adds practice cards for your weakest topic here. You can add your own too.</p>
+    {% endif %}
+  </div>
+
+  {# ── Exam setting (hidden until calendar icon clicked) ── #}
+  {% if user_deck %}
+  <div class="do-exam-section" id="exam" aria-labelledby="exam-heading" {% if not open_exam %}hidden{% endif %}>
     <h2 id="exam-heading">Exam setting</h2>
     <form method="post" action="{{ url_for('decks.update_exam', deck_id=deck.id) }}" novalidate class="exam-form">
       {{ exam_form.hidden_tag() }}
       {% with form = exam_form %}
         {% include "decks/_exam_fields.html" %}
       {% endwith %}
-      <button type="submit" class="button">Save exam setting</button>
+      <button type="submit" class="btn-outline-lg" style="margin-top:12px;">Save exam setting</button>
     </form>
-  </section>
-{% endif %}
+  </div>
+  {% endif %}
 
-<section class="deck-section" aria-labelledby="cards-heading">
-  <div class="section-top">
-    <h2 id="cards-heading">Cards</h2>
-    {% if can_add_cards %}
-      <div class="actions-inline">
-        <a class="button button-primary" href="{{ url_for('decks.new_card', deck_id=deck.id) }}">Add card</a>
-        <a class="button" href="{{ url_for('decks.create_my_own', deck_id=deck.id) }}">Paste or upload notes</a>
+  {# ── Card Box / shelves ── #}
+  {% if user_deck %}
+  <div class="do-section" aria-labelledby="shelves-heading">
+    <h2 id="shelves-heading">Your Card Box</h2>
+    <div class="shelf-box-new">
+      {% for count in shelves %}
+        <div class="shelf-slot-new s{{ loop.index }} {% if count > 0 %}active{% endif %}">
+          <span class="shelf-count-new">{{ count }}</span>
+          <span class="shelf-name-new">{{ shelf_names[loop.index0] }}</span>
+        </div>
+      {% endfor %}
+    </div>
+    <p class="not-studied-row">Not studied yet: <strong>{{ not_studied }}</strong></p>
+    <details class="how-details">
+      <summary>
+        <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M8 7v4"/><circle cx="8" cy="5.5" r=".5" fill="currentColor"/></svg>
+        How this works
+      </summary>
+      <p>Every card sits in one of five slots. Say <strong>Confident</strong> and then <strong>Got it right</strong>
+        in Smart Study and it moves one slot to the right. <strong>Triggered Recall</strong> keeps it where it is.
+        <strong>Got it wrong</strong> or <strong>Couldn't Recall</strong> sends it back to Learning.
+        Cards come back for review after 0, 1, 3, 7 and 14 days, so Mastered cards only
+        come back every two weeks. In Exam mode, every card is reviewed before your exam date.
+        Quick Revise never moves cards.</p>
+    </details>
+  </div>
+  {% endif %}
+
+  {# ── Your Cards panel ── #}
+  <div class="do-section" aria-labelledby="cards-panel-heading">
+    <h2 id="cards-panel-heading">Your Cards</h2>
+    <div class="do-cards-panel">
+      <div class="do-cards-info">
+        <div class="do-cards-count">{{ cards | length }}</div>
+        <p class="do-cards-label">{{ "card" if cards | length == 1 else "cards" }} in this deck</p>
+        <p style="margin:0;font-size:0.9375rem;color:#6B7F93;">Review and manage the flashcards in this deck.</p>
         {% if cards %}
-          <form method="post" action="{{ url_for('cardmaker.generate_more', deck_id=deck.id) }}" class="generate-more"
-                data-wait="Making new cards...">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <label for="more-count" class="visually-hidden">How many new cards</label>
-            <select name="count" id="more-count">
-              <option value="5">5 cards</option>
-              <option value="10">10 cards</option>
-            </select>
-            <button type="submit" class="button">Generate more cards</button>
-            <span class="wait-status" role="status" aria-live="polite"></span>
-          </form>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;">
+          <a class="btn-primary-lg" href="{{ url_for('decks.deck_cards', deck_id=deck.id) }}" id="view-all-cards-btn">
+            View All Cards →
+          </a>
+          <a class="btn-outline-lg" href="{{ url_for('decks.my_decks') }}" id="view-all-decks-btn">
+            View All Decks
+          </a>
+        </div>
         {% endif %}
       </div>
+    </div>
+
+    {# Card action buttons #}
+    {% if can_add_cards %}
+    <div class="do-card-actions">
+      <a class="btn-action-sm" href="{{ url_for('decks.new_card', deck_id=deck.id) }}" id="add-card-btn">
+        <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>
+        Add Card
+      </a>
+      <a class="btn-action-sm" href="{{ url_for('decks.create_my_own') }}?deck_id={{ deck.id }}" id="paste-upload-btn">
+        <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2H4a1 1 0 00-1 1v11a1 1 0 001 1h8a1 1 0 001-1V5z"/><path d="M10 2v3h3"/></svg>
+        Paste or Upload Notes
+      </a>
+      {% if cards %}
+      <form method="post" action="{{ url_for('cardmaker.generate_more', deck_id=deck.id) }}" class="inline-form generate-more" data-wait="Making new cards...">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="more-count" class="visually-hidden">How many new cards</label>
+        <select name="count" id="more-count" style="padding:6px 8px;border:1.5px solid #C9D6E3;border-radius:6px;font:inherit;font-size:0.875rem;background:#fff;">
+          <option value="5">5 cards</option>
+          <option value="10">10 cards</option>
+        </select>
+        <button type="submit" class="btn-action-sm" style="margin:0;">
+          Generate More Cards
+        </button>
+        <span class="wait-status" role="status" aria-live="polite"></span>
+      </form>
+      {% endif %}
+    </div>
+    {% if deck.is_ready %}
+      <p class="field-hint" style="margin-top:10px;">Cards you add to a ready deck are private — only you see them.</p>
+    {% endif %}
+    {% endif %}
+
+    {% if not cards %}
+      <p class="empty" style="margin-top:14px;">
+        {% if can_add_cards %}No cards yet. Add one or paste your notes.{% else %}This deck has no cards yet.{% endif %}
+      </p>
     {% endif %}
   </div>
-  {% if deck.is_ready and can_add_cards %}
-    <p class="field-hint">Cards you add to a ready deck are private: only you see them.</p>
-  {% endif %}
 
-  {% if not cards %}
-    <p class="empty">
-      {% if can_add_cards %}No cards yet. Add one or paste your notes.{% else %}This deck has no cards yet.{% endif %}
-    </p>
-  {% else %}
-    <ul class="card-list">
-      {% for card in cards %}
-        <li class="card-row" id="card-{{ card.id }}">
-          <div class="card-sides">
-            <p class="card-front">{{ card.question }}</p>
-            <p class="card-back">{{ card.answer }}</p>
-            <p class="card-meta">
-              {{ card.topic }} · {{ card.importance | capitalize }} importance
-              {% if deck.is_ready and card.owner_id == current_user.id %} · <span class="badge">Your card</span>{% endif %}
-            </p>
-          </div>
-          {% if can_edit or card.owner_id == current_user.id %}
-            <div class="card-actions">
-              <a class="icon-button" href="{{ url_for('decks.edit_card', deck_id=deck.id, card_id=card.id) }}" aria-label="Edit card" title="Edit card">{{ icon("pencil") }}</a>
-              <form method="post" action="{{ url_for('decks.delete_card', deck_id=deck.id, card_id=card.id) }}"
-                    class="inline-form" data-confirm="Delete this card? This can't be undone.">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="icon-button icon-danger" aria-label="Delete card" title="Delete card">{{ icon("trash") }}</button>
-              </form>
-            </div>
-          {% elif deck.is_ready and user_deck %}
-            <div class="card-actions">
-              <form method="post" action="{{ url_for('decks.hide_card', deck_id=deck.id, card_id=card.id) }}"
-                    class="inline-form" data-confirm="Hide this card? You can show it again from this page.">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="icon-button" aria-label="Hide this card" title="Hide this card">{{ icon("eye-off") }}</button>
-              </form>
-            </div>
-          {% endif %}
-        </li>
-      {% endfor %}
-    </ul>
-  {% endif %}
-
-  {% if hidden_cards %}
-    {% if not show_hidden %}
-      <p class="hidden-link">
-        <a href="{{ url_for('decks.deck_page', deck_id=deck.id, show_hidden=1) }}#hidden-cards">Show hidden cards ({{ hidden_cards | length }})</a>
-      </p>
-    {% else %}
-      <section class="hidden-cards" id="hidden-cards" aria-labelledby="hidden-heading">
-        <h3 id="hidden-heading">Hidden cards ({{ hidden_cards | length }})</h3>
-        <p class="field-hint">Only you have hidden these. They're left out of your study and plan.</p>
-        <ul class="card-list">
-          {% for card in hidden_cards %}
-            <li class="card-row card-row-hidden" id="card-{{ card.id }}">
-              <div class="card-sides">
-                <p class="card-front">{{ card.question }}</p>
-                <p class="card-meta">{{ card.topic }}</p>
-              </div>
-              <div class="card-actions">
-                <form method="post" action="{{ url_for('decks.unhide_card', deck_id=deck.id, card_id=card.id) }}" class="inline-form">
-                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                  <button type="submit" class="icon-button" aria-label="Show this card again" title="Show this card again">{{ icon("eye") }}</button>
-                </form>
-              </div>
-            </li>
-          {% endfor %}
-        </ul>
-        <p class="hidden-link"><a href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">Close hidden cards</a></p>
-      </section>
-    {% endif %}
-  {% endif %}
-</section>
+</div>
 {% endblock %}

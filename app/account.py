@@ -105,3 +105,10 @@ def send_feedback():
 @login_required
 def logo_preview():
     return render_template("logo_preview.html")
+
+
+@bp.get("/profile")
+@login_required
+def profile():
+    """Dedicated profile / account settings page."""
+    return render_template("profile.html")

@@ -1,0 +1,27 @@
+{
+  "title": "Python Programming Basics",
+  "folder": "placement",
+  "description": "Core Python concepts for campus placements and technical interviews — data types, OOP, functions and common patterns.",
+  "cards": [
+    {"question": "What are Python's built-in mutable data types?", "answer": "list, dict, set. Tuples and strings are immutable.", "topic": "Data Types", "importance": "high"},
+    {"question": "What is the difference between a list and a tuple?", "answer": "Lists are mutable (can be changed); tuples are immutable. Tuples use () and are faster for fixed data.", "topic": "Data Types", "importance": "high"},
+    {"question": "What does the `is` operator check?", "answer": "It checks object identity — whether two variables refer to the exact same object in memory, not just equal values.", "topic": "Operators", "importance": "high"},
+    {"question": "What is a Python decorator?", "answer": "A function that wraps another function to add behaviour without modifying its code. Written with @syntax above the function.", "topic": "Functions", "importance": "high"},
+    {"question": "What is the difference between *args and **kwargs?", "answer": "*args collects extra positional arguments as a tuple; **kwargs collects extra keyword arguments as a dictionary.", "topic": "Functions", "importance": "high"},
+    {"question": "What is a list comprehension?", "answer": "A concise way to create lists: [expression for item in iterable if condition]. Faster and more readable than a for loop.", "topic": "Data Types", "importance": "medium"},
+    {"question": "What is the GIL in Python?", "answer": "The Global Interpreter Lock — a mutex that allows only one thread to execute Python bytecode at a time, even on multi-core CPUs.", "topic": "Concurrency", "importance": "medium"},
+    {"question": "What is the difference between deep copy and shallow copy?", "answer": "Shallow copy copies only the reference to nested objects (copy.copy). Deep copy creates independent copies of all nested objects (copy.deepcopy).", "topic": "Memory", "importance": "medium"},
+    {"question": "What are Python generators?", "answer": "Functions that use `yield` to return values one at a time. They are memory-efficient because they don't hold all values at once.", "topic": "Functions", "importance": "high"},
+    {"question": "What is the difference between @classmethod and @staticmethod?", "answer": "@classmethod receives the class (cls) as first argument. @staticmethod receives no implicit first argument — it's just a function inside a class.", "topic": "OOP", "importance": "high"},
+    {"question": "What are Python's four pillars of OOP?", "answer": "Encapsulation, Inheritance, Polymorphism, Abstraction.", "topic": "OOP", "importance": "medium"},
+    {"question": "What is `__init__` in Python?", "answer": "The constructor method called when an object is created. It initialises the object's attributes.", "topic": "OOP", "importance": "high"},
+    {"question": "What is method resolution order (MRO) in Python?", "answer": "The order Python searches parent classes for an attribute or method in multiple inheritance. Python uses the C3 linearisation algorithm.", "topic": "OOP", "importance": "medium"},
+    {"question": "What is a lambda function?", "answer": "An anonymous single-expression function: lambda arguments: expression. Used for short throwaway functions.", "topic": "Functions", "importance": "medium"},
+    {"question": "What is the difference between `append` and `extend` on a list?", "answer": "append adds a single element (even a list as one element). extend adds all elements from an iterable.", "topic": "Data Types", "importance": "medium"},
+    {"question": "How does Python manage memory?", "answer": "Through reference counting and a cyclic garbage collector. When an object's reference count drops to zero it is deallocated.", "topic": "Memory", "importance": "medium"},
+    {"question": "What is a Python context manager?", "answer": "An object with __enter__ and __exit__ methods used with the `with` statement. Ensures resources are properly acquired and released.", "topic": "Functions", "importance": "high"},
+    {"question": "What is the difference between `==` and `is`?", "answer": "`==` compares values (equality); `is` compares identity (same object in memory).", "topic": "Operators", "importance": "high"},
+    {"question": "What is slicing in Python?", "answer": "Extracting a portion of a sequence with [start:stop:step]. A negative step reverses the sequence.", "topic": "Data Types", "importance": "medium"},
+    {"question": "What are Python's access modifiers?", "answer": "No strict modifiers. Single underscore _x = convention for protected; double underscore __x = name mangling (pseudo-private).", "topic": "OOP", "importance": "medium"}
+  ]
+}
