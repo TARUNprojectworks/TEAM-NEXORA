@@ -201,11 +201,19 @@ def chosen_target():
     return value if value.isdigit() else "new"
 
 
+MODES = ("paste", "upload")
+
+
 def render_maker(error=None, status=200):
+    """The maker page. mode="paste" or "upload" shows only that screen (from Create My Own)."""
+    chosen = chosen_target()
+    mode = request.values.get("mode")
     return render_template(
         "maker/maker.html",
         decks=deck_choices(),
-        chosen=chosen_target(),
+        chosen=chosen,
+        chosen_deck=db.session.get(Deck, int(chosen)) if chosen != "new" else None,
+        mode=mode if mode in MODES else "",
         notes=request.form.get("notes", ""),
         new_title=request.form.get("new_title", ""),
         exam_form=ExamForm(request.form if request.method == "POST" else None, meta={"csrf": False}),

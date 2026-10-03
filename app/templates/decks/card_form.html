@@ -2,11 +2,15 @@
 {% block title %}{{ "Edit card" if card else "Add a card" }} · Nexora Recall{% endblock %}
 {% block content %}
 <section class="narrow card-form-page">
-  <p class="deck-meta"><a href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">{{ deck.title }}</a></p>
+  {% if not card and request.args.get("back") == "options" %}
+    <p class="back-row"><a class="back-link" href="{{ url_for('decks.create_my_own', deck_id=deck.id) }}">← Back</a></p>
+  {% else %}
+    <p class="back-row"><a class="back-link" href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">← Back to {{ deck.title }}</a></p>
+  {% endif %}
   <h1>{{ "Edit card" if card else "Add a card" }}</h1>
   <p class="tip">Keep one idea per card.</p>
 
-  <form method="post" novalidate id="card-form"
+  <form method="post" novalidate id="card-form" data-unsaved="You have unsaved cards. Leave anyway?"
         data-long-front="{{ long_front }}" data-long-back="{{ long_back }}">
     {{ form.hidden_tag() }}
     {% for field in [form.question, form.answer] %}
