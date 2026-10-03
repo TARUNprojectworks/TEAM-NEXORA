@@ -1,12 +1,8 @@
 {% extends "base.html" %}
-{% block title %}{{ "Edit card" if card else "Add a card" }} · Nexora Recall{% endblock %}
+{% block title %}{{ "Edit card" if card else "Add a card" }} · Nexora Notebook{% endblock %}
+{% block back %}{% if not card and request.args.get("back") == "options" %}<a class="back-link" href="{{ url_for('decks.create_my_own', deck_id=deck.id) }}">← Back</a>{% else %}<a class="back-link" href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">← Back to {{ deck.title }}</a>{% endif %}{% endblock %}
 {% block content %}
 <section class="narrow card-form-page">
-  {% if not card and request.args.get("back") == "options" %}
-    <p class="back-row"><a class="back-link" href="{{ url_for('decks.create_my_own', deck_id=deck.id) }}">← Back</a></p>
-  {% else %}
-    <p class="back-row"><a class="back-link" href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">← Back to {{ deck.title }}</a></p>
-  {% endif %}
   <h1>{{ "Edit card" if card else "Add a card" }}</h1>
   <p class="tip">Keep one idea per card.</p>
 

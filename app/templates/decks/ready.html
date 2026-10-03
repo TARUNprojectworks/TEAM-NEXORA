@@ -1,5 +1,7 @@
 {% extends "base.html" %}
-{% block title %}Deck Library · Nexora Recall{% endblock %}
+{% from "decks/_deck_card.html" import deck_card %}
+{% block title %}Deck Library · Nexora Notebook{% endblock %}
+{% block back %}<a class="back-link" href="{{ url_for('planner.home') }}">← Back</a>{% endblock %}
 {% block content %}
 <div class="page-top">
   <div>
@@ -35,30 +37,14 @@
   <ul class="library-grid">
     {% for item in items %}
       {% set deck = item.deck %}
-      <li class="library-deck index-card">
-        <p class="card-header">{{ folders.get(deck.folder, "") }} · {{ item.card_count }} cards</p>
-        <h2 class="library-title"><a href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">{{ deck.title }}</a></h2>
-        {% if item.description %}<p class="library-description">{{ item.description }}</p>{% endif %}
-        {% if item.topics %}
-          <p class="library-topics">{% for topic in item.topics %}<span class="badge">{{ topic }}</span>{% endfor %}</p>
+      {% call deck_card(item, folders) %}
+        {% if deck.id in added_ids %}
+          <span class="badge badge-added">Added</span>
+          <a href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">Open</a>
+        {% else %}
+          <a class="button button-primary" href="{{ url_for('decks.add_ready_deck', deck_id=deck.id) }}">Add</a>
         {% endif %}
-        <details class="library-preview">
-          <summary>Preview 3 cards</summary>
-          <ol>
-            {% for card in item.preview %}
-              <li><span class="preview-q">{{ card.question }}</span><span class="preview-a">{{ card.answer }}</span></li>
-            {% endfor %}
-          </ol>
-        </details>
-        <div class="library-actions">
-          {% if deck.id in added_ids %}
-            <span class="badge badge-added">Added</span>
-            <a href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">Open</a>
-          {% else %}
-            <a class="button button-primary" href="{{ url_for('decks.add_ready_deck', deck_id=deck.id) }}">Add</a>
-          {% endif %}
-        </div>
-      </li>
+      {% endcall %}
     {% endfor %}
   </ul>
 {% endif %}

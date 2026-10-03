@@ -1,5 +1,8 @@
 {% extends "base.html" %}
-{% block title %}My decks · Nexora Recall{% endblock %}
+{% from "_icons.html" import icon %}
+{% from "decks/_deck_card.html" import deck_card %}
+{% block title %}My decks · Nexora Notebook{% endblock %}
+{% block back %}<a class="back-link" href="{{ url_for('planner.home') }}">← Back</a>{% endblock %}
 {% block content %}
 <div class="page-top">
   <h1>My decks</h1>
@@ -9,44 +12,32 @@
   </div>
 </div>
 
-<ul class="deck-list">
+<ul class="library-grid">
   {% for item in items %}
     {% set deck = item.deck %}
-    <li class="deck-row">
-      <div class="deck-info">
-        <a class="deck-title" href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">{{ deck.title }}</a>
-        <span class="deck-meta">
-          {{ item.card_count }} {{ "card" if item.card_count == 1 else "cards" }}
-          {% if item.hidden_count %} · {{ item.hidden_count }} hidden{% endif %}
-          · {{ folders.get(deck.folder, "My own") }}
-        </span>
-        {% if deck.is_weak_spot %}
-          <span class="deck-note">Practice cards for your weak topics are added here.</span>
-        {% endif %}
-      </div>
-      <div class="deck-actions">
-        {% set text, kind = item.badge %}
-        {% if kind == "passed" %}
-          <a class="badge badge-passed" href="{{ url_for('decks.deck_page', deck_id=deck.id) }}#exam">{{ text }}</a>
-        {% else %}
-          <span class="badge badge-{{ kind }}">{{ text }}</span>
-        {% endif %}
-        {# Own decks can be deleted, ready decks removed; the Weak spot practice deck stays. #}
-        {% if deck.is_ready %}
-          <form method="post" action="{{ url_for('decks.remove_ready_deck', deck_id=deck.id) }}" class="inline-form"
-                data-confirm="Remove {{ deck.title }} from your decks? Your progress is kept if you add it again.">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="button button-small">Remove from my decks</button>
-          </form>
-        {% elif not deck.is_weak_spot %}
-          <form method="post" action="{{ url_for('decks.delete_deck', deck_id=deck.id) }}" class="inline-form"
-                data-confirm="Delete {{ deck.title }} and all its cards? This can't be undone.">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="button button-small button-danger">Delete deck</button>
-          </form>
-        {% endif %}
-      </div>
-    </li>
+    {% call deck_card(item, folders) %}
+      {% set text, kind = item.badge %}
+      {% if kind == "passed" %}
+        <a class="badge badge-passed" href="{{ url_for('decks.deck_page', deck_id=deck.id) }}#exam">{{ text }}</a>
+      {% else %}
+        <span class="badge badge-{{ kind }}">{{ text }}</span>
+      {% endif %}
+      <a href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">Open</a>
+      {# Own decks can be deleted, ready decks removed; the Weak spot practice deck stays. #}
+      {% if deck.is_ready %}
+        <form method="post" action="{{ url_for('decks.remove_ready_deck', deck_id=deck.id) }}" class="inline-form push-end"
+              data-confirm="Remove {{ deck.title }} from your decks? Your progress is kept if you add it again.">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="icon-button" aria-label="Remove {{ deck.title }} from my decks" title="Remove from my decks">{{ icon("remove") }}</button>
+        </form>
+      {% elif not deck.is_weak_spot %}
+        <form method="post" action="{{ url_for('decks.delete_deck', deck_id=deck.id) }}" class="inline-form push-end"
+              data-confirm="Delete {{ deck.title }} and all its cards? This can't be undone.">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="icon-button icon-danger" aria-label="Delete {{ deck.title }}" title="Delete deck">{{ icon("trash") }}</button>
+        </form>
+      {% endif %}
+    {% endcall %}
   {% endfor %}
 </ul>
 

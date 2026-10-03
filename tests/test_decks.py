@@ -410,7 +410,7 @@ def test_cannot_delete_another_students_deck(app, arjun_client, riya_deck):
 # ---------- CSRF ----------
 
 def test_deck_actions_reject_posts_without_csrf_token(tmp_path):
-    app = create_app({"SQLALCHEMY_DATABASE_URI": f"sqlite:///{tmp_path / 'csrf.db'}"})
+    app = create_app({"TESTING": True, "SQLALCHEMY_DATABASE_URI": f"sqlite:///{tmp_path / 'csrf.db'}"})
     deck_id, card_ids = make_deck(app, is_ready=False, owner_id=None)
     client = app.test_client()
     with client.session_transaction() as session:

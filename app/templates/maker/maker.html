@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}AI Card Maker · Nexora Recall{% endblock %}
+{% block title %}AI Card Maker · Nexora Notebook{% endblock %}
+{% block back %}{% if mode %}<a class="back-link"
+       href="{{ url_for('decks.create_my_own', deck_id=chosen_deck.id) if chosen_deck else url_for('decks.create_my_own') }}">← Back</a>{% else %}<a class="back-link" href="{{ url_for('decks.create_my_own') }}">← Back</a>{% endif %}{% endblock %}
 {% block content %}
 <section class="maker">
   {% if mode %}
-    <p class="back-row"><a class="back-link"
-       href="{{ url_for('decks.create_my_own', deck_id=chosen_deck.id) if chosen_deck else url_for('decks.create_my_own') }}">← Back</a></p>
     <h1>{{ "Paste notes" if mode == "paste" else "Upload notes" }}</h1>
     <p>{% if mode == "paste" %}Paste your notes below.{% else %}Upload photos of your notes, a PDF or a .txt file.{% endif %}
       You'll check every card before anything is saved.</p>
@@ -97,6 +97,11 @@
     </div>
     <p class="wait-status" role="status" aria-live="polite"></p>
   </form>
+
+  <details class="maker-theme">
+    <summary>Card theme for studying</summary>
+    {% with prefix = "maker", next = request.full_path if request.query_string else request.path %}{% include "_theme_picker.html" %}{% endwith %}
+  </details>
 </section>
 {% endblock %}
 {% block scripts %}

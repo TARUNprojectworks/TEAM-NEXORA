@@ -99,7 +99,7 @@ def test_deleting_user_removes_their_decks(app, make_user):
 
 
 def test_csrf_is_on_outside_tests(tmp_path):
-    app = create_app({"SQLALCHEMY_DATABASE_URI": f"sqlite:///{tmp_path / 'csrf.db'}"})
+    app = create_app({"TESTING": True, "SQLALCHEMY_DATABASE_URI": f"sqlite:///{tmp_path / 'csrf.db'}"})
     response = app.test_client().post("/login", data={"email": "a@b.co", "password": "x"})
     assert response.status_code == 400
 
@@ -110,14 +110,10 @@ def test_unknown_page_shows_friendly_404(client):
     assert "find that page" in response.get_data(as_text=True)
 
 
-def test_old_database_stops_the_app_with_a_clear_message(tmp_path):
+def test_old_database_shows_a_clear_message(tmp_path):
     import sqlite3
 
-    import pytest
-
-    from app import OldDatabaseError
-
-    # A cards table made by pre-phase-5 code: no owner_id column.
+    # A cards table made by pre-phase-5 code: no owner_id column, and no other tables.
     path = tmp_path / "old.db"
     connection = sqlite3.connect(path)
     connection.execute(
@@ -128,5 +124,24 @@ def test_old_database_stops_the_app_with_a_clear_message(tmp_path):
     connection.commit()
     connection.close()
 
-    with pytest.raises(OldDatabaseError, match=r"missing: cards\.owner_id.*delete instance/nexora\.db"):
-        create_app({"SQLALCHEMY_DATABASE_URI": f"sqlite:///{path}"})
+    # The app still starts (so `flask db upgrade` can run), but pages say what to do.
+    client = create_app({"SQLALCHEMY_DATABASE_URI": f"sqlite:///{path}"}).test_client()
+    response = client.get("/login")
+    assert response.status_code == 503
+    assert "flask db upgrade" in response.get_data(as_text=True)
+
+
+def test_migrations_build_the_same_tables_as_the_models(tmp_path):
+    from flask_migrate import upgrade
+    from sqlalchemy import inspect
+
+    from app.models import db
+
+    app = create_app({"SQLALCHEMY_DATABASE_URI": f"sqlite:///{tmp_path / 'new.db'}"})
+    with app.app_context():
+        upgrade()
+        inspector = inspect(db.engine)
+        for table in db.metadata.sorted_tables:
+            have = {column["name"] for column in inspector.get_columns(table.name)}
+            assert have == {column.name for column in table.columns}, table.name
+    assert app.test_client().get("/login").status_code == 200
