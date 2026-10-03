@@ -42,6 +42,22 @@
     <p class="progress-text">{{ progress.done }} done · {{ progress.left }} {{ "card" if progress.left == 1 else "cards" }} left</p>
   </div>
 
+  {% if plan_timer %}
+    {# A soft time bar for today's plan. It never stops the session; plantimer.js keeps the clock
+       in sessionStorage so a reload doesn't reset it, and pauses it while the tab is hidden. #}
+    <div class="plan-timer" id="plan-timer" data-minutes="{{ plan_timer.minutes or '' }}"
+         data-total="{{ plan_timer.total }}" data-done="{{ plan_timer.done }}" data-date="{{ plan_timer.date }}">
+      <div class="timer-track" aria-hidden="true"><div class="timer-fill" id="timer-fill"></div></div>
+      <p class="timer-text" id="timer-text" aria-live="off"></p>
+    </div>
+    <p class="timer-done" id="timer-done" role="status" hidden>
+      <span id="timer-done-text"></span>
+      <a href="{{ url_for('study.summary') }}" class="button button-small">Stop here</a>
+      <button type="button" class="button button-small" id="keep-going">Keep going</button>
+    </p>
+    <button type="button" class="link-button timer-toggle" id="timer-toggle">Hide timer</button>
+  {% endif %}
+
   {% if coming_back %}
     <p class="coming-back">You missed this one earlier. Here it is once more.</p>
   {% endif %}
@@ -120,4 +136,5 @@
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/flip.js') }}"></script>
 <script src="{{ url_for('static', filename='js/study.js') }}"></script>
+<script src="{{ url_for('static', filename='js/plantimer.js') }}"></script>
 {% endblock %}

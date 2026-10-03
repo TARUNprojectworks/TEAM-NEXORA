@@ -172,6 +172,24 @@ def pick_next_card(state, queue):
     return queue[0] if queue else None
 
 
+def plan_timer(state, today):
+    """Numbers for the soft time bar, shown only in today's plan sessions (plantimer.js runs the clock).
+
+    minutes is None for a "No limit" plan. Cards count the whole plan, including cards
+    answered earlier today in other sessions.
+    """
+    plan = session.get("plan")
+    if not state["plan"] or state.get("card_ids") or not plan:
+        return None
+    left = plan_cards_left(current_user.id, plan, today)
+    return {
+        "minutes": plan["minutes"],
+        "total": len(plan["card_ids"]),
+        "done": len(plan["card_ids"]) - len(left),
+        "date": plan["date"],
+    }
+
+
 def session_progress(state, queue):
     done = len(state["answered"])
     left = len(queue) + len(state["returns"])
@@ -409,6 +427,7 @@ def show_card():
         coming_back=card.id in [entry[0] for entry in state["returns"]],
         last_tag=last_tag,
         practice=bool(state.get("card_ids")),
+        plan_timer=plan_timer(state, today),
     )
 
 

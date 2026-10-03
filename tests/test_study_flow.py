@@ -125,3 +125,46 @@ def test_quick_revise_shows_no_tag_and_moves_nothing(app, riya_client, riya):
     assert 'id="answer-tag"' not in page
     with app.app_context():
         assert db.session.query(Progress).count() == 0
+
+
+# ---------- Today's plan: soft time bar ----------
+
+def start_plan(client, minutes=None):
+    if minutes:
+        client.post("/plan/length", data={"minutes": minutes})
+    client.get("/home")
+    client.get("/study/plan")
+    return client.get("/study/card").get_data(as_text=True)
+
+
+def test_plan_session_has_the_time_bar(app, riya_client, riya):
+    own_deck(app, riya)
+    page = start_plan(riya_client, "15")
+    assert 'id="plan-timer" data-minutes="15"' in page
+    assert 'data-total="3" data-done="0"' in page and "Hide timer" in page
+    assert "plantimer.js" in page
+
+
+def test_no_limit_plan_has_no_minutes(app, riya_client, riya):
+    own_deck(app, riya)
+    assert 'id="plan-timer" data-minutes=""' in start_plan(riya_client, "none")
+
+
+def test_cards_done_count_the_whole_plan(app, riya_client, riya):
+    own_deck(app, riya)
+    start_plan(riya_client)
+    page = answer_one(riya_client, "sure", "1")
+    assert 'data-total="3" data-done="1"' in page
+
+
+@pytest.mark.parametrize("style", ["smart", "free"])
+def test_no_time_bar_outside_todays_plan(app, riya_client, riya, style):
+    riya_client.get(f"/study/{own_deck(app, riya)}?style={style}")
+    assert 'id="plan-timer"' not in riya_client.get("/study/card").get_data(as_text=True)
+
+
+def test_no_time_bar_when_revising_the_plan(app, riya_client, riya):
+    own_deck(app, riya)
+    start_plan(riya_client)
+    riya_client.get("/study/revise")
+    assert 'id="plan-timer"' not in riya_client.get("/study/card").get_data(as_text=True)
