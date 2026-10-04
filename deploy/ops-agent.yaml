@@ -1,0 +1,27 @@
+# Google Cloud Ops Agent: ships the app's JSON log to Cloud Logging.
+# setup_vm.sh copies this to /etc/google-cloud-ops-agent/config.yaml.
+# Each line in /var/log/nexora/app.log is one JSON object (see JsonFormatter in app/__init__.py),
+# so its fields arrive as jsonPayload.* (message, route, status, feature, ok, ...).
+# In Logs Explorer the log is called "nexora_app".
+logging:
+  receivers:
+    nexora_app:
+      type: files
+      include_paths:
+        - /var/log/nexora/app.log
+  processors:
+    nexora_json:
+      type: parse_json
+      time_key: time
+      time_format: "%Y-%m-%dT%H:%M:%S"
+    nexora_severity:
+      # Our "level" (INFO / WARNING / ERROR) becomes the entry's severity.
+      type: modify_fields
+      fields:
+        severity:
+          move_from: jsonPayload.level
+  service:
+    pipelines:
+      nexora:
+        receivers: [nexora_app]
+        processors: [nexora_json, nexora_severity]

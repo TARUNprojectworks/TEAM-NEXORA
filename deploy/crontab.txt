@@ -1,0 +1,9 @@
+# Cron jobs for the nexora user. setup_vm.sh installs them with: crontab -u nexora deploy/crontab.txt
+# The VM clock is UTC (Compute Engine's default), so 20:30 UTC = 02:00 IST.
+# /snap/bin: gcloud comes as a snap on Google's Ubuntu images.
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin
+
+# Nightly database backup to the backup bucket.
+30 20 * * * /srv/nexora/app/deploy/backup.sh >> /var/log/nexora/backup.log 2>&1
+
+# The BigQuery export (deploy/export_bq.sh) is optional and not scheduled.

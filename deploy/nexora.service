@@ -1,0 +1,20 @@
+# systemd service for the app. setup_vm.sh copies this to /etc/systemd/system/nexora.service.
+[Unit]
+Description=Nexora Notebook (Gunicorn)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=nexora
+Group=nexora
+WorkingDirectory=/srv/nexora/app
+# All settings live in .env (written by setup_vm.sh, readable only by nexora).
+EnvironmentFile=/srv/nexora/app/.env
+# 2 workers suit a small VM and SQLite. 60 s timeout: an AI request can take two 15 s
+# attempts plus the upload. Only Caddy talks to Gunicorn, so it listens on localhost.
+ExecStart=/srv/nexora/venv/bin/gunicorn wsgi:app --bind 127.0.0.1:8000 --workers 2 --timeout 60
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
