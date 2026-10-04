@@ -284,17 +284,6 @@ def ready_deck_descriptions():
     return descriptions
 
 
-def short_badge(user_deck, today):
-    """The mode badge in a few characters, so a deck card's buttons stay on one row: "Exam: 3 days"."""
-    text, kind = mode_badge(user_deck, today)
-    if kind == "exam":
-        days_left = (user_deck.exam_date - today).days
-        text = "Exam: today" if days_left == 0 else ("Exam: 1 day" if days_left == 1 else f"Exam: {days_left} days")
-    elif kind == "passed":
-        text = "Exam passed"
-    return text, kind
-
-
 def mastered_counts(user_id, deck_ids):
     """{deck_id: cards on the Mastered shelf (5)} for this student, hidden cards left out."""
     if not deck_ids:
@@ -429,7 +418,7 @@ def my_decks():
     mastered = mastered_counts(current_user.id, [deck.id for _, deck in rows])
     items = my_deck_cards([deck for _, deck in rows])
     for item, (user_deck, deck) in zip(items, rows):
-        item["badge"] = short_badge(user_deck, today)
+        item["badge"] = mode_badge(user_deck, today)
         item["hidden_count"] = hidden_counts.get(deck.id, 0)
         item["card_count"] -= item["hidden_count"]
         count = item["card_count"]

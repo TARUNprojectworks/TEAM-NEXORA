@@ -9,7 +9,16 @@
   <li class="library-deck index-card">
     <p class="card-header deck-card-top">
       <span class="chip">{{ icon(FOLDER_ICONS.get(deck.folder, "note")) }} {{ folders.get(deck.folder, "My own") }}</span>
-      <span>{{ item.card_count }} {{ "card" if item.card_count == 1 else "cards" }}{% if item.hidden_count %} · {{ item.hidden_count }} hidden{% endif %}</span>
+      <span class="deck-card-count">{{ item.card_count }} {{ "card" if item.card_count == 1 else "cards" }}{% if item.hidden_count %} · {{ item.hidden_count }} hidden{% endif %}</span>
+      {# My decks: the mode badge sits up here, next to the count, so it always has room. #}
+      {% if item.badge %}
+        {% set text, kind = item.badge %}
+        {% if kind == "passed" %}
+          <a class="badge badge-passed" href="{{ url_for('decks.deck_settings', deck_id=deck.id) }}#exam">{{ text }}</a>
+        {% else %}
+          <span class="badge badge-{{ kind }}">{{ text }}</span>
+        {% endif %}
+      {% endif %}
     </p>
     <h2 class="library-title"><a href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">{{ deck.title }}</a></h2>
     {% if item.description %}<p class="library-description">{{ item.description }}</p>{% endif %}
