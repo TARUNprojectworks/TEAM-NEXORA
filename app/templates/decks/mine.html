@@ -18,25 +18,35 @@
     {% call deck_card(item, folders) %}
       {% set text, kind = item.badge %}
       {% if kind == "passed" %}
-        <a class="badge badge-passed" href="{{ url_for('decks.deck_page', deck_id=deck.id) }}#exam">{{ text }}</a>
+        <a class="badge badge-passed" href="{{ url_for('decks.edit_deck', deck_id=deck.id) }}#exam">{{ text }}</a>
       {% else %}
         <span class="badge badge-{{ kind }}">{{ text }}</span>
       {% endif %}
-      <a href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">Open</a>
-      {# Own decks can be deleted, ready decks removed; the Weak spot practice deck stays. #}
-      {% if deck.is_ready %}
-        <form method="post" action="{{ url_for('decks.remove_ready_deck', deck_id=deck.id) }}" class="inline-form push-end"
-              data-confirm="Remove {{ deck.title }} from your decks? Your progress is kept if you add it again.">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <button type="submit" class="icon-button" aria-label="Remove {{ deck.title }} from my decks" title="Remove from my decks">{{ icon("remove") }}</button>
-        </form>
-      {% elif not deck.is_weak_spot %}
-        <form method="post" action="{{ url_for('decks.delete_deck', deck_id=deck.id) }}" class="inline-form push-end"
-              data-confirm="Delete {{ deck.title }} and all its cards? This can't be undone.">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <button type="submit" class="icon-button icon-danger" aria-label="Delete {{ deck.title }}" title="Delete deck">{{ icon("trash") }}</button>
-        </form>
+      <span class="push-end"></span>
+      {% if item.card_count %}
+        <a class="button button-primary button-small" href="{{ url_for('study.start', deck_id=deck.id, style='smart') }}">Study</a>
       {% endif %}
+      {# The ⋯ menu. Own decks can be deleted, ready decks removed; the Weak spot practice deck stays. #}
+      <details class="more-menu">
+        <summary class="icon-button" aria-label="More for {{ deck.title }}" title="More">{{ icon("more") }}</summary>
+        <div class="more-list">
+          <a href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">{{ icon("open") }} Open</a>
+          <a href="{{ url_for('decks.edit_deck', deck_id=deck.id) }}">{{ icon("pencil") }} Edit</a>
+          {% if deck.is_ready %}
+            <form method="post" action="{{ url_for('decks.remove_ready_deck', deck_id=deck.id) }}"
+                  data-confirm="Remove {{ deck.title }} from your decks? Your progress is kept if you add it again.">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit">{{ icon("remove") }} Remove from my decks</button>
+            </form>
+          {% elif not deck.is_weak_spot %}
+            <form method="post" action="{{ url_for('decks.delete_deck', deck_id=deck.id) }}"
+                  data-confirm="Delete {{ deck.title }} and all its cards? This can't be undone.">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="more-danger">{{ icon("trash") }} Delete deck</button>
+            </form>
+          {% endif %}
+        </div>
+      </details>
     {% endcall %}
   {% endfor %}
 </ul>

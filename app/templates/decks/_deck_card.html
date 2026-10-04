@@ -1,18 +1,18 @@
 {# One deck as an index card. My decks and the Deck Library both use it, so decks look the same
-   everywhere. The page puts its own buttons inside with {% call deck_card(item, folders) %}...{% endcall %}. #}
+   everywhere. The page puts its own buttons in the footer with {% call deck_card(item, folders) %}...{% endcall %}.
+   Optional parts show only when the item has them: description, topics and preview (Library),
+   mastery (My decks). #}
+{% from "_icons.html" import icon %}
+{% set FOLDER_ICONS = {"semester": "book", "placement": "briefcase", "competitive": "target", "personal": "note"} %}
 {% macro deck_card(item, folders) %}
   {% set deck = item.deck %}
   <li class="library-deck index-card">
-    <p class="card-header">
-      {{ folders.get(deck.folder, "My own") }} · {{ item.card_count }} {{ "card" if item.card_count == 1 else "cards" }}
-      {% if item.hidden_count %} · {{ item.hidden_count }} hidden{% endif %}
+    <p class="card-header deck-card-top">
+      <span class="chip">{{ icon(FOLDER_ICONS.get(deck.folder, "note")) }} {{ folders.get(deck.folder, "My own") }}</span>
+      <span>{{ item.card_count }} {{ "card" if item.card_count == 1 else "cards" }}{% if item.hidden_count %} · {{ item.hidden_count }} hidden{% endif %}</span>
     </p>
     <h2 class="library-title"><a href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">{{ deck.title }}</a></h2>
-    {% if deck.is_weak_spot %}
-      <p class="library-description">Practice cards for your weak topics are added here.</p>
-    {% elif item.description %}
-      <p class="library-description">{{ item.description }}</p>
-    {% endif %}
+    {% if item.description %}<p class="library-description">{{ item.description }}</p>{% endif %}
     {% if item.topics %}
       <p class="library-topics">{% for topic in item.topics %}<span class="badge">{{ topic }}</span>{% endfor %}</p>
     {% endif %}
@@ -25,6 +25,13 @@
           {% endfor %}
         </ol>
       </details>
+    {% endif %}
+    {% if item.mastery is defined %}
+      <div class="mastery">
+        <div class="mastery-track" role="progressbar" aria-label="Mastered" aria-valuemin="0" aria-valuemax="100"
+             aria-valuenow="{{ item.mastery }}"><div class="mastery-fill" style="width: {{ item.mastery }}%"></div></div>
+        <span class="mastery-text">{{ item.mastery }}% mastered</span>
+      </div>
     {% endif %}
     <div class="library-actions">{{ caller() }}</div>
   </li>

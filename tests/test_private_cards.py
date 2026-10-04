@@ -64,7 +64,7 @@ def test_student_can_add_a_private_card_to_a_ready_deck(app, riya_client, riya, 
         card = db.session.query(Card).filter_by(question="Riya's own Q").one()
         assert card.owner_id == riya
         assert card.deck_id == deck_id
-    page = riya_client.get(f"/decks/{deck_id}").get_data(as_text=True)
+    page = riya_client.get(f"/decks/{deck_id}/edit").get_data(as_text=True)
     assert "Riya&#39;s own Q" in page
     assert "Your card" in page
 

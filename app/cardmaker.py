@@ -340,16 +340,16 @@ def generate_more(deck_id):
         drafts = ai_service.generate_more_cards(deck.title, topics, existing, count)
     except AIError as error:
         flash(str(error), "error")
-        return redirect(url_for("decks.deck_page", deck_id=deck.id))
+        return redirect(url_for("decks.edit_deck", deck_id=deck.id))
     except Exception as error:
         log.warning("generate_more_failed", extra={"fields": {"error": type(error).__name__}})
         flash("Couldn't make new cards right now. Try again in a minute.", "error")
-        return redirect(url_for("decks.deck_page", deck_id=deck.id))
+        return redirect(url_for("decks.edit_deck", deck_id=deck.id))
 
     drafts = remove_near_duplicates(drafts, [c["question"] for c in existing])
     if not drafts:
         flash("Couldn't find new cards that aren't already in this deck.", "info")
-        return redirect(url_for("decks.deck_page", deck_id=deck.id))
+        return redirect(url_for("decks.edit_deck", deck_id=deck.id))
     return render_drafts(drafts, {"deck_id": deck.id}, "ai")
 
 
@@ -374,4 +374,4 @@ def save_drafts():
                                               "source": origin}})
     saved = min(len(kept), MAX_SAVED_CARDS)
     flash(f"Saved {saved} {'card' if saved == 1 else 'cards'}.", "info")
-    return redirect(url_for("decks.deck_page", deck_id=deck.id))
+    return redirect(url_for("decks.edit_deck", deck_id=deck.id))
