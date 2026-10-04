@@ -201,3 +201,15 @@ def test_landing_offers_sign_up_and_log_in(client):
     html = page(client, "/")
     assert ">Sign up</a>" in html or "Sign up\n" in html
     assert "Log in" in html and "Get Started" not in html
+
+
+def test_weak_points_page_has_no_misconception_list_but_links_to_my_progress(riya_client):
+    html = page(riya_client, "/tracking/weak-points")
+    assert 'class="avatar-card"' in html
+    assert "misconception-list" not in html
+    assert html.count('href="/tracking/#misconceptions-heading"') == 1
+
+
+def test_landing_has_no_arrows_or_emoji(client):
+    html = page(client, "/")
+    assert "→" not in html and "📚" not in html and "Get Started" not in html
