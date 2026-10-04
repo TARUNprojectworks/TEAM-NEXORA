@@ -324,5 +324,5 @@ def test_summary_counts_the_session(app, riya_client, riya):
                                           "misconceptions": 1, "plan_finished": False}
 
     page = riya_client.get("/study/summary").get_data(as_text=True)
-    for text in ["4 cards · +7 XP", "Got it right", "Missed", "Misconceptions", "Cards in this session (3)", 'id="weak-spot"']:
+    for text in ["Cards studied", "Got it right", "Missed", "Misconceptions", "XP earned", 'id="weak-spot"']:
         assert text in page

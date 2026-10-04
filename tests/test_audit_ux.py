@@ -273,7 +273,7 @@ def test_misconception_list_with_explain_and_practice(app, riya_client, riya):
     deck_id, card_ids = make_deck(app, riya)
     make_weak(app, riya, card_ids)
     page = text(riya_client, "/tracking/")
-    assert "Which organelle makes ATP?" in page and "2 open of 2" in page and "Practice this topic" in page
+    assert "Which organelle makes ATP?" in page and "Practise all open (2)" in page
     assert f"/study/explain/{card_ids[0]}" in page and f"/study/cards?ids={card_ids[0]}" in page
 
 
@@ -297,7 +297,7 @@ def test_fixed_weak_spot_is_listed_as_fixed(app, riya_client, riya):
             p.shelf, p.misconception_count = 5, 0
         db.session.commit()
     section = text(riya_client, "/tracking/").split("Weak spots")[1].split("Study calendar")[0]
-    assert 'badge-fixed">Fixed</span>' in section and '<p class="weak-row-topic">Cells</p>' in section
+    assert 'status-fixed">Fixed</span> <span class="weak-topic">Cells' in section
 
 
 def test_study_page_has_the_misconception_note(app, riya_client, riya):

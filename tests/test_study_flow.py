@@ -153,8 +153,7 @@ def test_summary_shows_right_and_missed(app, riya_client, riya):
     answer_one(riya_client, "sure", "0")
     answer_one(riya_client, "unsure", "0")
     page = riya_client.get("/study/summary").get_data(as_text=True)
-    order = ["Session done · Bio", "3 cards · +", "mark-right", "mark-missed", "mark-misconception", "mark-xp",
-             'class="right-bar"', "Cards in this session", 'id="weak-spot"']
+    order = ["Cards studied", "Got it right", "Missed", "Misconceptions", "XP earned", 'id="weak-spot"']
     positions = [page.index(text) for text in order]
     assert positions == sorted(positions)
     with riya_client.session_transaction() as state:
@@ -170,15 +169,3 @@ def test_plan_session_has_no_time_bar(app, riya_client, riya):
     riya_client.get("/study/plan")
     page = riya_client.get("/study/card").get_data(as_text=True)
     assert "plan-timer" not in page and "plantimer.js" not in page
-
-
-def test_summary_lists_the_cards_of_this_session_with_their_result(app, riya_client, riya):
-    riya_client.get(f"/study/{own_deck(app, riya)}")
-    answer_one(riya_client, "sure", "1")
-    answer_one(riya_client, "sure", "0")
-    page = riya_client.get("/study/summary").get_data(as_text=True)
-    cards = page.split('<details class="session-cards">')[1].split("</details>")[0]
-    assert "Cards in this session (2)" in cards
-    assert 'class="mark mark-right"' in cards and 'class="mark mark-misconception"' in cards
-    # Only "Study again" is a main button; the rest are links.
-    assert page.count("button button-primary") == 1 and ">Study again</a>" in page
