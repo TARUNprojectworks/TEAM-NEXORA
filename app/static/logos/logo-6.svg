@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Nexora Notebook">
+  <!-- Three cards fanned out like a hand of flashcards; the front one is highlighted. -->
+  <g stroke="#1C2A39" stroke-width="2.5" stroke-linejoin="round">
+    <rect x="16" y="14" width="30" height="40" rx="2" fill="#FFFFFF" transform="rotate(-18 31 54)"/>
+    <rect x="17" y="12" width="30" height="40" rx="2" fill="#FFFFFF" transform="rotate(-4 32 52)"/>
+    <rect x="18" y="12" width="30" height="40" rx="2" fill="#FFFFFF" transform="rotate(12 33 52)"/>
+  </g>
+  <g transform="rotate(12 33 52)">
+    <path d="M18 21h30" stroke="#E07A7A" stroke-width="2"/>
+    <path d="M22 29h22" stroke="#FFE45C" stroke-width="7" stroke-linecap="round"/>
+    <path d="M23 29h20M23 36h20M23 43h13" stroke="#1C2A39" stroke-width="2" stroke-linecap="round"/>
+  </g>
+</svg>

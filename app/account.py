@@ -107,8 +107,21 @@ def logo_preview():
     return render_template("logo_preview.html")
 
 
-@bp.get("/profile")
+# ---------- Settings pages, one per row of the side menu ----------
+
+@bp.get("/settings/account")
 @login_required
-def profile():
-    """Dedicated profile / account settings page."""
-    return render_template("profile.html")
+def account_page():
+    return render_template("settings/account.html")
+
+
+@bp.get("/settings/theme")
+@login_required
+def theme_page():
+    return render_template("settings/theme.html")
+
+
+@bp.get("/settings/feedback")
+@login_required
+def feedback_page():
+    return render_template("settings/feedback.html")

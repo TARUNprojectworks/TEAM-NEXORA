@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block title %}Create my own · Nexora Notebook{% endblock %}
-{% block back %}{% if deck %}<a class="back-link" href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">← Back</a>{% else %}<a class="back-link" href="{{ url_for('planner.home') }}">← Back</a>{% endif %}{% endblock %}
+{% block back %}{% if deck %}<a class="back-link" href="{{ url_for('decks.edit_deck', deck_id=deck.id) }}">← Back</a>{% else %}<a class="back-link" href="{{ url_for('planner.home') }}">← Back</a>{% endif %}{% endblock %}
 {% block content %}
 <section class="narrow create-own">
   {% if deck %}
     {# Coming back from one of the three screens: the deck already exists. #}
-    <p class="deck-meta"><a href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">{{ deck.title }}</a></p>
+    <p class="deck-meta"><a href="{{ url_for('decks.edit_deck', deck_id=deck.id) }}">{{ deck.title }}</a></p>
     <h1>Add cards</h1>
     <p>How do you want to add cards to <strong>{{ deck.title }}</strong>?</p>
     <div class="add-options">

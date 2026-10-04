@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Nexora Notebook">
+  <!-- Two stacked index cards, the back one tilted, with a yellow highlighter stroke. -->
+  <g transform="rotate(-10 32 32)">
+    <rect x="9" y="14" width="44" height="32" rx="2" fill="#FFFFFF" stroke="#1C2A39" stroke-width="2.5"/>
+  </g>
+  <rect x="13" y="20" width="44" height="32" rx="2" fill="#FFFFFF" stroke="#1C2A39" stroke-width="2.5"/>
+  <path d="M13 29h44" stroke="#E07A7A" stroke-width="2"/>
+  <path d="M19 37h32M19 44h24" stroke="#C9DDF0" stroke-width="2"/>
+  <path d="M17 37.5c9-2 21-2 33-1" stroke="#FFE45C" stroke-width="7" stroke-linecap="round" opacity="0.9"/>
+  <path d="M19 37h32" stroke="#1C2A39" stroke-width="2" stroke-linecap="round"/>
+</svg>

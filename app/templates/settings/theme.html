@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Card theme · Nexora Notebook{% endblock %}
+{% block back %}<a class="back-link" href="{{ url_for('planner.home') }}">← Back</a>{% endblock %}
+{% block content %}
+<section class="narrow settings">
+  <h1>Card theme</h1>
+  <p>One theme for all your decks. Pick one to see it on the card below.</p>
+  {% with prefix = "settings", next = request.path %}{% include "_theme_picker.html" %}{% endwith %}
+</section>
+{% endblock %}

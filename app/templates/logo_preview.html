@@ -4,18 +4,19 @@
 {% block content %}
 <section class="logo-preview">
   <h1>Logo options</h1>
-  <p>Three options, each shown large, at header size and at favicon size. Option 1 is the favicon for now.</p>
+  <p>Three new options next to the current logo. Each is shown large, with the name, and at favicon size.
+    The current logo stays until you pick one.</p>
   <ol class="logo-options">
-    {% for number, name in [(1, "Ruled card with an N"), (2, "Two stacked cards"), (3, "Card with a highlight and a tick")] %}
+    {% for number, name in [(1, "Current: ruled card with an N"), (4, "Stacked cards with a highlighter stroke"),
+                            (5, "Notebook page with a highlighted N"), (6, "A hand of flashcards")] %}
       <li class="logo-option index-card">
-        <p class="card-header">Option {{ number }}: {{ name }}</p>
+        <p class="card-header">{% if number == 1 %}{{ name }}{% else %}Option {{ loop.index0 }}: {{ name }}{% endif %}</p>
         {% set src = url_for('static', filename='logos/logo-' ~ number ~ '.svg') %}
         <div class="logo-sizes">
-          <img src="{{ src }}" alt="Logo option {{ number }}, large" width="128" height="128">
-          <img src="{{ src }}" alt="Logo option {{ number }}, header size" width="28" height="28">
-          <img src="{{ src }}" alt="Logo option {{ number }}, favicon size" width="16" height="16">
+          <img src="{{ src }}" alt="Logo {{ name }}, large" width="128" height="128">
+          <img src="{{ src }}" alt="Logo {{ name }}, favicon size" width="16" height="16">
         </div>
-        <p class="brand logo-sample"><img src="{{ src }}" alt="" width="28" height="28"> Nexora Notebook</p>
+        <p class="logo-lockup"><img src="{{ src }}" alt="" width="40" height="40"> Nexora Notebook</p>
       </li>
     {% endfor %}
   </ol>

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Feedback · Nexora Notebook{% endblock %}
+{% block back %}<a class="back-link" href="{{ url_for('planner.home') }}">← Back</a>{% endblock %}
+{% block content %}
+<section class="narrow settings">
+  <h1>Feedback</h1>
+  <form method="post" action="{{ url_for('account.send_feedback') }}" class="settings-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="next" value="{{ request.path }}">
+    <label for="feedback">What should we fix or add?</label>
+    <textarea id="feedback" name="feedback" rows="5" maxlength="2000" required></textarea>
+    <button type="submit" class="button button-primary">Send feedback</button>
+  </form>
+</section>
+{% endblock %}

@@ -1,71 +1,25 @@
 {# The side menu, opened by the menu button left of the logo. A modal <dialog>: it sits over
-   the page, keeps keyboard focus inside, and closes with Esc, the close button or a click outside. #}
+   the page, keeps keyboard focus inside, and closes with Esc, the close button or a click outside.
+   It holds no forms: each row opens its own small page. Log out submits the form in base.html. #}
 {% from "_icons.html" import icon %}
-<dialog class="drawer" id="drawer" aria-labelledby="drawer-heading">
+<dialog class="drawer" id="drawer" aria-labelledby="drawer-name">
   <div class="drawer-inner">
     <div class="drawer-top">
-      <h2 id="drawer-heading">Menu</h2>
-      <button type="button" class="icon-button" id="drawer-close" aria-label="Close menu" title="Close menu">{{ icon("close") }}</button>
+      <span class="avatar" aria-hidden="true">{{ (current_user.name or "?")[:1] | upper }}</span>
+      <div class="drawer-who">
+        <p class="drawer-name" id="drawer-name">{{ current_user.name }}</p>
+        <p class="drawer-chips">
+          <span class="chip">{{ icon("star") }} {{ current_user.xp }} XP</span>
+          <span class="chip">{{ icon("flame") }} {{ menu_streak }} {{ "day" if menu_streak == 1 else "days" }}</span>
+        </p>
+      </div>
+      <button type="button" class="icon-button icon-muted" id="drawer-close" aria-label="Close menu" title="Close menu">{{ icon("close") }}</button>
     </div>
-
-    <section class="drawer-section" aria-labelledby="account-heading">
-      <h3 id="account-heading">Account</h3>
-      <dl class="account-facts">
-        <div><dt>Name</dt><dd>{{ current_user.name }}</dd></div>
-        <div><dt>Email</dt><dd>{{ current_user.email }}</dd></div>
-        <div><dt>XP</dt><dd>{{ current_user.xp }}</dd></div>
-        <div><dt>Streak</dt><dd>{{ menu_streak }} {{ "day" if menu_streak == 1 else "days" }}</dd></div>
-        <div><dt>Member since</dt><dd>{{ current_user.created_at.strftime("%d %b %Y") }}</dd></div>
-      </dl>
-
-      <details class="drawer-form">
-        <summary>Change name</summary>
-        <form method="post" action="{{ url_for('account.change_name') }}">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <input type="hidden" name="next" value="{{ request.path }}">
-          <label for="drawer-name">New name</label>
-          <input type="text" id="drawer-name" name="name" value="{{ current_user.name }}" maxlength="80" required>
-          <button type="submit" class="button button-small">Save name</button>
-        </form>
-      </details>
-
-      <details class="drawer-form">
-        <summary>Change password</summary>
-        <form method="post" action="{{ url_for('account.change_password') }}">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <input type="hidden" name="next" value="{{ request.path }}">
-          <label for="drawer-current">Current password</label>
-          <input type="password" id="drawer-current" name="current_password" autocomplete="current-password" required>
-          <label for="drawer-new">New password (8+ characters)</label>
-          <input type="password" id="drawer-new" name="new_password" autocomplete="new-password" minlength="8" required>
-          <label for="drawer-confirm">New password again</label>
-          <input type="password" id="drawer-confirm" name="confirm_password" autocomplete="new-password" required>
-          <button type="submit" class="button button-small">Change password</button>
-        </form>
-      </details>
-    </section>
-
-    <section class="drawer-section" aria-label="Card theme">
-      {% with prefix = "drawer", next = request.path %}{% include "_theme_picker.html" %}{% endwith %}
-    </section>
-
-    <section class="drawer-section" aria-labelledby="feedback-heading">
-      <h3 id="feedback-heading">Feedback</h3>
-      <form method="post" action="{{ url_for('account.send_feedback') }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="hidden" name="next" value="{{ request.path }}">
-        <label for="drawer-feedback" class="visually-hidden">Your feedback</label>
-        <textarea id="drawer-feedback" name="feedback" rows="3" maxlength="2000"
-                  placeholder="What should we fix or add?"></textarea>
-        <button type="submit" class="button button-small">Send feedback</button>
-      </form>
-    </section>
-
-    <section class="drawer-section">
-      <form method="post" action="{{ url_for('auth.logout') }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button type="submit" class="button">Log out</button>
-      </form>
-    </section>
+    <nav class="drawer-rows" aria-label="Menu">
+      <a class="drawer-row" href="{{ url_for('account.account_page') }}"><span class="row-icon">{{ icon("user") }}</span> Account {{ icon("chevron") }}</a>
+      <a class="drawer-row" href="{{ url_for('account.theme_page') }}"><span class="row-icon">{{ icon("palette") }}</span> Card theme {{ icon("chevron") }}</a>
+      <a class="drawer-row" href="{{ url_for('account.feedback_page') }}"><span class="row-icon">{{ icon("message") }}</span> Feedback {{ icon("chevron") }}</a>
+      <button type="submit" class="drawer-row" form="logout-form"><span class="row-icon">{{ icon("logout") }}</span> Log out</button>
+    </nav>
   </div>
 </dialog>

@@ -31,11 +31,32 @@ def test_header_has_menu_button_and_no_log_out(riya_client):
     assert "logos/logo-1.svg" in html
 
 
-def test_menu_shows_account_theme_feedback_and_log_out(riya_client):
+def test_menu_shows_who_and_four_rows_without_forms(riya_client):
     drawer = page(riya_client, "/home").split('<dialog class="drawer"')[1].split("</dialog>")[0]
-    for text in ["Riya", "riya@example.com", "XP", "Streak", "Member since", "Change name", "Change password",
-                 "Card theme", "Feedback", "Log out"]:
-        assert text in drawer
+    assert '<span class="avatar" aria-hidden="true">R</span>' in drawer
+    assert "Riya" in drawer and "0 XP" in drawer and "0 days" in drawer
+    for row in ['href="/settings/account"', 'href="/settings/theme"', 'href="/settings/feedback"', 'form="logout-form"']:
+        assert row in drawer
+    assert "<form" not in drawer and "<input" not in drawer and "<textarea" not in drawer
+
+
+def test_log_out_from_the_menu(riya_client):
+    html = page(riya_client, "/home")
+    assert '<form method="post" action="/logout" id="logout-form" hidden>' in html
+    riya_client.post("/logout")
+    assert riya_client.get("/home").status_code == 302
+
+
+@pytest.mark.parametrize("url, texts", [
+    ("/settings/account", ["Member since", "riya@example.com", "Change name", "Change password"]),
+    ("/settings/theme", ["Card theme", "data-theme-picker", "preview-card"]),
+    ("/settings/feedback", ["What should we fix or add?", "Send feedback"]),
+])
+def test_each_menu_row_has_its_own_page(riya_client, url, texts):
+    html = page(riya_client, url)
+    for text in texts:
+        assert text in html
+    assert 'value="' + url + '"' in html  # forms come back to this page
 
 
 def test_logged_out_pages_have_no_menu(client):
@@ -164,7 +185,19 @@ def test_flash_messages_have_a_close_button(riya_client):
     assert 'class="flash-close" aria-label="Close message"' in html
 
 
-def test_logo_preview_shows_three_options(riya_client):
+def test_logo_preview_shows_three_new_options_next_to_the_current_one(riya_client):
     html = page(riya_client, "/logo-preview")
-    for number in (1, 2, 3):
+    for number in (1, 4, 5, 6):
         assert f"logos/logo-{number}.svg" in html
+    assert 'rel="icon" href="/static/logos/logo-1.svg"' in html  # unchanged until one is picked
+
+
+def test_weak_points_page_and_nav_link(riya_client):
+    assert 'href="/tracking/weak-points"' in page(riya_client, "/home")
+    assert riya_client.get("/tracking/weak-points").status_code == 200
+
+
+def test_landing_offers_sign_up_and_log_in(client):
+    html = page(client, "/")
+    assert ">Sign up</a>" in html or "Sign up\n" in html
+    assert "Log in" in html and "Get Started" not in html

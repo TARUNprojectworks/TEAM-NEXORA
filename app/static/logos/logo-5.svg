@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Nexora Notebook">
+  <!-- A spiral notebook page: rings on top, a red margin line and a highlighted N. -->
+  <rect x="10" y="12" width="44" height="44" rx="3" fill="#FFFFFF" stroke="#1C2A39" stroke-width="2.5"/>
+  <path d="M20 12v44" stroke="#E07A7A" stroke-width="2"/>
+  <g fill="none" stroke="#1C2A39" stroke-width="2.5" stroke-linecap="round">
+    <path d="M18 16V8M28 16V8M38 16V8M48 16V8"/>
+  </g>
+  <rect x="25" y="27" width="24" height="20" rx="2" fill="#FFE45C"/>
+  <path d="M30 44V30l14 14V30" fill="none" stroke="#1C2A39" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

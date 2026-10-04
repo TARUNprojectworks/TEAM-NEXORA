@@ -206,7 +206,7 @@ def test_save_cards_creates_the_new_deck_with_edited_cards(app, riya_client, riy
     response = riya_client.post("/maker/save", data=save_form(target, cards))
     with app.app_context():
         deck = db.session.query(Deck).filter_by(title="Bio notes").one()
-        assert response.headers["Location"].endswith(f"/decks/{deck.id}")
+        assert response.headers["Location"].endswith(f"/decks/{deck.id}/edit")
         assert db.session.get(UserDeck, (riya, deck.id)).mode == "exam"
         card = db.session.query(Card).filter_by(deck_id=deck.id).one()
         assert (card.question, card.source, card.owner_id, card.importance) == (

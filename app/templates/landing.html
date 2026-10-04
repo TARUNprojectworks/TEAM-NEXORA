@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Nexora Recall — Smart Flashcard Learning{% endblock %}
+{% block title %}Nexora Notebook — Smart Flashcard Learning{% endblock %}
 
 {# Suppress the standard site-header — landing has its own full navbar #}
 {% block header %}{% endblock %}
@@ -294,9 +294,9 @@ body { background: #EDF1F7; }
 
 {# ── NAVBAR ── #}
 <nav class="landing-nav" aria-label="Site navigation">
-  <a class="landing-nav-brand" href="{{ url_for('auth.landing') }}" aria-label="Nexora Recall home">
+  <a class="landing-nav-brand" href="{{ url_for('auth.landing') }}" aria-label="Nexora Notebook home">
     <img src="{{ url_for('static', filename='logos/logo-1.svg') }}" alt="" width="28" height="28">
-    Nexora Recall
+    Nexora Notebook
   </a>
 
   <div class="landing-nav-links">
@@ -315,10 +315,10 @@ body { background: #EDF1F7; }
   <div class="landing-nav-actions">
     {% if current_user.is_authenticated %}
       <a class="btn-nav-login" href="{{ url_for('planner.home') }}" id="nav-go-home">Go to Home</a>
-      <a class="btn-nav-cta" href="{{ url_for('account.profile') }}" id="nav-profile">Profile</a>
+      <a class="btn-nav-cta" href="{{ url_for('account.account_page') }}" id="nav-profile">Profile</a>
     {% else %}
-      <a class="btn-nav-login" href="{{ url_for('auth.login') }}" id="nav-login">Log In</a>
-      <a class="btn-nav-cta" href="{{ url_for('auth.signup') }}" id="nav-cta">Get Started</a>
+      <a class="btn-nav-login" href="{{ url_for('auth.login') }}" id="nav-login">Log in</a>
+      <a class="btn-nav-cta" href="{{ url_for('auth.signup') }}" id="nav-cta">Sign up</a>
     {% endif %}
   </div>
 </nav>
@@ -332,7 +332,7 @@ body { background: #EDF1F7; }
     Ace your exams.
   </h1>
   <p>
-    Nexora Recall shows you the right card at the right time, automatically finds
+    Nexora Notebook shows you the right card at the right time, automatically finds
     topics you struggle with, and builds your daily study plan — all in one place.
   </p>
   <div class="hero-buttons">
@@ -346,11 +346,10 @@ body { background: #EDF1F7; }
       </a>
     {% else %}
       <a class="btn-hero-primary" href="{{ url_for('auth.signup') }}" id="hero-cta-primary">
-        Get Started — it's free
-        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l6 5-6 5"/></svg>
+        Sign up
       </a>
       <a class="btn-hero-secondary" href="{{ url_for('auth.login') }}" id="hero-cta-secondary">
-        Log In
+        Log in
       </a>
     {% endif %}
   </div>
@@ -518,7 +517,7 @@ body { background: #EDF1F7; }
 
     {% if current_user.is_authenticated %}
     <a class="jump-card"
-       href="{{ url_for('account.profile') }}"
+       href="{{ url_for('account.account_page') }}"
        id="jump-profile">
       <div class="jump-icon" style="background:#F5F8FC;" aria-hidden="true">👤</div>
       <div class="jump-body">
@@ -557,7 +556,7 @@ body { background: #EDF1F7; }
 {# ── FINAL CTA ── #}
 <section class="final-cta" aria-labelledby="cta-heading">
   <h2 id="cta-heading">Ready to study smarter?</h2>
-  <p>Join Nexora Recall and turn passive revision into active mastery.</p>
+  <p>Join Nexora Notebook and turn passive revision into active mastery.</p>
   <div class="hero-buttons" style="justify-content:center;">
     {% if current_user.is_authenticated %}
       <a class="btn-cta-white" href="{{ url_for('planner.home') }}" id="cta-go-home">
@@ -568,10 +567,10 @@ body { background: #EDF1F7; }
       </a>
     {% else %}
       <a class="btn-cta-white" href="{{ url_for('auth.signup') }}" id="cta-get-started">
-        Get Started →
+        Sign up
       </a>
       <a class="btn-cta-outline" href="{{ url_for('auth.login') }}" id="cta-login">
-        Log In
+        Log in
       </a>
     {% endif %}
   </div>
@@ -579,7 +578,7 @@ body { background: #EDF1F7; }
 
 {# ── FOOTER ── #}
 <footer class="landing-footer">
-  <p>© 2025 Nexora Recall. Built for students, by students.</p>
+  <p>© 2025 Nexora Notebook. Built for students, by students.</p>
 </footer>
 
 {# Smooth scroll for anchor links #}

@@ -1,555 +1,115 @@
 {% extends "base.html" %}
-{% block title %}Home · Nexora Recall{% endblock %}
-
-{% block head %}
-<style>
-/* ───────────────────────────────────────────
-   HOME PAGE  —  Nexora Recall
-   Clean educational SaaS design
-   Palette: blue-gray background, white cards,
-   navy text, blue primary accent.
-─────────────────────────────────────────── */
-
-/* Override body background for home only */
-body { background: #EDF1F7; }
-
-/* ── Layout wrapper ── */
-.home-wrap {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 24px 16px 56px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-/* ── TODAY'S PLAN card ── */
-.plan-card {
-  background: #fff;
-  border: 1px solid #D6DFE8;
-  border-radius: 12px;
-  padding: 24px 28px;
-  box-shadow: 0 1px 4px rgba(28,42,57,0.06);
-}
-.plan-card-top {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 4px;
-}
-.plan-card-top h2 {
-  margin: 0;
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: #1C2A39;
-  display: flex; align-items: center; gap: 8px;
-}
-.plan-card-icon {
-  width: 32px; height: 32px;
-  background: #EBF2FB;
-  border-radius: 8px;
-  display: inline-flex; align-items: center; justify-content: center;
-  color: #2B6CB0;
-  flex-shrink: 0;
-}
-
-/* Plan size selector */
-.plan-size-group {
-  display: inline-flex;
-  border: 1.5px solid #C9D6E3;
-  border-radius: 8px;
-  overflow: hidden;
-  background: #F5F8FC;
-}
-.plan-size-group button {
-  padding: 6px 14px;
-  border: 0;
-  border-left: 1px solid #C9D6E3;
-  background: transparent;
-  color: #4A5A6B;
-  font: inherit; font-size: 0.875rem; font-weight: 600;
-  cursor: pointer;
-  transition: background 0.12s ease;
-}
-.plan-size-group button:first-child { border-left: 0; }
-.plan-size-group button[aria-pressed="true"] {
-  background: #2B6CB0; color: #fff; font-weight: 700;
-}
-.plan-size-group button:hover:not([aria-pressed="true"]) { background: #E8EFF7; }
-
-/* Plan breakdown pills */
-.plan-pills {
-  display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0;
-}
-.plan-pill {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 5px 12px;
-  border-radius: 100px;
-  font-size: 0.8125rem; font-weight: 600;
-  background: #F0F4FA; color: #3A5A78;
-  border: 1px solid #C9D6E3;
-}
-.plan-pill-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-}
-.plan-pill-due  .plan-pill-dot { background: #2B6CB0; }
-.plan-pill-weak .plan-pill-dot { background: #D69E2E; }
-.plan-pill-exam .plan-pill-dot { background: #C05621; }
-.plan-pill-new  .plan-pill-dot { background: #2D7D46; }
-
-/* Plan list */
-.plan-list-table {
-  list-style: none; margin: 0 0 16px; padding: 0;
-  border-top: 1px solid #E8EFF7;
-}
-.plan-list-table li {
-  display: flex; justify-content: space-between; align-items: center;
-  gap: 8px 16px;
-  padding: 9px 0;
-  border-bottom: 1px solid #E8EFF7;
-  font-size: 0.9375rem;
-}
-.plan-topic { color: #1C2A39; font-weight: 500; }
-.plan-count  { color: #6B7F93; font-size: 0.875rem; white-space: nowrap; }
-
-/* Plan CTA */
-.plan-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 16px; }
-.plan-cta .btn-primary {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 10px 22px; border-radius: 8px;
-  background: #2B6CB0; color: #fff;
-  font: inherit; font-weight: 700; font-size: 0.9375rem;
-  border: 0; text-decoration: none; cursor: pointer;
-  transition: background 0.15s ease;
-}
-.plan-cta .btn-primary:hover { background: #1E4E8C; }
-
-/* Empty plan state */
-.plan-empty {
-  text-align: center; padding: 32px 16px 16px;
-}
-.plan-empty-icon {
-  width: 64px; height: 64px; margin: 0 auto 16px;
-  background: #EBF2FB; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center; color: #2B6CB0;
-}
-.plan-empty h3 { margin: 0 0 6px; font-size: 1.0625rem; color: #1C2A39; }
-.plan-empty p { margin: 0 0 18px; color: #6B7F93; font-size: 0.9375rem; max-width: 36ch; margin-left: auto; margin-right: auto; }
-.plan-empty-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-.btn-outline-sm {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 8px 16px; border-radius: 8px;
-  border: 1.5px solid #C9D6E3;
-  background: #fff; color: #1C2A39;
-  font: inherit; font-size: 0.875rem; font-weight: 600;
-  text-decoration: none; cursor: pointer;
-  transition: border-color 0.12s ease, background 0.12s ease;
-}
-.btn-outline-sm:hover { border-color: #2B6CB0; background: #F0F4FA; color: #2B6CB0; }
-
-/* ── 2×2 action cards grid ── */
-.action-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-.action-card {
-  background: #fff;
-  border: 1px solid #D6DFE8;
-  border-radius: 12px;
-  padding: 20px 22px;
-  text-decoration: none; color: inherit;
-  display: flex; flex-direction: column; gap: 8px;
-  transition: box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
-  box-shadow: 0 1px 4px rgba(28,42,57,0.05);
-  position: relative; overflow: hidden;
-}
-.action-card:hover {
-  box-shadow: 0 6px 20px rgba(28,42,57,0.1);
-  transform: translateY(-2px);
-  border-color: #A8BFDA;
-}
-/* Highlight the Weak Points card slightly */
-.action-card.action-card-featured {
-  border-color: #2B6CB0;
-  background: linear-gradient(135deg, #fff 80%, #EBF2FB 100%);
-}
-
-.action-card-header {
-  display: flex; align-items: center; gap: 10px; justify-content: space-between;
-}
-.action-card-icon {
-  width: 38px; height: 38px; border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; font-size: 1.125rem;
-}
-.ac-icon-blue   { background: #EBF2FB; color: #2B6CB0; }
-.ac-icon-indigo { background: #EEF2FF; color: #4338CA; }
-.ac-icon-amber  { background: #FFFBEB; color: #D97706; }
-.ac-icon-green  { background: #ECFDF5; color: #059669; }
-
-.action-card-chevron { color: #A0AEC0; flex-shrink: 0; }
-
-.action-card h3 {
-  margin: 0; font-size: 1rem; font-weight: 700; color: #1C2A39;
-}
-.action-card p {
-  margin: 0; font-size: 0.875rem; color: #6B7F93; line-height: 1.45;
-}
-/* Sub-tags */
-.action-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
-.action-tag {
-  padding: 2px 8px; border-radius: 4px;
-  background: #F0F4FA; color: #4A6080;
-  font-size: 0.75rem; font-weight: 600;
-}
-.action-card-featured .action-tag { background: #D5E5F7; color: #1E4E8C; }
-
-.action-cta {
-  margin-top: 6px;
-  font-size: 0.8125rem; font-weight: 700; color: #2B6CB0;
-}
-.action-card-featured .action-cta { color: #1E4E8C; }
-
-/* ── Continue Studying section ── */
-.section-card {
-  background: #fff;
-  border: 1px solid #D6DFE8;
-  border-radius: 12px;
-  padding: 20px 24px;
-  box-shadow: 0 1px 4px rgba(28,42,57,0.05);
-}
-.section-head {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 12px; margin-bottom: 14px;
-}
-.section-head h2 {
-  margin: 0; font-size: 1.0625rem; font-weight: 700; color: #1C2A39;
-  display: flex; align-items: center; gap: 8px;
-}
-.section-link { font-size: 0.875rem; font-weight: 600; color: #2B6CB0; text-decoration: none; }
-.section-link:hover { text-decoration: underline; }
-
-/* Continue studying row */
-.continue-row {
-  display: flex; align-items: center; flex-wrap: wrap;
-  gap: 12px 20px;
-  padding: 14px 16px;
-  background: #F5F8FC;
-  border: 1px solid #D6DFE8;
-  border-radius: 10px;
-}
-.continue-info { flex: 1; min-width: 0; }
-.continue-deck { font-weight: 700; font-size: 0.9375rem; color: #1C2A39; margin: 0 0 2px; }
-.continue-meta { font-size: 0.8125rem; color: #6B7F93; }
-.continue-empty {
-  padding: 16px;
-  text-align: center;
-  color: #6B7F93; font-size: 0.9375rem;
-}
-.continue-empty a { color: #2B6CB0; font-weight: 600; }
-
-/* ── Weak Points preview ── */
-.weak-preview-list { display: flex; flex-direction: column; gap: 10px; }
-.weak-preview-row {
-  display: flex; align-items: center; gap: 12px;
-  padding: 12px 14px;
-  border: 1px solid #D6DFE8;
-  border-radius: 10px;
-  background: #F9FBFD;
-  transition: background 0.12s ease;
-}
-.weak-preview-row:hover { background: #EBF2FB; border-color: #A8BFDA; }
-.weak-preview-icon {
-  width: 36px; height: 36px; flex-shrink: 0;
-  background: #FFF8E6; border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  color: #D97706;
-}
-.weak-preview-body { flex: 1; min-width: 0; }
-.weak-preview-name {
-  font-weight: 700; font-size: 0.9375rem; color: #1C2A39; margin: 0 0 4px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.weak-preview-meta { font-size: 0.8rem; color: #6B7F93; margin: 0 0 5px; }
-.wp-bar { height: 5px; background: #D6DFE8; border-radius: 100px; overflow: hidden; }
-.wp-bar-fill { height: 100%; border-radius: 100px; background: #D69E2E; transition: width 0.3s ease; }
-.wp-bar-fill.wp-high { background: #E53E3E; }
-.wp-bar-fill.wp-med  { background: #D97706; }
-.wp-bar-fill.wp-low  { background: #2B6CB0; }
-.weak-fix-btn {
-  flex-shrink: 0;
-  padding: 6px 14px; border-radius: 6px;
-  border: 1.5px solid #2B6CB0;
-  background: #fff; color: #2B6CB0;
-  font: inherit; font-size: 0.8125rem; font-weight: 700;
-  text-decoration: none; cursor: pointer;
-  transition: background 0.12s ease;
-  white-space: nowrap;
-}
-.weak-fix-btn:hover { background: #EBF2FB; }
-
-.empty-state {
-  text-align: center; padding: 24px;
-  color: #6B7F93; font-size: 0.9375rem;
-}
-.empty-state a { color: #2B6CB0; font-weight: 600; }
-
-/* ── Refresh plan ── */
-.plan-refresh { margin-top: 10px; }
-.plan-refresh .link-button {
-  color: #6B7F93; text-decoration: underline; font-size: 0.875rem;
-}
-
-/* ── Welcome back banner ── */
-.welcome-banner {
-  padding: 12px 18px;
-  background: #EBF2FB; border-left: 4px solid #2B6CB0;
-  border-radius: 8px;
-  font-size: 0.9375rem; color: #1C2A39;
-}
-
-@media (max-width: 640px) {
-  .action-grid { grid-template-columns: 1fr; }
-  .plan-card { padding: 18px; }
-  .home-wrap { padding: 16px 12px 48px; gap: 16px; }
-  .section-card { padding: 16px; }
-}
-</style>
-{% endblock %}
-
+{% block title %}Home · Nexora Notebook{% endblock %}
 {% block content %}
-<div class="home-wrap">
-
-  {# ── Welcome back ── #}
-  {% if welcome_back %}
-  <div class="welcome-banner" role="status">
-    Welcome back! <strong>{{ welcome_back }} {{ "card" if welcome_back == 1 else "cards" }}</strong> due today.
-    Today's plan takes a comfortable slice; the rest waits for the next few days.
+<section class="home">
+  <div class="home-top">
+    <h1>Hi {{ user.name }}</h1>
+    <p class="stats">
+      <span>Streak: {{ streak }} {{ "day" if streak == 1 else "days" }}</span>
+      <span>XP: {{ user.xp }}</span>
+    </p>
   </div>
+
+  {% if welcome_back %}
+    <p class="welcome-back" role="status">Welcome back. {{ welcome_back }} {{ "card" if welcome_back == 1 else "cards" }} due.
+      Today's plan takes a normal-sized slice; the rest waits for the next few days.</p>
   {% endif %}
 
-  {# ── TODAY'S PLAN ── #}
-  <div class="plan-card">
-    <div class="plan-card-top">
-      <h2>
-        <span class="plan-card-icon" aria-hidden="true">
-          <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8h14M7 2v3M13 2v3"/>
-          </svg>
-        </span>
-        Today's Plan
-      </h2>
-      <form method="post" action="{{ url_for('planner.change_plan_length') }}" class="plan-size-group">
+  <section class="plan-box" aria-labelledby="plan-heading">
+    <div class="plan-top">
+      <h2 id="plan-heading">Today's plan</h2>
+      <form method="post" action="{{ url_for('planner.change_plan_length') }}" class="plan-length">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <span class="visually-hidden" id="plan-sz-label">Plan size</span>
-        {% for value, size in choices.items() %}
-          <button type="submit" name="size" value="{{ value }}"
-                  aria-pressed="{{ 'true' if plan.size == size else 'false' }}"
-                  aria-labelledby="plan-sz-label">
-            {{ "All" if size is none else size }}
-          </button>
-        {% endfor %}
+        <span class="plan-length-label" id="plan-length-label">Cards</span>
+        <div class="segmented" role="group" aria-labelledby="plan-length-label">
+          {% for value, size in choices.items() %}
+            <button type="submit" name="size" value="{{ value }}"
+                    aria-pressed="{{ 'true' if plan.size == size else 'false' }}">
+              {{ "All" if size is none else size }}
+            </button>
+          {% endfor %}
+        </div>
       </form>
     </div>
 
     {% if plan.card_ids %}
-      {# Breakdown pills #}
-      <div class="plan-pills">
-        <span class="plan-pill plan-pill-due">
-          <span class="plan-pill-dot"></span>
-          {{ plan.card_ids | length }} cards total
-        </span>
-        <span class="plan-pill">~{{ total_minutes }} min</span>
-        {% if cards_done %}<span class="plan-pill">{{ cards_done }} done</span>{% endif %}
-      </div>
-
-      {# Group list #}
-      <ul class="plan-list-table">
-        {% for group in groups %}
-        <li>
-          <span class="plan-topic">{{ group.deck }} · {{ group.topic }}</span>
-          <span class="plan-count">{{ group.cards }} {{ "card" if group.cards == 1 else "cards" }} · {{ group.minutes }} min</span>
-        </li>
+      <p class="plan-meta">
+        {{ plan.card_ids | length }} cards · about {{ total_minutes }} min
+        {% if cards_done %} · {{ cards_done }} done{% endif %}
+      </p>
+      {% macro plan_rows(rows) %}
+        {% for group in rows %}
+          <li>
+            <span class="plan-topic">{{ group.deck }} · {{ group.topic }}</span>
+            <span class="plan-count">{{ group.cards }} {{ "card" if group.cards == 1 else "cards" }} · {{ group.minutes }} min</span>
+          </li>
         {% endfor %}
-      </ul>
-
+      {% endmacro %}
+      {# The first 3 groups; the rest open from "+N more" (a plain <details>, no JavaScript). #}
+      <ul class="plan-list">{{ plan_rows(groups[:3]) }}</ul>
+      {% if groups | length > 3 %}
+        <details class="plan-more">
+          <summary>+{{ groups | length - 3 }} more</summary>
+          <ul class="plan-list">{{ plan_rows(groups[3:]) }}</ul>
+        </details>
+      {% endif %}
       {% if plan.moved %}
-        <p style="margin:0 0 12px;font-size:0.875rem;color:#6B7F93;">{{ plan.moved }} {{ "card" if plan.moved == 1 else "cards" }} moved to tomorrow.</p>
+        <p class="plan-moved">{{ plan.moved }} {{ "card" if plan.moved == 1 else "cards" }} moved to tomorrow.</p>
       {% endif %}
 
       {% if plan_finished and not cards_left %}
-        <p style="font-weight:700;color:#2D7D46;margin:0 0 12px;padding:10px 14px;background:#ECFDF5;border-radius:8px;border-left:4px solid #2D7D46;">
-          🎉 Done for today! You earned 10 bonus XP.
-        </p>
-        <div class="plan-cta">
-          <a class="btn-primary" href="{{ url_for('study.start_revise') }}">Revise today's cards</a>
-          <a class="btn-outline-sm" href="{{ url_for('decks.my_decks') }}">Study more</a>
+        <div class="plan-finished">
+          <p class="plan-done">Done for today. You earned 10 bonus XP.</p>
+          <div class="actions-inline">
+            <a class="button" href="{{ url_for('study.start_revise') }}">Revise today's cards again</a>
+            <a class="button" href="{{ url_for('decks.my_decks') }}">Keep going</a>
+          </div>
+          <p class="field-hint">Revising uses Quick Revise: no XP and your progress doesn't change.
+            "Keep going" opens your decks for more Smart Study.</p>
         </div>
       {% elif cards_left %}
-        <div class="plan-cta">
-          <a class="btn-primary" href="{{ url_for('study.start_plan') }}">
-            {{ "Continue plan" if cards_done else "Start today's plan" }}
-            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l6 5-6 5"/></svg>
-          </a>
-        </div>
+        <a class="button button-primary" href="{{ url_for('study.start_plan') }}">
+          {{ "Continue today's plan" if cards_done else "Start today's plan" }}
+        </a>
       {% endif %}
-
     {% else %}
-      {# Empty plan state #}
-      <div class="plan-empty">
-        <div class="plan-empty-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M8 7h8M8 11h5"/>
-          </svg>
-        </div>
-        <h3>Your study plan is ready to be built</h3>
-        <p>Explore a deck, create your own cards, or check your weak points to get started.</p>
-        <div class="plan-empty-actions">
-          <a class="btn-primary" href="{{ url_for('decks.ready_decks') }}">Explore Decks</a>
-          <a class="btn-outline-sm" href="{{ url_for('decks.create_my_own') }}">Create Cards</a>
-          <a class="btn-outline-sm" href="{{ url_for('tracking.weak_points') }}">Weak Points</a>
-        </div>
-      </div>
+      <p>Nothing to study today. Add a deck from the Deck Library or make your own, and your plan shows up here.</p>
     {% endif %}
-
-    <form method="post" action="{{ url_for('planner.refresh_plan') }}" class="plan-refresh">
+    <form method="post" action="{{ url_for('planner.refresh_plan') }}" class="refresh-plan">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <button type="submit" class="link-button">Refresh plan</button>
     </form>
-  </div>
+  </section>
 
-  {# ── Weak Spot Box (if active) ── #}
   {% if weak_spot %}
-    {% with box = weak_spot, show_links = true %}{% include "_weak_spot_box.html" %}{% endwith %}
+    {% with box = weak_spot, show_links = false %}{% include "_weak_spot_box.html" %}{% endwith %}
   {% endif %}
 
-  {# ── 2×2 Action Cards ── #}
-  <div class="action-grid">
+  {% set open_weak = weak_preview | selectattr("status", "equalto", "Open") | list %}
+  {% if open_weak %}
+    <section class="weak-preview" aria-labelledby="weak-preview-heading">
+      <h2 id="weak-preview-heading">Weak points</h2>
+      <ul class="plan-list">
+        {% for row in open_weak %}
+          <li>
+            <span class="plan-topic"><mark>{{ row.topic }}</mark> · {{ row.deck }}</span>
+            <span class="plan-count">{{ row.weak_percent }}% still learning</span>
+          </li>
+        {% endfor %}
+      </ul>
+      <a href="{{ url_for('tracking.weak_points') }}">See all weak points</a>
+    </section>
+  {% endif %}
 
-    {# Card 1: Deck Library #}
-    <a class="action-card" href="{{ url_for('decks.ready_decks') }}" id="action-deck-library">
-      <div class="action-card-header">
-        <span class="action-card-icon ac-icon-blue" aria-hidden="true">
-          <svg viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="6" height="13" rx="1"/><rect x="10" y="4" width="8" height="13" rx="1"/><path d="M5 8h2M12 8h4M12 11h4M5 11h2"/></svg>
-        </span>
-        <svg class="action-card-chevron" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l6 5-6 5"/></svg>
-      </div>
-      <h3>Explore the Deck Library</h3>
-      <p>Ready-made decks for semester, placement and competitive categories.</p>
-      <div class="action-tags">
-        <span class="action-tag">Semester</span>
-        <span class="action-tag">Placement</span>
-        <span class="action-tag">Competitive</span>
-      </div>
+  <div class="choices">
+    <a class="choice" href="{{ url_for('decks.ready_decks') }}">
+      <span class="choice-title">Explore the Deck Library</span>
+      <span class="choice-text">Semester, placement and competitive exam decks.</span>
     </a>
-
-    {# Card 2: Create My Own #}
-    <a class="action-card" href="{{ url_for('decks.create_my_own') }}" id="action-create-own">
-      <div class="action-card-header">
-        <span class="action-card-icon ac-icon-indigo" aria-hidden="true">
-          <svg viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v14M3 10h14"/></svg>
-        </span>
-        <svg class="action-card-chevron" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l6 5-6 5"/></svg>
-      </div>
-      <h3>Create My Own</h3>
-      <p>Type cards manually, paste your notes, or upload a photo of handwritten notes.</p>
-      <div class="action-tags">
-        <span class="action-tag">Type cards</span>
-        <span class="action-tag">Paste notes</span>
-        <span class="action-tag">Upload photo</span>
-      </div>
-    </a>
-
-    {# Card 3: Weak Points (featured) #}
-    <a class="action-card action-card-featured" href="{{ url_for('tracking.weak_points') }}" id="action-weak-points">
-      <div class="action-card-header">
-        <span class="action-card-icon ac-icon-amber" aria-hidden="true">
-          <svg viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8"/><path d="M10 6v4l3 3"/></svg>
-        </span>
-        <svg class="action-card-chevron" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l6 5-6 5"/></svg>
-      </div>
-      <h3>Explore Weak Points</h3>
-      <p>Topics you struggle with, misconceptions and cards that need more review.</p>
-      <div class="action-cta">Focus on what you need most →</div>
-    </a>
-
-    {# Card 4: My Progress #}
-    <a class="action-card" href="{{ url_for('tracking.tracking_page') }}" id="action-my-progress">
-      <div class="action-card-header">
-        <span class="action-card-icon ac-icon-green" aria-hidden="true">
-          <svg viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14l4-5 3 3 3-4 4 6"/><rect x="1" y="2" width="18" height="16" rx="2"/></svg>
-        </span>
-        <svg class="action-card-chevron" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l6 5-6 5"/></svg>
-      </div>
-      <h3>My Progress</h3>
-      <p>Track your mastery, streak, study activity and learning analytics.</p>
-      <div class="action-tags">
-        <span class="action-tag">Mastery %</span>
-        <span class="action-tag">Streak {{ streak }} days</span>
-        <span class="action-tag">Analytics</span>
-      </div>
+    <a class="choice" href="{{ url_for('decks.create_my_own') }}">
+      <span class="choice-title">Create My Own</span>
+      <span class="choice-text">Type cards, paste notes or upload a photo of your notes.</span>
     </a>
   </div>
-
-  {# ── Continue Studying ── #}
-  <div class="section-card">
-    <div class="section-head">
-      <h2>
-        <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 3 19 10 5 17 5 3"/></svg>
-        Continue Studying
-      </h2>
-      <a class="section-link" href="{{ url_for('decks.my_decks') }}">All my decks →</a>
-    </div>
-
-    {% if plan.card_ids and cards_left %}
-      <div class="continue-row">
-        <div class="continue-info">
-          <p class="continue-deck">Today's plan — {{ cards_left }} {{ "card" if cards_left == 1 else "cards" }} left</p>
-          <p class="continue-meta">~{{ total_minutes }} min · Smart Study</p>
-        </div>
-        <a class="btn-primary" href="{{ url_for('study.start_plan') }}" style="padding:8px 18px;font-size:0.875rem;">
-          Continue →
-        </a>
-      </div>
-    {% else %}
-      <div class="continue-empty">
-        No recent study session found.
-        <a href="{{ url_for('decks.ready_decks') }}">Explore a deck</a> or
-        <a href="{{ url_for('tracking.weak_points') }}">check your weak points</a> to get started.
-      </div>
-    {% endif %}
-  </div>
-
-
-  {# ── Browse Decks ── #}
-  <div class="section-card">
-    <div class="section-head">
-      <h2>
-        <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="6" height="13" rx="1"/><rect x="10" y="4" width="8" height="13" rx="1"/><path d="M5 8h2M12 8h4M12 11h4M5 11h2"/></svg>
-        Browse Decks
-      </h2>
-    </div>
-    <div style="display:flex;flex-wrap:wrap;gap:10px;">
-      <a class="btn-primary" href="{{ url_for('decks.my_decks') }}" id="home-my-decks-btn"
-         style="display:inline-flex;align-items:center;gap:6px;padding:10px 22px;font-size:0.9375rem;">
-        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h4v9H2zM8 4h6v9H8z"/></svg>
-        My Decks
-      </a>
-      <a class="btn-outline-sm" href="{{ url_for('decks.ready_decks') }}" id="home-deck-library-btn"
-         style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;font-size:0.9375rem;">
-        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2h8a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z"/><path d="M6 6h4M6 9h4"/></svg>
-        Deck Library
-      </a>
-      <a class="btn-outline-sm" href="{{ url_for('decks.create_my_own') }}" id="home-create-deck-btn"
-         style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;font-size:0.9375rem;">
-        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>
-        Create Deck
-      </a>
-    </div>
-  </div>
-
-</div>
+</section>
 {% endblock %}
