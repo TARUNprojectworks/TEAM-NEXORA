@@ -39,7 +39,13 @@
       {% endif %}
     </nav>
   </header>
-  {% if current_user.is_authenticated %}{% include "_drawer.html" %}{% endif %}
+  {% if current_user.is_authenticated %}
+    {% include "_drawer.html" %}
+    {# Log out in the side menu submits this form (the menu itself holds no forms). #}
+    <form method="post" action="{{ url_for('auth.logout') }}" id="logout-form" hidden>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    </form>
+  {% endif %}
 
   <main id="main" class="page">
     {# Every page except Home sets its parent page here. #}

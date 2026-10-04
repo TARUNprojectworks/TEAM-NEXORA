@@ -105,3 +105,23 @@ def send_feedback():
 @login_required
 def logo_preview():
     return render_template("logo_preview.html")
+
+
+# ---------- Settings pages, one per row of the side menu ----------
+
+@bp.get("/settings/account")
+@login_required
+def account_page():
+    return render_template("settings/account.html")
+
+
+@bp.get("/settings/theme")
+@login_required
+def theme_page():
+    return render_template("settings/theme.html")
+
+
+@bp.get("/settings/feedback")
+@login_required
+def feedback_page():
+    return render_template("settings/feedback.html")

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Account · Nexora Notebook{% endblock %}
+{% block back %}<a class="back-link" href="{{ url_for('planner.home') }}">← Back</a>{% endblock %}
+{% block content %}
+<section class="narrow settings">
+  <h1>Account</h1>
+  <dl class="account-facts">
+    <div><dt>Name</dt><dd>{{ current_user.name }}</dd></div>
+    <div><dt>Email</dt><dd>{{ current_user.email }}</dd></div>
+    <div><dt>XP</dt><dd>{{ current_user.xp }}</dd></div>
+    <div><dt>Streak</dt><dd>{{ menu_streak }} {{ "day" if menu_streak == 1 else "days" }}</dd></div>
+    <div><dt>Member since</dt><dd>{{ current_user.created_at.strftime("%d %b %Y") }}</dd></div>
+  </dl>
+
+  <h2>Change name</h2>
+  <form method="post" action="{{ url_for('account.change_name') }}" class="settings-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="next" value="{{ request.path }}">
+    <label for="name">New name</label>
+    <input type="text" id="name" name="name" value="{{ current_user.name }}" maxlength="80" required>
+    <button type="submit" class="button">Save name</button>
+  </form>
+
+  <h2>Change password</h2>
+  <form method="post" action="{{ url_for('account.change_password') }}" class="settings-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="next" value="{{ request.path }}">
+    <label for="current_password">Current password</label>
+    <input type="password" id="current_password" name="current_password" autocomplete="current-password" required>
+    <label for="new_password">New password (8+ characters)</label>
+    <input type="password" id="new_password" name="new_password" autocomplete="new-password" minlength="8" required>
+    <label for="confirm_password">New password again</label>
+    <input type="password" id="confirm_password" name="confirm_password" autocomplete="new-password" required>
+    <button type="submit" class="button">Change password</button>
+  </form>
+</section>
+{% endblock %}
