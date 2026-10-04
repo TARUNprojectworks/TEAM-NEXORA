@@ -1,0 +1,22 @@
+# Caddy: HTTPS for our hostname, then hands every request to Gunicorn.
+# setup_vm.sh copies this to /etc/caddy/Caddyfile and replaces NEXORA_HOST with --host
+# (e.g. 34-93-12-34.sslip.io). Caddy gets and renews the Let's Encrypt certificate itself.
+# Caddy adds X-Forwarded-For/Proto/Host; the app trusts them through ProxyFix.
+
+NEXORA_HOST {
+	encode gzip
+
+	# Same cap as the app's MAX_CONTENT_LENGTH (40 MB card maker uploads), plus room for the form.
+	request_body {
+		max_size 41MB
+	}
+
+	reverse_proxy 127.0.0.1:8000
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+}
