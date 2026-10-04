@@ -295,8 +295,8 @@ def test_fixed_weak_spot_is_listed_as_fixed(app, riya_client, riya):
         for p in db.session.query(Progress).filter(Progress.card_id.in_(card_ids), Progress.user_id == riya):
             p.shelf, p.misconception_count = 5, 0
         db.session.commit()
-    section = text(riya_client, "/tracking/").split("Weak spots")[1].split("Study calendar")[0]
-    assert 'status-fixed">Fixed</span> <span class="weak-topic">Cells' in section
+    section = text(riya_client, "/tracking/weak-points").split('id="weak-heading"')[1].split('id="misconceptions-heading"')[0]
+    assert '<p class="weak-row-topic">Cells</p>' in section and 'badge-fixed">Fixed</span>' in section
 
 
 def test_study_page_has_the_misconception_note(app, riya_client, riya):

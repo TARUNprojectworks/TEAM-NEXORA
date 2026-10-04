@@ -208,3 +208,32 @@ def test_home_has_a_weak_points_box(riya_client):
     choices = html.split('<div class="choices">')[1]
     assert choices.count('class="choice"') == 3
     assert 'href="/tracking/weak-points"' in choices and "No open weak topics right now." in choices
+
+
+@pytest.mark.parametrize("logged_in", [False, True])
+def test_landing_copy_follows_our_rules(client, make_user, logged_in):
+    if logged_in:
+        make_user()
+        client.post("/login", data={"email": "riya@example.com", "password": "password123"})
+    html = page(client, "/")
+    main = html.split('<main id="main"')[1]
+    assert "→" not in main and "—" not in main and "Smart Flashcard Learning" not in main
+    assert "Every link takes you directly" not in main and ">Log In<" not in main
+    assert '<mark class="stroke">Fix weak spots.</mark>' in main
+    assert "Nexora Notebook picks the next card for you" in main
+    for text in ["Start studying", "See weak points", "View progress", "Three things the app does for you.",
+                 "From your first deck to exam day.", "Start with one deck today.", "Pick a ready deck or make your own.",
+                 "© 2026 Nexora Notebook · Team Nexora", ">Confident<", ">Not sure<"]:
+        assert text in main
+    assert 'class="site-header"' in html  # the same header as every other page
+
+
+@pytest.mark.parametrize("url", ["/", "/tracking/weak-points"])
+def test_no_page_has_its_own_stylesheet(riya_client, url):
+    html = page(riya_client, url)
+    assert "<style" not in html
+
+
+def test_weak_points_rows(riya_client):
+    html = page(riya_client, "/tracking/weak-points")
+    assert 'class="avatar-card"' in html and "→" not in html and "★" not in html

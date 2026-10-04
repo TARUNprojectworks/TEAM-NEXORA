@@ -12,28 +12,13 @@
     <p class="empty">No study history yet. Study a deck and your progress shows up here.</p>
   {% endif %}
 
-  <section class="track-section" aria-labelledby="weak-heading">
-    <h2 id="weak-heading">Weak spots</h2>
-    {% if weak_spots %}
-      <ul class="weak-list">
-        {% for row in weak_spots %}
-          <li>
-            <span class="status-pill status-{{ row.status | lower }}">{{ row.status }}</span>
-            <span class="weak-topic">{% if row.status == "Open" %}<mark>{{ row.topic }}</mark>{% else %}{{ row.topic }}{% endif %}</span>
-            <span class="deck-meta">{{ row.deck }}</span>
-            <span class="weak-detail">
-              {{ row.weak_percent }}% of {{ row.seen }} seen on Learning or Getting there
-              {% if row.open_misconceptions %} · {{ row.open_misconceptions }} open {{ "misconception" if row.open_misconceptions == 1 else "misconceptions" }}{% endif %}
-            </span>
-            <a class="button button-small" href="{{ url_for('fixer.topic_page', deck_id=row.deck_id, topic=row.topic) }}">Fix it</a>
-          </li>
-        {% endfor %}
-      </ul>
-      <p class="field-hint">Open: still weak. Fixed: you got practice cards for it and it's no longer weak.</p>
-    {% else %}
-      <p class="empty">No weak spots yet. A topic shows up here once you've seen 3 of its cards in Smart Study and keep missing them.</p>
-    {% endif %}
-  </section>
+  {# The weak topics themselves are on the Weak Points page; here is just the count. #}
+  {% set open_weak = weak_spots | selectattr("status", "equalto", "Open") | list | length %}
+  <p class="weak-line">
+    {% if open_weak %}<mark>{{ open_weak }} open weak {{ "topic" if open_weak == 1 else "topics" }}.</mark>{% else %}No open weak topics.{% endif %}
+    <a href="{{ url_for('tracking.weak_points') }}">See Weak Points</a>
+  </p>
+
 
   <section class="track-section" aria-labelledby="calendar-heading">
     <h2 id="calendar-heading">Study calendar</h2>

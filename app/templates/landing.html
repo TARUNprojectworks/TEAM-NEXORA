@@ -1,598 +1,108 @@
 {% extends "base.html" %}
-{% block title %}Nexora Notebook — Smart Flashcard Learning{% endblock %}
-
-{# Suppress the standard site-header — landing has its own full navbar #}
-{% block header %}{% endblock %}
-
-{% block head %}
-<style>
-/* ── Landing page — standalone design, no base page padding ── */
-body { background: #EDF1F7; }
-
-/* Let sections control their own width — override the .page container */
-.page {
-  max-width: 100% !important;
-  padding: 0 !important;
-}
-
-/* ── NAV ── */
-.landing-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px 24px;
-  max-width: 1080px;
-  margin: 0 auto;
-  padding: 18px 24px;
-}
-.landing-nav-brand {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-weight: 700; font-size: 1.125rem;
-  text-decoration: none; color: #1C2A39;
-}
-.landing-nav-brand img { display: block; }
-.landing-nav-links {
-  display: flex; align-items: center; gap: 4px 6px; flex-wrap: wrap;
-}
-.lnl {
-  padding: 6px 12px; border-radius: 6px;
-  text-decoration: none; font-size: 0.9375rem; color: #4A5A6B;
-  font-weight: 500;
-  transition: background 0.12s ease, color 0.12s ease;
-}
-.lnl:hover { background: #E8EFF7; color: #1C2A39; }
-.landing-nav-actions { display: flex; align-items: center; gap: 8px; }
-.btn-nav-login {
-  padding: 8px 16px; border-radius: 8px;
-  border: 1.5px solid #C9D6E3;
-  background: #fff; color: #1C2A39;
-  font: inherit; font-size: 0.875rem; font-weight: 700;
-  text-decoration: none; cursor: pointer;
-  transition: border-color 0.12s ease, background 0.12s ease;
-}
-.btn-nav-login:hover { border-color: #2B6CB0; background: #EBF2FB; color: #2B6CB0; }
-.btn-nav-cta {
-  padding: 8px 18px; border-radius: 8px;
-  background: #2B6CB0; color: #fff;
-  font: inherit; font-size: 0.875rem; font-weight: 700;
-  text-decoration: none; cursor: pointer; border: 0;
-  transition: background 0.15s ease;
-}
-.btn-nav-cta:hover { background: #1E4E8C; }
-
-/* ── HERO ── */
-.landing-hero {
-  text-align: center;
-  padding: 72px 24px 64px;
-  max-width: 720px;
-  margin: 0 auto;
-}
-.landing-hero-badge {
-  display: inline-block;
-  padding: 4px 14px; border-radius: 100px;
-  background: #EBF2FB; color: #1E4E8C;
-  font-size: 0.8125rem; font-weight: 700;
-  letter-spacing: 0.03em;
-  margin-bottom: 20px;
-}
-.landing-hero h1 {
-  font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: 700; line-height: 1.18;
-  color: #1C2A39;
-  margin: 0 0 18px;
-}
-.landing-hero h1 span { color: #2B6CB0; }
-.landing-hero p {
-  font-size: 1.125rem; color: #4A5A6B;
-  max-width: 52ch; margin: 0 auto 32px;
-  line-height: 1.6;
-}
-.hero-buttons {
-  display: flex; justify-content: center;
-  flex-wrap: wrap; gap: 12px;
-}
-.btn-hero-primary {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 13px 28px; border-radius: 10px;
-  background: #2B6CB0; color: #fff;
-  font: inherit; font-size: 1rem; font-weight: 700;
-  text-decoration: none; border: 0; cursor: pointer;
-  transition: background 0.15s ease, transform 0.15s ease;
-  box-shadow: 0 2px 8px rgba(43,108,176,0.25);
-}
-.btn-hero-primary:hover { background: #1E4E8C; transform: translateY(-1px); }
-.btn-hero-secondary {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 13px 28px; border-radius: 10px;
-  border: 2px solid #C9D6E3;
-  background: #fff; color: #1C2A39;
-  font: inherit; font-size: 1rem; font-weight: 700;
-  text-decoration: none; cursor: pointer;
-  transition: border-color 0.12s ease, background 0.12s ease;
-}
-.btn-hero-secondary:hover { border-color: #2B6CB0; background: #EBF2FB; color: #2B6CB0; }
-
-/* ── FEATURES SECTION ── */
-.landing-section {
-  max-width: 1080px;
-  margin: 0 auto;
-  padding: 48px 24px;
-}
-.landing-section-title {
-  text-align: center;
-  font-size: 1.5rem; font-weight: 700; color: #1C2A39;
-  margin: 0 0 8px;
-}
-.landing-section-sub {
-  text-align: center; color: #6B7F93; font-size: 1rem;
-  margin: 0 0 36px; max-width: 50ch; margin-left: auto; margin-right: auto;
-}
-.feature-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
-}
-.feature-card {
-  background: #fff;
-  border: 1px solid #D6DFE8;
-  border-radius: 14px;
-  padding: 28px 24px;
-  display: flex; flex-direction: column; gap: 12px;
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
-  box-shadow: 0 1px 4px rgba(28,42,57,0.05);
-}
-.feature-card:hover {
-  box-shadow: 0 8px 24px rgba(28,42,57,0.1);
-  transform: translateY(-2px);
-}
-.feature-icon {
-  width: 48px; height: 48px; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.375rem;
-}
-.fi-blue  { background: #EBF2FB; }
-.fi-amber { background: #FFFBEB; }
-.fi-green { background: #ECFDF5; }
-.feature-card h3 {
-  margin: 0; font-size: 1.125rem; font-weight: 700; color: #1C2A39;
-}
-.feature-card p {
-  margin: 0; font-size: 0.9375rem; color: #6B7F93; line-height: 1.5; flex: 1;
-}
-.feature-card-btn {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 9px 18px; border-radius: 8px;
-  border: 1.5px solid #2B6CB0;
-  background: #fff; color: #2B6CB0;
-  font: inherit; font-size: 0.875rem; font-weight: 700;
-  text-decoration: none; cursor: pointer; align-self: flex-start;
-  transition: background 0.12s ease;
-}
-.feature-card-btn:hover { background: #EBF2FB; }
-.feature-card-btn-primary {
-  background: #2B6CB0; color: #fff; border-color: #2B6CB0;
-}
-.feature-card-btn-primary:hover { background: #1E4E8C; }
-
-/* ── HOW IT WORKS ── */
-.how-section {
-  background: #fff;
-  border-top: 1px solid #D6DFE8;
-  border-bottom: 1px solid #D6DFE8;
-}
-.how-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 32px;
-  padding: 48px 24px;
-  max-width: 1080px;
-  margin: 0 auto;
-}
-.how-step { text-align: center; }
-.how-num {
-  width: 44px; height: 44px; border-radius: 50%;
-  background: #2B6CB0; color: #fff;
-  font-weight: 700; font-size: 1.125rem;
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 14px;
-}
-.how-step h3 { margin: 0 0 6px; font-size: 1rem; font-weight: 700; color: #1C2A39; }
-.how-step p { margin: 0; font-size: 0.875rem; color: #6B7F93; line-height: 1.5; }
-
-/* ── JUMP RIGHT IN ── */
-.jump-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 14px;
-}
-.jump-card {
-  display: flex; align-items: center; gap: 12px;
-  padding: 16px 18px;
-  background: #fff;
-  border: 1px solid #D6DFE8;
-  border-radius: 10px;
-  text-decoration: none; color: inherit;
-  transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
-  cursor: pointer;
-}
-.jump-card:hover {
-  box-shadow: 0 4px 14px rgba(28,42,57,0.09);
-  border-color: #A8BFDA;
-  transform: translateY(-1px);
-}
-.jump-icon {
-  width: 40px; height: 40px; border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.125rem; flex-shrink: 0;
-}
-.jump-body { flex: 1; min-width: 0; }
-.jump-title { font-weight: 700; font-size: 0.9375rem; color: #1C2A39; margin: 0 0 2px; }
-.jump-sub   { font-size: 0.8125rem; color: #6B7F93; margin: 0; }
-.jump-arrow { color: #A0AEC0; flex-shrink: 0; }
-
-/* ── FINAL CTA ── */
-.final-cta {
-  background: #1C2A39;
-  padding: 64px 24px;
-  text-align: center;
-}
-.final-cta h2 {
-  color: #fff; font-size: 1.875rem; margin: 0 0 12px;
-}
-.final-cta p {
-  color: rgba(255,255,255,0.65); font-size: 1rem;
-  max-width: 44ch; margin: 0 auto 28px;
-}
-.btn-cta-white {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 12px 26px; border-radius: 10px;
-  background: #fff; color: #1C2A39;
-  font: inherit; font-size: 1rem; font-weight: 700;
-  text-decoration: none; border: 0; cursor: pointer;
-  transition: background 0.12s ease;
-}
-.btn-cta-white:hover { background: #EBF2FB; color: #2B6CB0; }
-.btn-cta-outline {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 12px 26px; border-radius: 10px;
-  border: 2px solid rgba(255,255,255,0.35);
-  background: transparent; color: #fff;
-  font: inherit; font-size: 1rem; font-weight: 700;
-  text-decoration: none; cursor: pointer;
-  transition: border-color 0.12s ease, background 0.12s ease;
-}
-.btn-cta-outline:hover { border-color: #fff; background: rgba(255,255,255,0.08); }
-
-/* ── FOOTER ── */
-.landing-footer {
-  background: #1C2A39;
-  border-top: 1px solid rgba(255,255,255,0.08);
-  padding: 24px;
-  text-align: center;
-  color: rgba(255,255,255,0.4);
-  font-size: 0.875rem;
-}
-
-/* ── DIVIDER ── */
-.section-divider {
-  height: 1px; background: #D6DFE8;
-  max-width: 1080px; margin: 0 auto;
-}
-
-@media (max-width:640px) {
-  .landing-hero { padding: 48px 16px 40px; }
-  .landing-section { padding: 36px 16px; }
-  .how-grid { gap: 20px; padding: 32px 16px; }
-  .final-cta { padding: 48px 16px; }
-  .final-cta h2 { font-size: 1.5rem; }
-}
-</style>
-{% endblock %}
-
+{% from "_icons.html" import icon %}
+{% block title %}Nexora Notebook{% endblock %}
 {% block content %}
+{% set signed_in = current_user.is_authenticated %}
+<div class="landing-page">
+  {# Hero: the headline and, beside it, one sample card drawn like the study page (not clickable). #}
+  <section class="landing-hero" aria-labelledby="hero-heading">
+    <div class="hero-copy">
+      <h1 id="hero-heading">Study smarter.<br><mark class="stroke">Fix weak spots.</mark><br>Ace your exams.</h1>
+      <p class="hero-text">Nexora Notebook picks the next card for you, finds the topics you keep missing, and plans what to revise each day.</p>
+      <div class="actions">
+        {% if signed_in %}
+          <a class="button button-primary" href="{{ url_for('planner.home') }}">Go to Home</a>
+          <a class="button" href="{{ url_for('decks.ready_decks') }}">Deck Library</a>
+        {% else %}
+          <a class="button button-primary" href="{{ url_for('auth.signup') }}">Sign up</a>
+          <a class="button" href="{{ url_for('auth.login') }}">Log in</a>
+        {% endif %}
+      </div>
+    </div>
+    <figure class="sample-card" aria-label="A sample flashcard">
+      <div class="index-card">
+        <p class="card-header">Cell Biology</p>
+        <p class="card-text">Which organelle makes most of the cell's ATP?</p>
+      </div>
+      <div class="sample-buttons" aria-hidden="true">
+        <span class="button">Confident</span>
+        <span class="button">Not sure</span>
+      </div>
+    </figure>
+  </section>
 
-{# ── NAVBAR ── #}
-<nav class="landing-nav" aria-label="Site navigation">
-  <a class="landing-nav-brand" href="{{ url_for('auth.landing') }}" aria-label="Nexora Notebook home">
-    <img src="{{ url_for('static', filename='logos/logo-1.svg') }}" alt="" width="28" height="28">
-    Nexora Notebook
-  </a>
+  <section class="landing-section" aria-labelledby="features-heading">
+    <h2 id="features-heading">What can you do?</h2>
+    <p class="landing-sub">Three things the app does for you.</p>
+    <ul class="landing-grid">
+      <li class="index-card feature-card">
+        <p class="card-header"><span class="topic-icon">{{ icon("note") }}</span>Study flashcards</p>
+        <p class="feature-text">Smart Study shows the right card at the right time, using five shelves and how sure you felt.
+          Quick Revise lets you go through a deck freely.</p>
+        <a class="button button-primary button-small" href="{{ url_for('decks.my_decks') if signed_in else url_for('auth.signup') }}">Start studying</a>
+      </li>
+      <li class="index-card feature-card">
+        <p class="card-header"><span class="topic-icon is-open">{{ icon("target") }}</span>Find weak points</p>
+        <p class="feature-text">The app finds the topics you keep missing, and cards you were sure about but got wrong.</p>
+        <a class="button button-small" href="{{ url_for('tracking.weak_points') if signed_in else url_for('auth.signup') }}">See weak points</a>
+      </li>
+      <li class="index-card feature-card">
+        <p class="card-header"><span class="topic-icon">{{ icon("calendar") }}</span>Track progress</p>
+        <p class="feature-text">Mastery per topic, your study streak, XP and a calendar of the days you studied.</p>
+        <a class="button button-small" href="{{ url_for('tracking.tracking_page') if signed_in else url_for('auth.signup') }}">View progress</a>
+      </li>
+    </ul>
+  </section>
 
-  <div class="landing-nav-links">
-    <a class="lnl" href="{{ url_for('planner.home') if current_user.is_authenticated else url_for('auth.landing') }}">Home</a>
-    <a class="lnl" href="#features">Features</a>
-    <a class="lnl" href="#how-it-works">How It Works</a>
-    {% if current_user.is_authenticated %}
-      <a class="lnl" href="{{ url_for('tracking.weak_points') }}">Weak Spot Fixer</a>
-      <a class="lnl" href="{{ url_for('tracking.tracking_page') }}">Progress</a>
-    {% else %}
-      <a class="lnl" href="{{ url_for('auth.login') }}#features" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'});return false;">Weak Spot Fixer</a>
-      <a class="lnl" href="{{ url_for('auth.login') }}">Progress</a>
-    {% endif %}
-  </div>
+  <section class="landing-section" aria-labelledby="how-heading">
+    <h2 id="how-heading">How it works</h2>
+    <p class="landing-sub">From your first deck to exam day.</p>
+    <ol class="landing-grid how-steps">
+      <li><span class="step-tile" aria-hidden="true">1</span><h3>Pick a deck</h3>
+        <p>Choose a ready deck for Semester, Placement or Competitive exams, or make your own.</p></li>
+      <li><span class="step-tile" aria-hidden="true">2</span><h3>Say how sure you are</h3>
+        <p>Tap Confident or Not sure before you see the answer. The app keeps track of both.</p></li>
+      <li><span class="step-tile" aria-hidden="true">3</span><h3>Fix weak spots</h3>
+        <p>Weak topics are found for you, with an explanation and practice cards.</p></li>
+      <li><span class="step-tile" aria-hidden="true">4</span><h3>Follow the plan</h3>
+        <p>Each day you get a short plan. Exam decks and weak topics come first.</p></li>
+    </ol>
+  </section>
 
-  <div class="landing-nav-actions">
-    {% if current_user.is_authenticated %}
-      <a class="btn-nav-login" href="{{ url_for('planner.home') }}" id="nav-go-home">Go to Home</a>
-      <a class="btn-nav-cta" href="{{ url_for('account.account_page') }}" id="nav-profile">Profile</a>
-    {% else %}
-      <a class="btn-nav-login" href="{{ url_for('auth.login') }}" id="nav-login">Log in</a>
-      <a class="btn-nav-cta" href="{{ url_for('auth.signup') }}" id="nav-cta">Sign up</a>
-    {% endif %}
-  </div>
-</nav>
+  <section class="landing-section" aria-labelledby="jump-heading">
+    <h2 id="jump-heading">Jump right in</h2>
+    <ul class="landing-grid quick-links">
+      {% for url, icon_name, title, text in [
+          (url_for('decks.my_decks'), "note", "Start studying", "Open your decks"),
+          (url_for('tracking.weak_points'), "target", "Weak Points", "Topics to fix"),
+          (url_for('tracking.tracking_page'), "calendar", "My Progress", "Mastery and streak"),
+          (url_for('decks.create_my_own'), "pencil", "Create a deck", "Type, paste or upload"),
+          (url_for('decks.ready_decks'), "book", "Deck Library", "Ready decks"),
+        ] %}
+        <li>
+          <a class="quick-link" href="{{ url if signed_in else url_for('auth.signup') }}">
+            <span class="topic-icon{{ ' is-open' if icon_name == 'target' }}" aria-hidden="true">{{ icon(icon_name) }}</span>
+            <span><span class="quick-title">{{ title }}</span><span class="quick-text">{{ text }}</span></span>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
 
-{# ── HERO ── #}
-<section class="landing-hero" aria-labelledby="hero-heading">
-  <div class="landing-hero-badge" aria-hidden="true">Smart Flashcard Learning</div>
-  <h1 id="hero-heading">
-    Study smarter.<br>
-    <span>Fix weak spots.</span><br>
-    Ace your exams.
-  </h1>
-  <p>
-    Nexora Notebook shows you the right card at the right time, automatically finds
-    topics you struggle with, and builds your daily study plan — all in one place.
-  </p>
-  <div class="hero-buttons">
-    {% if current_user.is_authenticated %}
-      <a class="btn-hero-primary" href="{{ url_for('planner.home') }}" id="hero-cta-primary">
-        Go to Home
-        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l6 5-6 5"/></svg>
-      </a>
-      <a class="btn-hero-secondary" href="{{ url_for('decks.ready_decks') }}" id="hero-cta-secondary">
-        Explore Deck Library
-      </a>
-    {% else %}
-      <a class="btn-hero-primary" href="{{ url_for('auth.signup') }}" id="hero-cta-primary">
-        Sign up
-      </a>
-      <a class="btn-hero-secondary" href="{{ url_for('auth.login') }}" id="hero-cta-secondary">
-        Log in
-      </a>
-    {% endif %}
-  </div>
-</section>
-
-{# ── FEATURES SECTION ── #}
-<section class="landing-section" id="features" aria-labelledby="features-heading">
-  <h2 class="landing-section-title" id="features-heading">What can you do?</h2>
-  <p class="landing-section-sub">Everything you need to go from confused to confident.</p>
-
-  <div class="feature-grid">
-
-    {# Card 1: Study #}
-    <div class="feature-card">
-      <div class="feature-icon fi-blue" aria-hidden="true">📚</div>
-      <h3>Study Flashcards</h3>
-      <p>
-        Smart Study shows the right card at the right time using a shelf system
-        and confidence tracking. Quick Revise lets you practise freely.
-      </p>
-      {% if current_user.is_authenticated %}
-        <a class="feature-card-btn feature-card-btn-primary"
-           href="{{ url_for('decks.my_decks') }}"
-           id="feature-start-study">
-          Start Study →
-        </a>
+  <section class="landing-cta" aria-labelledby="cta-heading">
+    <h2 id="cta-heading">Start with one deck today.</h2>
+    <p>Pick a ready deck or make your own.</p>
+    <div class="actions">
+      {% if signed_in %}
+        <a class="button button-on-navy" href="{{ url_for('decks.ready_decks') }}">Deck Library</a>
+        <a class="button button-outline-light" href="{{ url_for('decks.create_my_own') }}">Create my own</a>
       {% else %}
-        <a class="feature-card-btn feature-card-btn-primary"
-           href="{{ url_for('auth.signup') }}"
-           id="feature-start-study">
-          Start Study →
-        </a>
+        <a class="button button-on-navy" href="{{ url_for('auth.signup') }}">Sign up</a>
+        <a class="button button-outline-light" href="{{ url_for('auth.login') }}">Log in</a>
       {% endif %}
     </div>
+  </section>
 
-    {# Card 2: Weak Points #}
-    <div class="feature-card">
-      <div class="feature-icon fi-amber" aria-hidden="true">🎯</div>
-      <h3>Find Weak Points</h3>
-      <p>
-        The Weak Spot Fixer automatically detects topics you struggle with and
-        misconceptions — things you were confident about but got wrong.
-      </p>
-      {% if current_user.is_authenticated %}
-        <a class="feature-card-btn"
-           href="{{ url_for('tracking.weak_points') }}"
-           id="feature-weak-points">
-          Explore Weak Points →
-        </a>
-      {% else %}
-        <a class="feature-card-btn"
-           href="{{ url_for('auth.signup') }}"
-           id="feature-weak-points">
-          Explore Weak Points →
-        </a>
-      {% endif %}
-    </div>
-
-    {# Card 3: Progress #}
-    <div class="feature-card">
-      <div class="feature-icon fi-green" aria-hidden="true">📈</div>
-      <h3>Track Progress</h3>
-      <p>
-        See your mastery per topic, study streak, XP, shelf distribution and
-        a full calendar of study activity — all in one dashboard.
-      </p>
-      {% if current_user.is_authenticated %}
-        <a class="feature-card-btn"
-           href="{{ url_for('tracking.tracking_page') }}"
-           id="feature-progress">
-          View Progress →
-        </a>
-      {% else %}
-        <a class="feature-card-btn"
-           href="{{ url_for('auth.signup') }}"
-           id="feature-progress">
-          View Progress →
-        </a>
-      {% endif %}
-    </div>
-
-  </div>
-</section>
-
-{# ── HOW IT WORKS ── #}
-<div class="how-section" id="how-it-works">
-  <div style="text-align:center; padding: 40px 24px 0; max-width:1080px; margin:0 auto;">
-    <h2 class="landing-section-title" id="how-heading">How it works</h2>
-    <p class="landing-section-sub" style="margin-bottom:0;">Four steps to mastery.</p>
-  </div>
-  <div class="how-grid">
-    <div class="how-step">
-      <div class="how-num" aria-hidden="true">1</div>
-      <h3>Pick a deck</h3>
-      <p>Choose from ready-made Semester, Placement and Competitive decks, or create your own.</p>
-    </div>
-    <div class="how-step">
-      <div class="how-num" aria-hidden="true">2</div>
-      <h3>Study with confidence</h3>
-      <p>Mark each card Confident or Not Sure before seeing the answer. The engine tracks both.</p>
-    </div>
-    <div class="how-step">
-      <div class="how-num" aria-hidden="true">3</div>
-      <h3>Fix weak spots</h3>
-      <p>Weak topics are detected automatically. Practice cards are generated to close the gaps.</p>
-    </div>
-    <div class="how-step">
-      <div class="how-num" aria-hidden="true">4</div>
-      <h3>Follow the plan</h3>
-      <p>A daily study plan is built each morning — exam deadlines and weak topics get priority.</p>
-    </div>
-  </div>
+  <footer class="landing-footer">© 2026 Nexora Notebook · Team Nexora</footer>
 </div>
-
-{# ── JUMP RIGHT IN ── #}
-<section class="landing-section" aria-labelledby="jump-heading">
-  <h2 class="landing-section-title" id="jump-heading">Jump right in</h2>
-  <p class="landing-section-sub">Every link takes you directly to the real feature.</p>
-
-  <div class="jump-grid">
-
-    <a class="jump-card"
-       href="{{ url_for('decks.my_decks') if current_user.is_authenticated else url_for('auth.signup') }}"
-       id="jump-study">
-      <div class="jump-icon fi-blue" aria-hidden="true">📚</div>
-      <div class="jump-body">
-        <p class="jump-title">Start Studying</p>
-        <p class="jump-sub">Open your decks</p>
-      </div>
-      <svg class="jump-arrow" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l6 5-6 5"/></svg>
-    </a>
-
-    <a class="jump-card"
-       href="{{ url_for('tracking.weak_points') if current_user.is_authenticated else url_for('auth.signup') }}"
-       id="jump-weak">
-      <div class="jump-icon fi-amber" aria-hidden="true">🎯</div>
-      <div class="jump-body">
-        <p class="jump-title">Explore Weak Points</p>
-        <p class="jump-sub">Weak Spot Fixer</p>
-      </div>
-      <svg class="jump-arrow" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l6 5-6 5"/></svg>
-    </a>
-
-    <a class="jump-card"
-       href="{{ url_for('tracking.tracking_page') if current_user.is_authenticated else url_for('auth.signup') }}"
-       id="jump-progress">
-      <div class="jump-icon fi-green" aria-hidden="true">📈</div>
-      <div class="jump-body">
-        <p class="jump-title">View Progress</p>
-        <p class="jump-sub">Mastery & analytics</p>
-      </div>
-      <svg class="jump-arrow" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l6 5-6 5"/></svg>
-    </a>
-
-    <a class="jump-card"
-       href="{{ url_for('decks.create_my_own') if current_user.is_authenticated else url_for('auth.signup') }}"
-       id="jump-create">
-      <div class="jump-icon" style="background:#EEF2FF;" aria-hidden="true">✏️</div>
-      <div class="jump-body">
-        <p class="jump-title">Create Your Deck</p>
-        <p class="jump-sub">Type, paste or upload</p>
-      </div>
-      <svg class="jump-arrow" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l6 5-6 5"/></svg>
-    </a>
-
-    {% if current_user.is_authenticated %}
-    <a class="jump-card"
-       href="{{ url_for('account.account_page') }}"
-       id="jump-profile">
-      <div class="jump-icon" style="background:#F5F8FC;" aria-hidden="true">👤</div>
-      <div class="jump-body">
-        <p class="jump-title">Profile</p>
-        <p class="jump-sub">Weak points & account</p>
-      </div>
-      <svg class="jump-arrow" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l6 5-6 5"/></svg>
-    </a>
-    {% else %}
-    <a class="jump-card"
-       href="{{ url_for('auth.login') }}"
-       id="jump-login">
-      <div class="jump-icon" style="background:#F5F8FC;" aria-hidden="true">🔑</div>
-      <div class="jump-body">
-        <p class="jump-title">Log In</p>
-        <p class="jump-sub">Access your account</p>
-      </div>
-      <svg class="jump-arrow" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l6 5-6 5"/></svg>
-    </a>
-    {% endif %}
-
-    <a class="jump-card"
-       href="{{ url_for('decks.ready_decks') if current_user.is_authenticated else url_for('auth.signup') }}"
-       id="jump-library">
-      <div class="jump-icon fi-blue" aria-hidden="true">🗂️</div>
-      <div class="jump-body">
-        <p class="jump-title">Deck Library</p>
-        <p class="jump-sub">Ready-made decks</p>
-      </div>
-      <svg class="jump-arrow" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3l6 5-6 5"/></svg>
-    </a>
-
-  </div>
-</section>
-
-{# ── FINAL CTA ── #}
-<section class="final-cta" aria-labelledby="cta-heading">
-  <h2 id="cta-heading">Ready to study smarter?</h2>
-  <p>Join Nexora Notebook and turn passive revision into active mastery.</p>
-  <div class="hero-buttons" style="justify-content:center;">
-    {% if current_user.is_authenticated %}
-      <a class="btn-cta-white" href="{{ url_for('planner.home') }}" id="cta-go-home">
-        Go to Home →
-      </a>
-      <a class="btn-cta-outline" href="{{ url_for('decks.ready_decks') }}" id="cta-explore">
-        Explore Decks
-      </a>
-    {% else %}
-      <a class="btn-cta-white" href="{{ url_for('auth.signup') }}" id="cta-get-started">
-        Sign up
-      </a>
-      <a class="btn-cta-outline" href="{{ url_for('auth.login') }}" id="cta-login">
-        Log in
-      </a>
-    {% endif %}
-  </div>
-</section>
-
-{# ── FOOTER ── #}
-<footer class="landing-footer">
-  <p>© 2025 Nexora Notebook. Built for students, by students.</p>
-</footer>
-
-{# Smooth scroll for anchor links #}
-<script>
-(function () {
-  document.querySelectorAll('a[href^="#"]').forEach(function (link) {
-    link.addEventListener('click', function (e) {
-      var target = document.querySelector(this.getAttribute('href'));
-      if (target) {
-        e.preventDefault();
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    });
-  });
-})();
-</script>
 {% endblock %}

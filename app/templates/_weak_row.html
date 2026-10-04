@@ -1,0 +1,25 @@
+{# One row in the Weak Points lists: a navy line icon on a soft square (yellow while open), the name
+   with a highlighter stroke while open, a meta line, an optional "missed" bar, at most two badges,
+   and one action with a small chevron. Needs `item` (a dict) built by the page:
+   name, meta, open, badges [(text, "open"|"fixed")], percent (or None), action_url, action_text, icon. #}
+{% from "_icons.html" import icon %}
+<li class="weak-row">
+  <span class="topic-icon{{ ' is-open' if item.open }}" aria-hidden="true">{{ icon(item.icon) }}</span>
+  <div class="weak-row-body">
+    <p class="weak-row-topic">{% if item.open %}<mark class="stroke">{{ item.name }}</mark>{% else %}{{ item.name }}{% endif %}</p>
+    <p class="deck-meta">{{ item.meta }}</p>
+    {% if item.percent is not none %}
+      <div class="missed-bar">
+        <div class="missed-track" role="progressbar" aria-label="Often missed" aria-valuemin="0" aria-valuemax="100"
+             aria-valuenow="{{ item.percent }}"><div class="missed-fill" style="width: {{ item.percent }}%"></div></div>
+        <span class="missed-text">{{ item.percent }}% missed</span>
+      </div>
+    {% endif %}
+    <p class="weak-row-badges">
+      {% for text, kind in item.badges[:2] %}<span class="badge badge-{{ kind }}">{{ text }}</span>{% endfor %}
+    </p>
+  </div>
+  {% if item.action_url %}
+    <a class="button button-small fix-button" href="{{ item.action_url }}">{{ item.action_text }} {{ icon("chevron") }}</a>
+  {% endif %}
+</li>

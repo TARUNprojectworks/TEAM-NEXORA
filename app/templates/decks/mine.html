@@ -16,12 +16,6 @@
   {% for item in items %}
     {% set deck = item.deck %}
     {% call deck_card(item, folders) %}
-      {% set text, kind = item.badge %}
-      {% if kind == "passed" %}
-        <a class="badge badge-passed" href="{{ url_for('decks.deck_settings', deck_id=deck.id) }}#exam">{{ text }}</a>
-      {% else %}
-        <span class="badge badge-{{ kind }}">{{ text }}</span>
-      {% endif %}
       <span class="push-end"></span>
       {% if item.card_count %}
         <a class="button button-primary button-small" href="{{ url_for('study.start', deck_id=deck.id, style='smart') }}">Study</a>

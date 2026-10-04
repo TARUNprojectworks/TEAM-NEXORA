@@ -209,8 +209,6 @@ a { color: var(--ink); text-underline-offset: 2px; }
 
 /* ---------- Landing ---------- */
 
-.landing { max-width: 560px; margin: 32px auto 0; }
-.landing-card { min-height: 220px; transform: rotate(-1deg); }
 
 /* ---------- Home ---------- */
 
@@ -559,11 +557,7 @@ fieldset.field legend { font-weight: 700; margin-bottom: 4px; padding: 0; }
 
 mark { background: var(--highlight); color: var(--ink); padding: 0 3px; }
 
-.weak-list { list-style: none; margin: 0; padding: 0; background: var(--paper); border: 1px solid var(--line); }
-.weak-list li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; padding: 10px 14px; border-top: 1px solid var(--line); }
-.weak-list li:first-child { border-top: 0; }
 .weak-topic { font-weight: 700; }
-.weak-detail { margin-left: auto; color: var(--ink-soft); font-size: 0.9375rem; }
 
 .calendar { display: flex; gap: 4px; overflow-x: auto; padding: 4px 0; }
 .calendar-days, .calendar-week { display: grid; grid-template-rows: repeat(7, 16px); gap: 4px; }
@@ -597,8 +591,7 @@ mark { background: var(--highlight); color: var(--ink); padding: 0 3px; }
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
-  .landing-card { transform: none; }
-}
+  }
 
 /* ---------- Shared helpers ---------- */
 
@@ -777,18 +770,6 @@ mark { background: var(--highlight); color: var(--ink); padding: 0 3px; }
 
 /* ---------- My Progress: weak spots and misconceptions ---------- */
 
-.status-pill {
-  display: inline-block;
-  padding: 1px 8px;
-  border-radius: var(--radius);
-  font-size: 0.8125rem;
-  font-weight: 700;
-  white-space: nowrap;
-}
-.status-open { background: var(--highlight); color: var(--ink); }
-.status-fixed { border: 1px solid var(--know-green); color: var(--know-green); }
-.weak-list li .button-small { margin-left: auto; }
-.weak-detail { margin-left: 0; }
 
 .misconception-list { list-style: none; margin: 12px 0 0; padding: 0; border-top: 1px solid var(--line); }
 .misconception-list li {
@@ -1132,4 +1113,126 @@ dialog::backdrop { background: rgba(28, 42, 57, 0.4); }
 .custom-box input { width: 5.5em; }
 @media (max-width: 600px) {
   .custom-size summary { padding: 6px 9px; }
+}
+
+/* ---------- Shared pieces for Weak Points, My Progress and the landing page ---------- */
+
+/* Badges: yellow = open, green = fixed. */
+.badge-open { background: var(--highlight); border-color: var(--highlight); color: var(--ink); }
+.badge-fixed { border-color: var(--know-green); color: var(--know-green); }
+
+/* A highlighter stroke behind a word, like a student marking notes: a flat band, no colour fade. */
+mark.stroke { background: none; box-shadow: inset 0 -0.55em 0 var(--highlight); padding: 0 2px; color: inherit; }
+
+/* A navy line icon on a soft square; yellow while a weak topic is open. */
+.topic-icon {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  width: 40px; height: 40px; border-radius: var(--radius);
+  background: #EEF2F5; color: var(--ink);
+}
+.topic-icon.is-open { background: #FFF3B0; }
+
+/* Rows in an index-card list (weak topics and misconceptions). */
+.weak-rows { list-style: none; margin: 0; padding: 0; background-image: none; }
+.weak-row { display: flex; align-items: flex-start; gap: 12px; padding: 14px 0; border-top: 1px solid var(--line); font-family: var(--font-ui); }
+.weak-row:first-child { border-top: 0; }
+.weak-row-body { flex: 1; min-width: 0; }
+.weak-row-topic { margin: 0; font-weight: 700; font-size: 1.0625rem; overflow-wrap: anywhere; }
+.weak-row .deck-meta { margin: 0; }
+.weak-row-badges { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 0; }
+.weak-row-badges .badge { font-size: 0.8125rem; }
+.missed-bar { display: flex; align-items: center; gap: 8px; margin-top: 6px; max-width: 320px; }
+.missed-track { flex: 1; height: 6px; border-radius: 3px; background: #EEF2F5; overflow: hidden; }
+.missed-fill { height: 100%; background: var(--ink-soft); }
+.missed-text { font-size: 0.8125rem; color: var(--ink-soft); white-space: nowrap; }
+.fix-button { display: inline-flex; align-items: center; gap: 2px; flex: none; }
+.fix-button .icon { width: 16px; height: 16px; }
+.mastered-text { color: var(--know-green); font-weight: 700; }
+.weak-rows.index-card::before { display: none; }  /* a plain list card: no header, so no red line */
+@media (max-width: 600px) {
+  /* On a phone the button goes under the text, so long questions keep the full width. */
+  .weak-row { flex-wrap: wrap; }
+  .weak-row-body { flex: 1 1 calc(100% - 52px); }
+  .fix-button { margin-left: 52px; }
+}
+
+/* Weak Points: profile strip with a small index-card avatar (navy initial over a thin red line). */
+.weak-points { max-width: 760px; margin: 0 auto; }
+.profile-strip {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 16px 20px;
+  padding: 20px 24px; background-image: none; font-family: var(--font-ui);
+}
+.profile-strip::before { display: none; }
+.profile-who { flex: 1 1 200px; min-width: 0; }
+.profile-who h1 { margin: 0; font-size: 1.5rem; }
+.profile-who .deck-meta { margin: 0; overflow-wrap: anywhere; }
+.avatar-card {
+  position: relative; display: inline-flex; align-items: flex-start; justify-content: center; flex: none;
+  width: 56px; height: 56px; padding-top: 6px;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 2px; box-shadow: var(--paper-shadow);
+  font-family: var(--font-card); font-size: 1.625rem; font-weight: 600; color: var(--ink);
+}
+.avatar-card::after { content: ""; position: absolute; left: 6px; right: 6px; top: 42px; border-top: 2px solid var(--margin-red); }
+.profile-stats { display: grid; grid-template-columns: repeat(4, auto); gap: 4px 24px; margin: 0; }
+.profile-stats dt { color: var(--ink-soft); font-size: 0.8125rem; }
+.profile-stats dd { margin: 0; font-size: 1.375rem; font-weight: 700; color: var(--ink); }
+@media (max-width: 600px) {
+  .profile-stats { grid-template-columns: repeat(2, auto); }
+}
+
+/* My Progress: one line about weak topics. */
+.weak-line { margin: 16px 0 0; }
+
+/* My decks: the count and the mode badge share the card's top row. */
+.deck-card-top { flex-wrap: wrap; gap: 6px 10px; }
+.deck-card-count { margin-left: auto; }
+.deck-card-top .badge { font-size: 0.8125rem; }
+
+/* ---------- Landing page ---------- */
+
+.landing-page { max-width: 960px; margin: 0 auto; }
+.landing-hero { display: grid; grid-template-columns: 1.2fr 1fr; gap: 32px; align-items: center; margin-top: 16px; }
+.landing-hero h1 { font-size: 2.5rem; line-height: 1.15; color: var(--ink); }
+.hero-text { font-size: 1.125rem; max-width: 52ch; }
+.sample-card { margin: 0; }
+.sample-card .index-card { min-height: 180px; transform: rotate(-1deg); }
+.sample-buttons { display: flex; gap: 10px; margin-top: 16px; }
+.sample-buttons .button { cursor: default; }
+.landing-section { margin-top: 56px; }
+.landing-sub { margin: -4px 0 16px; color: var(--ink-soft); }
+.landing-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.feature-card { display: flex; flex-direction: column; gap: 10px; padding-bottom: 20px; background-image: none; }
+.feature-card .card-header { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--ink); }
+.feature-card .topic-icon { width: 34px; height: 34px; }
+.feature-text { margin: 0; flex: 1; }
+.feature-card .button { align-self: flex-start; font-family: var(--font-ui); }
+.how-steps { grid-template-columns: repeat(4, 1fr); }
+.how-steps h3 { margin: 10px 0 4px; font-size: 1.0625rem; }
+.how-steps p { margin: 0; color: var(--ink-soft); }
+/* Step numbers on small index-card tiles. */
+.step-tile {
+  position: relative; display: inline-flex; align-items: flex-start; justify-content: center;
+  width: 40px; height: 40px; padding-top: 3px;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 2px; box-shadow: var(--paper-shadow);
+  font-family: var(--font-card); font-weight: 600; font-size: 1.125rem;
+}
+.step-tile::after { content: ""; position: absolute; left: 5px; right: 5px; top: 29px; border-top: 2px solid var(--margin-red); }
+.quick-links { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.quick-link {
+  display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+  background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius);
+  text-decoration: none; color: var(--ink);
+}
+.quick-link:hover { border-color: var(--ink); }
+.quick-title { display: block; font-weight: 700; }
+.quick-text { display: block; font-size: 0.875rem; color: var(--ink-soft); }
+.landing-cta { margin-top: 56px; padding: 32px 24px; background: var(--ink); color: var(--paper); border-radius: var(--radius); text-align: center; }
+.landing-cta h2 { color: var(--paper); }
+.landing-cta .actions { justify-content: center; }
+.button-on-navy { background: var(--paper); color: var(--ink); border-color: var(--paper); }
+.button-outline-light { background: transparent; color: var(--paper); border-color: var(--paper); }
+.landing-footer { margin: 32px 0 0; padding-top: 16px; border-top: 1px solid var(--line); color: var(--ink-soft); font-size: 0.875rem; text-align: center; }
+@media (max-width: 760px) {
+  .landing-hero, .landing-grid, .how-steps { grid-template-columns: 1fr; }
+  .landing-hero h1 { font-size: 2rem; }
 }
