@@ -49,7 +49,7 @@ def test_tracking_needs_login(client):
 def test_tracking_page_has_every_section(riya_client):
     page = riya_client.get("/tracking/").get_data(as_text=True)
     assert "My Progress" in page
-    for heading in ["Weak spots", "Study calendar", "Mastery by topic", "Progress per deck"]:
+    for heading in ["See Weak Points", "Study calendar", "Mastery by topic", "Progress per deck"]:
         assert heading in page
     assert 'id="misconceptions-heading"' not in page  # misconceptions live on the Weak Points page
     assert "No study history yet" in page
@@ -94,7 +94,9 @@ def test_misconceptions_found_and_resolved(app, riya_client, riya):
 
 
 def weak_spots_section(client):
-    return client.get("/tracking/").get_data(as_text=True).split('id="weak-heading"')[1].split("Study calendar")[0]
+    """The weak topics list, which now lives on the Weak Points page."""
+    page = client.get("/tracking/weak-points").get_data(as_text=True)
+    return page.split('id="weak-heading"')[1].split('id="misconceptions-heading"')[0]
 
 
 def test_weak_spots_lists_open_topics_with_fix_it(app, riya_client, riya):
@@ -104,8 +106,8 @@ def test_weak_spots_lists_open_topics_with_fix_it(app, riya_client, riya):
     for card_id in card_ids[3:]:
         set_progress(app, riya, card_id, shelf=5)
     section = weak_spots_section(riya_client)
-    assert "<mark>Cells</mark>" in section and ">Open<" in section
-    assert "100% of 3 seen on Learning or Getting there" in section
+    assert '<mark class="stroke">Cells</mark>' in section and ">Open<" in section
+    assert "100% missed" in section and "3 cards seen" in section
     assert f"/fixer/topic/{deck_id}?topic=Cells" in section
     assert "DNA" not in section
 
@@ -124,8 +126,7 @@ def test_weakest_topics_count_only_open_misconceptions(app, riya_client, riya):
     set_progress(app, riya, card_ids[1], shelf=2, misconceptions=1)   # open
     set_progress(app, riya, card_ids[2], shelf=4, misconceptions=3)   # resolved
     set_progress(app, riya, card_ids[3], shelf=5)
-    page = riya_client.get("/tracking/").get_data(as_text=True)
-    assert "2 open misconceptions" in page
+    assert "2 misconceptions</span>" in weak_spots_section(riya_client)
 
 
 def test_topic_with_only_resolved_misconceptions_is_not_weak(app, riya_client, riya):
@@ -134,7 +135,7 @@ def test_topic_with_only_resolved_misconceptions_is_not_weak(app, riya_client, r
         set_progress(app, riya, card_id, shelf=4, misconceptions=1)
     section = weak_spots_section(riya_client)
     assert "Processes" not in section
-    assert "No weak spots yet" in section
+    assert "No weak topics yet" in section
 
 
 def test_calendar_counts_answers_per_day(app, riya_client, riya):
@@ -153,3 +154,12 @@ def test_chart_js_comes_from_cdnjs_with_integrity(riya_client):
     page = riya_client.get("/tracking/").get_data(as_text=True)
     assert "cdnjs.cloudflare.com/ajax/libs/Chart.js/" in page
     assert 'integrity="sha512-' in page
+
+
+def test_my_progress_shows_only_a_line_about_weak_topics(app, riya_client, riya):
+    _, card_ids = add_deck(app, riya, ["Cells"] * 3)
+    for card_id in card_ids:
+        set_progress(app, riya, card_id, shelf=1)
+    page = riya_client.get("/tracking/").get_data(as_text=True)
+    assert "1 open weak topic." in page and 'href="/tracking/weak-points">See Weak Points</a>' in page
+    assert 'class="weak-row' not in page and 'id="weak-heading"' not in page

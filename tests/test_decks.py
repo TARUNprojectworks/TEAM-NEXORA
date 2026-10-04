@@ -154,25 +154,26 @@ def test_my_decks_shows_weak_spot_deck_and_badges(app, riya_client, ready_deck, 
 
     page = riya_client.get("/decks/mine").get_data(as_text=True)
     assert "Weak spot practice" in page
-    assert "Exam: 5 days" in page  # short, so the card's buttons stay on one row
+    assert "Exam in 5 days" in page
     assert "Normal" in page
-    assert "Exam in 5 days" in riya_client.get(f"/decks/{deck_id}").get_data(as_text=True)
+    # The badge sits in the card's top row, next to the card count.
+    top = page.split('class="card-header deck-card-top"')[1].split("</p>")[0]
+    assert 'class="badge badge-' in top
 
 
-@pytest.mark.parametrize("days, text, short", [(0, "Exam today", "Exam: today"), (1, "Exam tomorrow", "Exam: 1 day"),
-                                               (30, "Exam in 30 days", "Exam: 30 days")])
-def test_exam_badge_wording(app, riya_client, ready_deck, riya, days, text, short):
+@pytest.mark.parametrize("days, text", [(0, "Exam today"), (1, "Exam tomorrow"), (30, "Exam in 30 days")])
+def test_exam_badge_wording(app, riya_client, ready_deck, riya, days, text):
     deck_id, _ = ready_deck
     add_to_list(app, riya, deck_id, mode="exam", exam_date=today_local() + timedelta(days=days))
     assert text in riya_client.get(f"/decks/{deck_id}").get_data(as_text=True)
-    assert short in riya_client.get("/decks/mine").get_data(as_text=True)
+    assert text in riya_client.get("/decks/mine").get_data(as_text=True)
 
 
 def test_past_exam_switches_deck_to_normal(app, riya_client, ready_deck, riya):
     deck_id, _ = ready_deck
     add_to_list(app, riya, deck_id, mode="exam", exam_date=today_local() - timedelta(days=2))
 
-    assert "Exam passed" in riya_client.get("/decks/mine").get_data(as_text=True)
+    assert "Exam passed. Set a new date?" in riya_client.get("/decks/mine").get_data(as_text=True)
     page = riya_client.get(f"/decks/{deck_id}").get_data(as_text=True)
     assert "Exam passed. Set a new date?" in page
     assert user_deck(app, riya, deck_id).mode == "normal"
