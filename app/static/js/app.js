@@ -119,17 +119,16 @@ document.querySelectorAll("[data-theme-picker]").forEach(function (picker) {
   });
 });
 
-// ----- Buttons with data-toggle="<id>" show or hide that section (e.g. the exam setting) -----
-document.querySelectorAll("[data-toggle]").forEach(function (button) {
-  const target = document.getElementById(button.dataset.toggle);
-  if (!target) return;
-  if (window.location.hash === "#" + target.id) {
-    target.hidden = false;
-    button.setAttribute("aria-expanded", "true");
-  }
-  button.addEventListener("click", function () {
-    target.hidden = !target.hidden;
-    button.setAttribute("aria-expanded", target.hidden ? "false" : "true");
-    if (!target.hidden) target.scrollIntoView({ block: "nearest" });
+// ----- The ⋯ menu on deck cards (<details>): only one open at a time; a click outside or Esc closes it -----
+document.addEventListener("click", function (event) {
+  document.querySelectorAll("details.more-menu[open]").forEach(function (menu) {
+    if (!menu.contains(event.target)) menu.removeAttribute("open");
+  });
+});
+document.addEventListener("keydown", function (event) {
+  if (event.key !== "Escape") return;
+  document.querySelectorAll("details.more-menu[open]").forEach(function (menu) {
+    menu.removeAttribute("open");
+    menu.querySelector("summary").focus();
   });
 });

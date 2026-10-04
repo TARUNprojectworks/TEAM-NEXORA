@@ -858,30 +858,51 @@ mark { background: var(--highlight); color: var(--ink); padding: 0 3px; }
 .brand { display: inline-flex; align-items: center; gap: 8px; }
 .brand img { display: block; }
 
-/* ---------- Icon buttons (delete, rename, exam setting, remove, hide) ---------- */
+/* ---------- Icons in soft coloured circles ----------
+   One line-icon set (_icons.html). The circle's tint says what the button does:
+   red = delete, blue = exam, grey = remove/close, yellow = weak spot, navy = edit and the rest. */
 
 .icon-button {
+  --tint: #E3EAF0;
+  --tint-ink: var(--ink);
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex: none;
   width: 40px;
   height: 40px;
   padding: 0;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--paper);
-  color: var(--ink);
+  border: 0;
+  border-radius: 50%;
+  background: var(--tint);
+  color: var(--tint-ink);
   cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
-.icon-button:hover { border-color: var(--ink); }
-.icon-button[aria-expanded="true"] { background: var(--ink); color: var(--paper); }
-.icon-danger { color: var(--error); }
-.icon-danger:hover { border-color: var(--error); }
+.icon-button:hover { transform: translateY(-2px); box-shadow: 0 3px 6px rgba(28, 42, 57, 0.18); }
+.icon-danger { --tint: #F6E1DD; --tint-ink: var(--error); }
+.icon-exam { --tint: #DCE9F7; --tint-ink: #2A5D8F; }
+.icon-muted { --tint: #E6E9EC; --tint-ink: var(--ink-soft); }
+.icon-weak { --tint: var(--highlight); --tint-ink: var(--ink); }
 .icon { display: block; }
-.menu-button { border-color: transparent; background: transparent; }
-.icon-actions { gap: 8px; }
+.menu-button { --tint: transparent; }
+.icon-actions { gap: 8px; align-items: center; }
 .push-end { margin-left: auto; }
-.card-actions .icon-button + .inline-form, .card-actions .inline-form + .inline-form { margin-left: 4px; }
+.card-actions { display: flex; gap: 8px; align-items: flex-start; }
+
+/* A small icon circle in front of a heading or row (not a button). */
+.icon-dot {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--tint, #E3EAF0); color: var(--tint-ink, var(--ink));
+  vertical-align: middle; margin-right: 8px;
+}
+.icon-dot .icon { width: 18px; height: 18px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .icon-button { transition: none; }
+  .icon-button:hover { transform: none; }
+}
 
 /* ---------- Flash messages ---------- */
 
@@ -904,7 +925,7 @@ dialog::backdrop { background: rgba(28, 42, 57, 0.4); }
 
 .drawer {
   margin: 0 auto 0 0;
-  width: min(360px, 100vw);
+  width: min(320px, 100vw);
   max-width: 100vw;
   height: 100%;
   max-height: 100%;
@@ -914,20 +935,47 @@ dialog::backdrop { background: rgba(28, 42, 57, 0.4); }
   color: var(--ink);
   box-shadow: var(--paper-shadow);
 }
-.drawer-inner { padding: 12px 16px 32px; }
-.drawer-top { display: flex; align-items: center; justify-content: space-between; }
-.drawer-top h2 { margin: 0; }
-.drawer-section { padding: 16px 0; border-top: 1px solid var(--line); }
-.drawer-section h3 { font-size: 1.0625rem; }
+.drawer-inner { padding: 16px; }
+.drawer-top { display: flex; align-items: center; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.drawer-who { flex: 1; min-width: 0; }
+.drawer-name { margin: 0; font-weight: 700; overflow-wrap: anywhere; }
+.drawer-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 0; }
+.avatar {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--ink); color: var(--paper); font-size: 1.25rem; font-weight: 700;
+}
+.drawer-rows { display: grid; gap: 4px; margin-top: 12px; }
+.drawer-row {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; padding: 10px 8px;
+  border: 0; border-radius: var(--radius); background: none;
+  font: inherit; color: var(--ink); text-align: left; text-decoration: none; cursor: pointer;
+}
+.drawer-row:hover { background: var(--paper); }
+.drawer-row > .icon { margin-left: auto; color: var(--ink-soft); }
+.row-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 50%; background: var(--paper);
+}
+
+/* Chips: small rounded labels (XP, streak, folder). */
+.chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 10px; border-radius: 999px;
+  background: var(--paper); color: var(--ink-soft);
+  font-family: var(--font-ui); font-size: 0.8125rem;
+}
+.chip .icon { width: 14px; height: 14px; }
+
+/* Settings pages (Account, Card theme, Feedback). */
+.settings h2 { margin-top: 28px; }
+.settings-form { display: grid; gap: 6px; }
+.settings-form .button { justify-self: start; margin-top: 6px; }
 .account-facts { margin: 0 0 12px; display: grid; gap: 4px; }
 .account-facts div { display: flex; gap: 8px; flex-wrap: wrap; }
-.account-facts dt { color: var(--ink-soft); min-width: 104px; }
+.account-facts dt { color: var(--ink-soft); min-width: 120px; }
 .account-facts dd { margin: 0; overflow-wrap: anywhere; }
-.drawer-form { margin-top: 8px; }
-.drawer-form summary, .maker-theme summary { cursor: pointer; text-decoration: underline; }
-.drawer-form form, .drawer-section form { display: grid; gap: 6px; margin-top: 8px; }
-.drawer-section textarea, .drawer-form input { width: 100%; }
-.drawer-section .button { justify-self: start; }
 
 .confirm-dialog {
   max-width: min(420px, calc(100vw - 32px));
@@ -974,9 +1022,71 @@ dialog::backdrop { background: rgba(28, 42, 57, 0.4); }
 .logo-options { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
 .logo-option { padding-bottom: 16px; background-image: none; }
 .logo-sizes { display: flex; align-items: flex-end; gap: 20px; padding-top: 16px; }
-.logo-sample { margin: 16px 0 0; font-family: var(--font-ui); }
+.logo-lockup { display: flex; align-items: center; gap: 10px; margin: 16px 0 0; font-family: var(--font-ui); font-size: 1.375rem; font-weight: 700; }
 
 @media (prefers-reduced-motion: reduce) {
   .flash-list .flash { transition: none; }
 }
 .answer-form .answer-tag { display: block; width: fit-content; margin: 12px 0 0; font-size: 1rem; }
+
+/* ---------- Deck page: study view ---------- */
+
+.deck-study .page-top { align-items: flex-start; }
+.button-big { padding: 14px 28px; font-size: 1.125rem; }
+.study-buttons-big { margin-top: 20px; gap: 12px; }
+.shelf-bar-wrap { margin-top: 28px; max-width: 560px; }
+.shelf-bar {
+  display: flex; height: 14px; overflow: hidden;
+  border-radius: 7px; background: var(--paper); border: 1px solid var(--line);
+}
+.shelf-part { display: block; min-width: 4px; background: var(--shelf-colour); }
+.shelf-new { --shelf-colour: #EEF2F5; }
+.shelf-bar-ends { display: flex; justify-content: space-between; margin: 4px 0 0; color: var(--ink-soft); font-size: 0.8125rem; }
+
+/* ---------- Deck page: edit view ---------- */
+
+.rename-form { display: flex; flex-wrap: wrap; gap: 8px; max-width: 520px; }
+.rename-form input { flex: 1 1 220px; }
+.section-title { display: flex; align-items: center; }
+
+/* ---------- Deck cards (My decks and Deck Library) ---------- */
+
+.deck-card-top { justify-content: space-between; gap: 8px; }
+.mastery { display: flex; align-items: center; gap: 10px; font-family: var(--font-ui); }
+.mastery-track { flex: 1; height: 8px; border-radius: 4px; background: #EEF2F5; overflow: hidden; }
+.mastery-fill { height: 100%; background: var(--know-green); }
+.mastery-text { font-size: 0.875rem; color: var(--ink-soft); white-space: nowrap; }
+.library-actions { flex-wrap: wrap; }
+
+/* The ⋯ menu on a deck card: a <details> that opens a small list under the button. */
+.more-menu { position: relative; }
+/* Each tilted card is its own layer, so lift the card whose menu is open above the next one. */
+.library-deck:has(.more-menu[open]) { z-index: 10; }
+.more-menu summary { list-style: none; }
+.more-menu summary::-webkit-details-marker { display: none; }
+.more-list {
+  position: absolute; right: 0; top: 46px; z-index: 5;
+  min-width: 210px; padding: 6px;
+  background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--paper-shadow);
+  display: grid;
+}
+.more-list a, .more-list button {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 8px 10px; border: 0; border-radius: var(--radius);
+  background: none; font: inherit; font-family: var(--font-ui); font-size: 0.9375rem;
+  color: var(--ink); text-align: left; text-decoration: none; cursor: pointer;
+}
+.more-list a:hover, .more-list button:hover { background: #EEF2F5; }
+.more-list form { margin: 0; }
+.more-list .more-danger { color: var(--error); }
+.more-list .icon { width: 18px; height: 18px; }
+
+/* Folder tabs with an icon. */
+.folder-tab { display: inline-flex; flex-wrap: wrap; align-items: center; column-gap: 6px; }
+.folder-tab .icon { width: 18px; height: 18px; }
+.folder-tab .count { flex-basis: 100%; }
+
+/* Home: "+N more" plan groups. */
+.plan-more summary { cursor: pointer; margin: 6px 0; color: var(--ink-soft); text-decoration: underline; }
+.library-deck .chip { background: #EEF2F5; }
