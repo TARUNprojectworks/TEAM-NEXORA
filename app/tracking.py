@@ -176,3 +176,41 @@ def tracking_page():
 def tracking_json():
     """Numbers for the charts on the tracking page."""
     return jsonify(tracking_data(current_user.id))
+
+
+@bp.get("/weak-points")
+@login_required
+def weak_points():
+    """Dedicated Weak Points / learning profile page."""
+    today = today_local()
+    weak = weak_spot_rows(current_user.id)
+    misconceptions = misconception_cards(current_user.id)
+
+    # Overall mastery: cards on shelf 5 / all cards the student has seen
+    total_seen = db.session.query(Progress).filter_by(user_id=current_user.id, hidden=False).count()
+    mastered = db.session.query(Progress).filter_by(user_id=current_user.id, hidden=False, shelf=5).count()
+    overall_mastery = round(mastered / total_seen * 100) if total_seen else 0
+
+    # Cards studied count
+    cards_studied = db.session.query(Progress.card_id).filter(
+        Progress.user_id == current_user.id, Progress.last_seen.isnot(None)
+    ).count()
+
+    # Per-topic mastery for "recently improved" section
+    mastery_rows = topic_mastery_rows(current_user.id)
+    recently_improved = sorted(
+        [r for r in mastery_rows if r["mastery"] >= 60],
+        key=lambda r: -r["mastery"]
+    )[:5]
+
+    from app.planner import streak_to_show
+    return render_template(
+        "weak_points.html",
+        weak=weak,
+        misconceptions=misconceptions,
+        recently_improved=recently_improved,
+        overall_mastery=overall_mastery,
+        cards_studied=cards_studied,
+        streak=streak_to_show(current_user, today),
+    )
+

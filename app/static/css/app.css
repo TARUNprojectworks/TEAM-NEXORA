@@ -1090,3 +1090,4 @@ dialog::backdrop { background: rgba(28, 42, 57, 0.4); }
 /* Home: "+N more" plan groups. */
 .plan-more summary { cursor: pointer; margin: 6px 0; color: var(--ink-soft); text-decoration: underline; }
 .library-deck .chip { background: #EEF2F5; }
+.weak-preview { margin-top: 24px; }

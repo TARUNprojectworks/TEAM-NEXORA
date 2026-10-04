@@ -53,8 +53,6 @@ def safe_next_url(target):
 
 @bp.get("/")
 def landing():
-    if current_user.is_authenticated:
-        return redirect(url_for("planner.home"))
     return render_template("landing.html")
 
 

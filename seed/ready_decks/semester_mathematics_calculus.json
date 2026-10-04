@@ -1,0 +1,27 @@
+{
+  "title": "Class 12 Mathematics — Calculus",
+  "folder": "semester",
+  "description": "Limits, derivatives, integrals and their applications for Class 12 board exams and JEE.",
+  "cards": [
+    {"question": "State the definition of a derivative using limits.", "answer": "f'(x) = lim[h→0] (f(x+h) − f(x)) / h, provided this limit exists.", "topic": "Derivatives", "importance": "high"},
+    {"question": "What is the chain rule?", "answer": "If y = f(g(x)), then dy/dx = f'(g(x)) · g'(x). Used for differentiating composite functions.", "topic": "Derivatives", "importance": "high"},
+    {"question": "What is the product rule?", "answer": "d/dx [u·v] = u'v + uv'. Differentiate one factor and keep the other, then add the terms.", "topic": "Derivatives", "importance": "high"},
+    {"question": "What is the quotient rule?", "answer": "d/dx [u/v] = (u'v − uv') / v². Denominator squared in the denominator.", "topic": "Derivatives", "importance": "high"},
+    {"question": "State Rolle's Theorem.", "answer": "If f is continuous on [a,b], differentiable on (a,b) and f(a) = f(b), then there exists c in (a,b) such that f'(c) = 0.", "topic": "Theorems", "importance": "high"},
+    {"question": "State the Mean Value Theorem (Lagrange).", "answer": "If f is continuous on [a,b] and differentiable on (a,b), there exists c in (a,b) such that f'(c) = (f(b)−f(a))/(b−a).", "topic": "Theorems", "importance": "high"},
+    {"question": "What is ∫sin x dx?", "answer": "−cos x + C", "topic": "Integration", "importance": "high"},
+    {"question": "What is ∫cos x dx?", "answer": "sin x + C", "topic": "Integration", "importance": "high"},
+    {"question": "What is ∫eˣ dx?", "answer": "eˣ + C", "topic": "Integration", "importance": "high"},
+    {"question": "What is ∫1/x dx?", "answer": "ln|x| + C", "topic": "Integration", "importance": "high"},
+    {"question": "What is integration by parts and what is its formula?", "answer": "∫u dv = uv − ∫v du. Choose u using the ILATE rule (Inverse, Log, Algebraic, Trigonometric, Exponential).", "topic": "Integration", "importance": "high"},
+    {"question": "What does the Fundamental Theorem of Calculus say?", "answer": "Part 1: d/dx ∫[a to x] f(t)dt = f(x). Part 2: ∫[a to b] f(x)dx = F(b)−F(a) where F is any antiderivative of f.", "topic": "Integration", "importance": "high"},
+    {"question": "How do you find the area between two curves?", "answer": "∫[a to b] |f(x)−g(x)| dx, where a and b are the x-coordinates of their intersection points.", "topic": "Applications", "importance": "high"},
+    {"question": "What are the conditions for a local maximum?", "answer": "f'(x) = 0 and f''(x) < 0 at that point. (First derivative test: f' changes from + to − at the point.)", "topic": "Applications", "importance": "high"},
+    {"question": "What is L'Hôpital's rule?", "answer": "If lim f/g gives 0/0 or ∞/∞, then lim f(x)/g(x) = lim f'(x)/g'(x), provided the latter limit exists.", "topic": "Limits", "importance": "high"},
+    {"question": "What is a definite integral?", "answer": "∫[a to b] f(x) dx — the signed area under f between x=a and x=b. The answer is a number, not a function.", "topic": "Integration", "importance": "medium"},
+    {"question": "What is d/dx (xⁿ)?", "answer": "nxⁿ⁻¹ (Power rule). Valid for all real n.", "topic": "Derivatives", "importance": "high"},
+    {"question": "What is d/dx (ln x)?", "answer": "1/x, for x > 0.", "topic": "Derivatives", "importance": "high"},
+    {"question": "What is ∫tan x dx?", "answer": "ln|sec x| + C = −ln|cos x| + C", "topic": "Integration", "importance": "medium"},
+    {"question": "What is the difference between continuity and differentiability?", "answer": "Differentiability implies continuity, but continuity does not imply differentiability (e.g., |x| is continuous but not differentiable at x=0).", "topic": "Derivatives", "importance": "high"}
+  ]
+}

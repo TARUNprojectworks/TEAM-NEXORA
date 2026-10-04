@@ -11,22 +11,22 @@ from app.planner import seen_cards_for, welcome_back_count
 from seed import cards_to_check, create_demo_users, load_ready_decks, read_all_deck_files, read_deck_file
 
 
-def test_all_eight_ready_decks_are_valid():
+def test_all_thirteen_ready_decks_are_valid():
     decks = read_all_deck_files()
-    assert len(decks) == 8
+    assert len(decks) == 13
     for deck in decks:
         assert 20 <= len(deck["cards"]) <= 30, deck["title"]
 
 
-def test_each_folder_has_two_or_three_decks():
+def test_each_folder_has_four_or_five_decks():
     folders = [deck["folder"] for deck in read_all_deck_files()]
     for folder in ("semester", "placement", "competitive"):
-        assert 2 <= folders.count(folder) <= 3
+        assert 4 <= folders.count(folder) <= 5
 
 
-def test_about_two_hundred_cards_in_total():
+def test_about_three_hundred_cards_in_total():
     total = sum(len(deck["cards"]) for deck in read_all_deck_files())
-    assert 180 <= total <= 220
+    assert 280 <= total <= 310
 
 
 def test_no_duplicate_questions_within_a_deck():
@@ -39,11 +39,11 @@ def test_loading_twice_does_not_duplicate(app):
     decks = read_all_deck_files()
     with app.app_context():
         added, _ = load_ready_decks(decks)
-        assert len(added) == 8
+        assert len(added) == 13
         added_again, updated = load_ready_decks(decks)
         assert added_again == []
         assert updated == []
-        assert db.session.query(Deck).filter_by(is_ready=True).count() == 8
+        assert db.session.query(Deck).filter_by(is_ready=True).count() == 13
         assert db.session.query(Card).count() == sum(len(d["cards"]) for d in decks)
 
 

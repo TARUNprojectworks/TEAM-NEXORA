@@ -1,0 +1,27 @@
+{
+  "title": "Computer Networks",
+  "folder": "competitive",
+  "description": "OSI model, TCP/IP, protocols and networking concepts for GATE, UGC NET and campus placements.",
+  "cards": [
+    {"question": "List the 7 layers of the OSI model from top to bottom.", "answer": "Application, Presentation, Session, Transport, Network, Data Link, Physical.", "topic": "OSI Model", "importance": "high"},
+    {"question": "What is the difference between TCP and UDP?", "answer": "TCP: connection-oriented, reliable, ordered, flow control. UDP: connectionless, faster, no guarantees — used for video, DNS, gaming.", "topic": "Transport Layer", "importance": "high"},
+    {"question": "What is the three-way handshake?", "answer": "TCP connection setup: (1) SYN from client (2) SYN-ACK from server (3) ACK from client. Establishes sequence numbers.", "topic": "Transport Layer", "importance": "high"},
+    {"question": "What is the purpose of the IP address?", "answer": "Uniquely identifies a device on a network at the Network layer, enabling routing of packets across networks.", "topic": "Network Layer", "importance": "high"},
+    {"question": "What is the difference between IPv4 and IPv6?", "answer": "IPv4: 32-bit, ~4.3 billion addresses. IPv6: 128-bit, ~3.4×10³⁸ addresses, also adds built-in security and no NAT needed.", "topic": "Network Layer", "importance": "high"},
+    {"question": "What is CIDR notation?", "answer": "Classless Inter-Domain Routing: IP address written as X.X.X.X/n where n is the number of bits in the network prefix. e.g. 192.168.1.0/24.", "topic": "Network Layer", "importance": "medium"},
+    {"question": "What is the purpose of DNS?", "answer": "Domain Name System: translates human-readable domain names (google.com) to IP addresses.", "topic": "Application Layer", "importance": "high"},
+    {"question": "What is the difference between HTTP and HTTPS?", "answer": "HTTPS adds TLS/SSL encryption over HTTP, ensuring confidentiality, integrity and server authentication.", "topic": "Application Layer", "importance": "high"},
+    {"question": "What is ARP?", "answer": "Address Resolution Protocol: maps an IP address to a MAC (hardware) address on a local network.", "topic": "Data Link Layer", "importance": "high"},
+    {"question": "What is the difference between a hub, switch and router?", "answer": "Hub: broadcasts to all ports (Physical layer). Switch: forwards to the specific port (Data Link). Router: routes between networks (Network layer).", "topic": "Devices", "importance": "high"},
+    {"question": "What is NAT?", "answer": "Network Address Translation: allows multiple devices on a private network to share a single public IP address by translating port numbers.", "topic": "Network Layer", "importance": "medium"},
+    {"question": "What is flow control in TCP?", "answer": "Uses a sliding window mechanism. The receiver advertises a window size; the sender can only have that many unacknowledged bytes in flight at once.", "topic": "Transport Layer", "importance": "medium"},
+    {"question": "What is congestion control in TCP?", "answer": "Prevents too much data from overwhelming the network. Key algorithms: slow start, congestion avoidance, fast retransmit, fast recovery.", "topic": "Transport Layer", "importance": "medium"},
+    {"question": "What is subnetting?", "answer": "Dividing a larger network into smaller sub-networks by borrowing bits from the host portion of an IP address, reducing broadcast domains.", "topic": "Network Layer", "importance": "high"},
+    {"question": "What port numbers do HTTP, HTTPS, FTP and SSH use by default?", "answer": "HTTP: 80, HTTPS: 443, FTP: 21 (control) / 20 (data), SSH: 22.", "topic": "Application Layer", "importance": "high"},
+    {"question": "What is the difference between a MAC address and an IP address?", "answer": "MAC: hardware address burned in the NIC, used within a LAN (Data Link layer). IP: logical address assigned by network admin, used for routing across networks (Network layer).", "topic": "Addressing", "importance": "high"},
+    {"question": "What is DHCP?", "answer": "Dynamic Host Configuration Protocol: automatically assigns IP addresses, subnet masks, gateways and DNS servers to devices on a network.", "topic": "Application Layer", "importance": "medium"},
+    {"question": "What is the difference between connection-oriented and connectionless services?", "answer": "Connection-oriented (TCP): establishes a connection first, guarantees delivery and order. Connectionless (UDP): sends packets independently, no setup, no guarantee.", "topic": "Transport Layer", "importance": "high"},
+    {"question": "What is ICMP and what is it used for?", "answer": "Internet Control Message Protocol: used for error reporting and diagnostics. Powers the `ping` and `traceroute` commands.", "topic": "Network Layer", "importance": "medium"},
+    {"question": "What is a CDN?", "answer": "Content Delivery Network: a geographically distributed set of servers that cache content close to users, reducing latency and load on origin servers.", "topic": "Application Layer", "importance": "medium"}
+  ]
+}

@@ -190,3 +190,14 @@ def test_logo_preview_shows_three_new_options_next_to_the_current_one(riya_clien
     for number in (1, 4, 5, 6):
         assert f"logos/logo-{number}.svg" in html
     assert 'rel="icon" href="/static/logos/logo-1.svg"' in html  # unchanged until one is picked
+
+
+def test_weak_points_page_and_nav_link(riya_client):
+    assert 'href="/tracking/weak-points"' in page(riya_client, "/home")
+    assert riya_client.get("/tracking/weak-points").status_code == 200
+
+
+def test_landing_offers_sign_up_and_log_in(client):
+    html = page(client, "/")
+    assert ">Sign up</a>" in html or "Sign up\n" in html
+    assert "Log in" in html and "Get Started" not in html

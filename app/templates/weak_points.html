@@ -1,0 +1,440 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Weak Points · Nexora Notebook{% endblock %}
+
+{% block head %}
+<style>
+/* ── Weak Points / Profile page ── */
+body { background: #EDF1F7; }
+
+.wp-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 16px 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Profile card */
+.profile-card {
+  background: #fff;
+  border: 1px solid #D6DFE8;
+  border-radius: 12px;
+  padding: 24px 28px;
+  box-shadow: 0 1px 4px rgba(28,42,57,0.06);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px 32px;
+}
+.profile-avatar {
+  width: 64px; height: 64px; flex-shrink: 0;
+  background: #2B6CB0; color: #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; font-weight: 700;
+  letter-spacing: -1px;
+}
+.profile-info { flex: 1; min-width: 180px; }
+.profile-name { font-size: 1.25rem; font-weight: 700; margin: 0 0 2px; color: #1C2A39; }
+.profile-email { font-size: 0.875rem; color: #6B7F93; margin: 0; }
+.profile-stats {
+  display: flex; flex-wrap: wrap; gap: 16px 28px; margin-left: auto;
+}
+.profile-stat { text-align: center; }
+.profile-stat-val { font-size: 1.5rem; font-weight: 700; color: #1C2A39; line-height: 1.1; }
+.profile-stat-lbl { font-size: 0.8rem; color: #6B7F93; margin-top: 2px; }
+.profile-stat-streak { color: #D97706; }
+.profile-stat-xp     { color: #2B6CB0; }
+.profile-stat-mastery { color: #2D7D46; }
+
+/* Section header */
+.wp-section {
+  background: #fff;
+  border: 1px solid #D6DFE8;
+  border-radius: 12px;
+  padding: 22px 24px;
+  box-shadow: 0 1px 4px rgba(28,42,57,0.05);
+}
+.wp-section-head {
+  margin-bottom: 18px;
+}
+.wp-section-head h2 {
+  margin: 0 0 4px;
+  font-size: 1.0625rem; font-weight: 700; color: #1C2A39;
+  display: flex; align-items: center; gap: 8px;
+}
+.wp-section-head p { margin: 0; font-size: 0.875rem; color: #6B7F93; }
+
+.wp-icon-wrap {
+  width: 28px; height: 28px; border-radius: 7px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.wp-icon-amber  { background: #FFF8E6; color: #D97706; }
+.wp-icon-red    { background: #FFF5F5; color: #E53E3E; }
+.wp-icon-green  { background: #ECFDF5; color: #2D7D46; }
+.wp-icon-blue   { background: #EBF2FB; color: #2B6CB0; }
+
+/* Weak topic cards */
+.weak-cards-list { display: flex; flex-direction: column; gap: 12px; }
+.weak-topic-card {
+  border: 1px solid #D6DFE8;
+  border-radius: 10px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.weak-topic-card:hover { box-shadow: 0 4px 14px rgba(28,42,57,0.09); border-color: #A8BFDA; }
+.weak-topic-card-icon {
+  width: 42px; height: 42px; flex-shrink: 0;
+  background: #FFF8E6; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: #D97706;
+}
+.wtc-body { flex: 1; min-width: 0; }
+.wtc-name {
+  font-weight: 700; font-size: 1rem; color: #1C2A39; margin: 0 0 2px;
+}
+.wtc-deck { font-size: 0.8125rem; color: #6B7F93; margin: 0 0 8px; }
+.wtc-mastery-row {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+}
+.wtc-mastery-label { font-size: 0.8125rem; font-weight: 600; color: #E53E3E; white-space: nowrap; }
+.wtc-bar { flex: 1; height: 6px; background: #E8EFF7; border-radius: 100px; overflow: hidden; }
+.wtc-bar-fill { height: 100%; border-radius: 100px; background: #E53E3E; transition: width 0.4s ease; }
+.wtc-bar-fill.wtc-high { background: #E53E3E; }
+.wtc-bar-fill.wtc-med  { background: #D97706; }
+.wtc-bar-fill.wtc-low  { background: #2B6CB0; }
+.wtc-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.wtc-tag {
+  padding: 2px 8px; border-radius: 4px;
+  background: #FFF8E6; color: #92400E;
+  font-size: 0.75rem; font-weight: 600;
+}
+.wtc-tag-misc { background: #FEF0EC; color: #C0412A; }
+.wtc-action { flex-shrink: 0; margin-top: 2px; }
+.fix-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 8px 16px; border-radius: 8px;
+  border: 1.5px solid #2B6CB0;
+  background: #fff; color: #2B6CB0;
+  font: inherit; font-size: 0.875rem; font-weight: 700;
+  text-decoration: none; cursor: pointer;
+  transition: background 0.12s ease;
+  white-space: nowrap;
+}
+.fix-btn:hover { background: #EBF2FB; }
+
+/* Misconceptions list */
+.misc-list { display: flex; flex-direction: column; gap: 8px; }
+.misc-row {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 10px 16px;
+  padding: 13px 14px;
+  border: 1px solid #D6DFE8;
+  border-radius: 10px;
+  background: #FFFBFB;
+  transition: border-color 0.12s ease;
+}
+.misc-row:hover { border-color: #FEB2B2; }
+.misc-icon {
+  width: 30px; height: 30px; flex-shrink: 0;
+  background: #FFF5F5; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: #E53E3E;
+}
+.misc-body { flex: 1; min-width: 180px; }
+.misc-question {
+  font-weight: 600; font-size: 0.9375rem; color: #1C2A39; margin: 0 0 2px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.misc-deck { font-size: 0.8125rem; color: #6B7F93; margin: 0; }
+.misc-action { margin-left: auto; flex-shrink: 0; }
+
+/* Recently improved */
+.improved-list { display: flex; flex-direction: column; gap: 8px; }
+.improved-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid #D6DFE8;
+  border-radius: 10px;
+  background: #F9FBFD;
+}
+.improved-icon {
+  width: 36px; height: 36px; flex-shrink: 0;
+  background: #ECFDF5; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: #2D7D46;
+}
+.improved-body { flex: 1; min-width: 0; }
+.improved-name { font-weight: 700; font-size: 0.9375rem; color: #1C2A39; margin: 0 0 2px; }
+.improved-meta { font-size: 0.8125rem; color: #6B7F93; margin: 0; }
+.improved-mastery {
+  font-weight: 700; font-size: 1rem; color: #2D7D46; flex-shrink: 0;
+}
+
+/* Empty state */
+.wp-empty {
+  text-align: center; padding: 28px 16px; color: #6B7F93;
+}
+.wp-empty a { color: #2B6CB0; font-weight: 600; }
+
+/* Open vs Fixed badge */
+.status-open  { display:inline-block; padding:2px 8px; border-radius:4px; background:#FFF8E6; color:#92400E; font-size:0.75rem; font-weight:700; }
+.status-fixed { display:inline-block; padding:2px 8px; border-radius:4px; background:#ECFDF5; color:#2D7D46; font-size:0.75rem; font-weight:700; }
+
+@media (max-width:640px) {
+  .profile-card { padding: 18px; }
+  .wp-section { padding: 16px; }
+  .profile-stats { gap: 12px 20px; }
+  .weak-topic-card { flex-wrap: wrap; }
+  .wtc-action { width: 100%; }
+  .fix-btn { width: 100%; justify-content: center; }
+}
+
+/* ── Account Settings styles ── */
+.acct-facts {
+  display: flex; flex-wrap: wrap; gap: 8px 28px;
+  margin: 0 0 18px; padding: 14px 16px;
+  background: #F5F8FC; border: 1px solid #D6DFE8; border-radius: 8px;
+}
+.acct-facts div { display: flex; flex-direction: column; gap: 2px; }
+.acct-facts dt { font-size: 0.75rem; color: #6B7F93; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+.acct-facts dd { margin: 0; font-size: 0.9375rem; font-weight: 600; color: #1C2A39; }
+
+.acct-detail {
+  border-top: 1px solid #E8EFF7;
+  padding: 12px 0;
+}
+.acct-detail summary {
+  cursor: pointer;
+  font-size: 0.9375rem; font-weight: 700; color: #2B6CB0;
+  list-style: none;
+  display: inline-flex; align-items: center; gap: 6px;
+  user-select: none;
+}
+.acct-detail summary::-webkit-details-marker { display: none; }
+.acct-detail summary::before {
+  content: '▶';
+  font-size: 0.625rem; color: #A0AEC0;
+  transition: transform 0.15s ease;
+  display: inline-block;
+}
+.acct-detail[open] summary::before { transform: rotate(90deg); }
+.acct-detail summary:hover { color: #1E4E8C; }
+
+.acct-form {
+  margin-top: 12px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.acct-form label {
+  font-size: 0.875rem; font-weight: 600; color: #1C2A39;
+}
+.acct-form input[type="text"],
+.acct-form input[type="password"],
+.acct-form textarea {
+  padding: 9px 12px;
+  border: 1.5px solid #C9D6E3; border-radius: 7px;
+  font: inherit; font-size: 0.9375rem;
+  background: #fff; color: #1C2A39;
+  transition: border-color 0.12s ease;
+  width: 100%;
+}
+.acct-form input:focus, .acct-form textarea:focus {
+  outline: none; border-color: #2B6CB0;
+}
+.acct-form textarea { resize: vertical; min-height: 72px; }
+
+.acct-btn {
+  align-self: flex-start;
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 9px 20px; border-radius: 8px;
+  border: 1.5px solid #2B6CB0;
+  background: #2B6CB0; color: #fff;
+  font: inherit; font-size: 0.875rem; font-weight: 700;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+.acct-btn:hover { background: #1E4E8C; border-color: #1E4E8C; }
+.acct-btn-danger {
+  background: #fff; color: #C53030; border-color: #FEB2B2;
+}
+.acct-btn-danger:hover { background: #FFF5F5; border-color: #FC8181; }
+
+</style>
+{% endblock %}
+
+{% block back %}<a class="back-link" href="{{ url_for('planner.home') }}">← Home</a>{% endblock %}
+
+{% block content %}
+<div class="wp-wrap">
+
+  {# ── Profile Card ── #}
+  <div class="profile-card">
+    <div class="profile-avatar" aria-hidden="true">
+      {{ current_user.name[:2].upper() }}
+    </div>
+    <div class="profile-info">
+      <p class="profile-name">{{ current_user.name }}</p>
+      <p class="profile-email">{{ current_user.email }}</p>
+    </div>
+    <div class="profile-stats">
+      <div class="profile-stat">
+        <div class="profile-stat-val profile-stat-streak">{{ streak }}</div>
+        <div class="profile-stat-lbl">Day streak</div>
+      </div>
+      <div class="profile-stat">
+        <div class="profile-stat-val profile-stat-xp">{{ current_user.xp }}</div>
+        <div class="profile-stat-lbl">XP</div>
+      </div>
+      <div class="profile-stat">
+        <div class="profile-stat-val">{{ cards_studied }}</div>
+        <div class="profile-stat-lbl">Cards studied</div>
+      </div>
+      <div class="profile-stat">
+        <div class="profile-stat-val profile-stat-mastery">{{ overall_mastery }}%</div>
+        <div class="profile-stat-lbl">Overall mastery</div>
+      </div>
+    </div>
+  </div>
+
+  {# ── Weak Points ── #}
+  <div class="wp-section">
+    <div class="wp-section-head">
+      <h2>
+        <span class="wp-icon-wrap wp-icon-amber" aria-hidden="true">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3"/><circle cx="8" cy="10.5" r=".5" fill="currentColor"/></svg>
+        </span>
+        Weak Points
+      </h2>
+      <p>Focus on these topics to improve your mastery and performance.</p>
+    </div>
+
+    {% if weak %}
+      <div class="weak-cards-list">
+        {% for row in weak %}
+        <div class="weak-topic-card" id="topic-{{ loop.index }}">
+          <div class="weak-topic-card-icon" aria-hidden="true">
+            <svg viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2l2.4 5h5.6l-4.5 3.3 1.7 5.2L10 12.3l-5.2 3.2 1.7-5.2L2 7h5.6z"/></svg>
+          </div>
+
+          <div class="wtc-body">
+            <p class="wtc-name">{{ row.topic }}</p>
+            <p class="wtc-deck">{{ row.deck }} · {{ row.seen }} cards seen</p>
+
+            <div class="wtc-mastery-row">
+              <span class="wtc-mastery-label">{{ row.weak_percent }}% often missed</span>
+              <div class="wtc-bar">
+                <div class="wtc-bar-fill {% if row.weak_percent >= 60 %}wtc-high{% elif row.weak_percent >= 40 %}wtc-med{% else %}wtc-low{% endif %}"
+                     style="width: {{ row.weak_percent }}%"></div>
+              </div>
+            </div>
+
+            <div class="wtc-tags">
+              <span class="{% if row.status == 'Open' %}status-open{% else %}status-fixed{% endif %}">{{ row.status }}</span>
+              {% if row.open_misconceptions > 0 %}
+                <span class="wtc-tag wtc-tag-misc">{{ row.open_misconceptions }} misconception{{ "s" if row.open_misconceptions != 1 }}</span>
+              {% endif %}
+              <span class="wtc-tag">Frequently missed</span>
+            </div>
+          </div>
+
+          <div class="wtc-action">
+            <a class="fix-btn" href="{{ url_for('decks.deck_page', deck_id=row.deck_id) }}">
+              Fix Topic →
+            </a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="wp-empty">
+        No weak points detected yet. Study some cards and your trouble topics will appear here.
+        <br><br><a href="{{ url_for('decks.ready_decks') }}">Explore the Deck Library →</a>
+      </div>
+    {% endif %}
+  </div>
+
+  {# ── Misconceptions to Review ── #}
+  <div class="wp-section">
+    <div class="wp-section-head">
+      <h2>
+        <span class="wp-icon-wrap wp-icon-red" aria-hidden="true">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2l6 12H2z"/><path d="M8 7v3"/><circle cx="8" cy="12" r=".5" fill="currentColor"/></svg>
+        </span>
+        Misconceptions to Review
+      </h2>
+      <p>Common mistakes you made while confident. Revisit these to avoid them in exams.</p>
+    </div>
+
+    {% if misconceptions %}
+      <div class="misc-list">
+        {% for entry in misconceptions %}
+        <div class="misc-row">
+          <div class="misc-icon" aria-hidden="true">
+            {% if entry.open %}
+              <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3"/><circle cx="8" cy="10.5" r=".5" fill="currentColor"/></svg>
+            {% else %}
+              <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L6 10l-3-3"/></svg>
+            {% endif %}
+          </div>
+          <div class="misc-body">
+            <p class="misc-question">{{ entry.card.question }}</p>
+            <p class="misc-deck">{{ entry.deck }} · {{ entry.card.topic }}
+              {% if not entry.open %}<span class="status-fixed" style="margin-left:6px;">Fixed</span>{% endif %}
+            </p>
+          </div>
+          {% if entry.open %}
+          <div class="misc-action">
+            <a class="fix-btn" href="{{ url_for('decks.deck_page', deck_id=entry.card.deck_id) }}">Fix →</a>
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="wp-empty">
+        No misconceptions recorded yet. Misconceptions are cards you got wrong while feeling confident.
+      </div>
+    {% endif %}
+  </div>
+
+  {# ── Recently Improved ── #}
+  <div class="wp-section">
+    <div class="wp-section-head">
+      <h2>
+        <span class="wp-icon-wrap wp-icon-green" aria-hidden="true">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l3-4 3 3 3-5 3 6"/></svg>
+        </span>
+        Recently Improved
+      </h2>
+      <p>Topics where you've shown good progress. Keep it up!</p>
+    </div>
+
+    {% if recently_improved %}
+      <div class="improved-list">
+        {% for row in recently_improved %}
+        <div class="improved-row">
+          <div class="improved-icon" aria-hidden="true">
+            <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12V4M4 8l4-4 4 4"/></svg>
+          </div>
+          <div class="improved-body">
+            <p class="improved-name">{{ row.topic }}</p>
+            <p class="improved-meta">{{ row.deck }}</p>
+          </div>
+          <div class="improved-mastery">{{ row.mastery }}%</div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="wp-empty">
+        No improved topics yet. Keep studying and progress will appear here.
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

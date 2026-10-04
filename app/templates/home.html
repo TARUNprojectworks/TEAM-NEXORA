@@ -85,6 +85,22 @@
     {% with box = weak_spot, show_links = false %}{% include "_weak_spot_box.html" %}{% endwith %}
   {% endif %}
 
+  {% set open_weak = weak_preview | selectattr("status", "equalto", "Open") | list %}
+  {% if open_weak %}
+    <section class="weak-preview" aria-labelledby="weak-preview-heading">
+      <h2 id="weak-preview-heading">Weak points</h2>
+      <ul class="plan-list">
+        {% for row in open_weak %}
+          <li>
+            <span class="plan-topic"><mark>{{ row.topic }}</mark> · {{ row.deck }}</span>
+            <span class="plan-count">{{ row.weak_percent }}% still learning</span>
+          </li>
+        {% endfor %}
+      </ul>
+      <a href="{{ url_for('tracking.weak_points') }}">See all weak points</a>
+    </section>
+  {% endif %}
+
   <div class="choices">
     <a class="choice" href="{{ url_for('decks.ready_decks') }}">
       <span class="choice-title">Explore the Deck Library</span>

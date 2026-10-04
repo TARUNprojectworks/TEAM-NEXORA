@@ -16,6 +16,7 @@
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
 
+  {% block header %}
   <header class="site-header">
     <div class="header-start">
       {% if current_user.is_authenticated %}
@@ -32,6 +33,7 @@
         <a href="{{ url_for('planner.home') }}">Home</a>
         <a href="{{ url_for('decks.my_decks') }}">My decks</a>
         <a href="{{ url_for('decks.ready_decks') }}">Deck Library</a>
+        <a href="{{ url_for('tracking.weak_points') }}">Weak Points</a>
         <a href="{{ url_for('tracking.tracking_page') }}">My Progress</a>
       {% else %}
         <a href="{{ url_for('auth.login') }}">Log in</a>
@@ -39,6 +41,7 @@
       {% endif %}
     </nav>
   </header>
+  {% endblock %}
   {% if current_user.is_authenticated %}
     {% include "_drawer.html" %}
     {# Log out in the side menu submits this form (the menu itself holds no forms). #}

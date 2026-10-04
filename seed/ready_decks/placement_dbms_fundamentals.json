@@ -1,0 +1,27 @@
+{
+  "title": "DBMS Fundamentals",
+  "folder": "placement",
+  "description": "Database management essentials for campus placements — SQL, normalisation, transactions, indexes and query optimisation.",
+  "cards": [
+    {"question": "What is ACID in databases?", "answer": "Atomicity (all or nothing), Consistency (valid state), Isolation (transactions don't interfere), Durability (committed data persists).", "topic": "Transactions", "importance": "high"},
+    {"question": "What is the difference between DELETE, TRUNCATE and DROP?", "answer": "DELETE: removes chosen rows, logged row by row, can be rolled back. TRUNCATE: removes all rows fast with minimal logging; often can't be rolled back (some databases, like PostgreSQL, allow it inside a transaction). DROP: removes the whole table, structure and data.", "topic": "SQL", "importance": "high"},
+    {"question": "What is normalisation and why is it done?", "answer": "Organising a database to reduce data redundancy and improve integrity. Done by applying normal forms (1NF, 2NF, 3NF, BCNF).", "topic": "Normalisation", "importance": "high"},
+    {"question": "What is 3NF?", "answer": "A table is in 3NF if it is in 2NF and no non-key attribute is transitively dependent on the primary key.", "topic": "Normalisation", "importance": "high"},
+    {"question": "What is BCNF?", "answer": "Boyce-Codd Normal Form: a stricter form of 3NF. For every functional dependency X→Y, X must be a superkey.", "topic": "Normalisation", "importance": "medium"},
+    {"question": "What is the difference between a primary key and a unique key?", "answer": "Primary key: never NULL, only one per table. Unique key: values must be distinct but NULL is allowed (SQL Server allows one NULL; MySQL and PostgreSQL allow many). A table can have several unique keys.", "topic": "Keys & Constraints", "importance": "high"},
+    {"question": "What is a foreign key?", "answer": "A column that references the primary key of another table. Enforces referential integrity.", "topic": "Keys & Constraints", "importance": "high"},
+    {"question": "What is the difference between INNER JOIN and LEFT JOIN?", "answer": "INNER JOIN: only matching rows from both tables. LEFT JOIN: all rows from the left table plus matching rows from the right (NULLs if no match).", "topic": "SQL", "importance": "high"},
+    {"question": "What is a SQL index and why is it used?", "answer": "A data structure (usually a B-tree) that speeds up row lookup at the cost of extra storage and slower writes.", "topic": "Indexes", "importance": "high"},
+    {"question": "What is the difference between clustered and non-clustered indexes?", "answer": "Clustered: the table data is physically sorted by the index key (one per table). Non-clustered: a separate structure with a pointer to the actual row (many per table).", "topic": "Indexes", "importance": "high"},
+    {"question": "What is a view in SQL?", "answer": "A virtual table based on a SELECT query. It doesn't store data itself; it is recomputed each time it is queried.", "topic": "SQL", "importance": "medium"},
+    {"question": "What is a stored procedure?", "answer": "A precompiled set of SQL statements stored in the database and executed by name. Reduces network traffic and can accept parameters.", "topic": "SQL", "importance": "medium"},
+    {"question": "What are SQL aggregate functions?", "answer": "COUNT, SUM, AVG, MAX, MIN. They operate on a set of rows and return a single value.", "topic": "SQL", "importance": "high"},
+    {"question": "What is the difference between HAVING and WHERE?", "answer": "WHERE filters rows before grouping. HAVING filters groups after GROUP BY — it can reference aggregate functions.", "topic": "SQL", "importance": "high"},
+    {"question": "What is a deadlock in a database?", "answer": "A situation where two or more transactions wait for each other's locks forever. Resolved by rollback of one transaction.", "topic": "Transactions", "importance": "high"},
+    {"question": "What is an ER diagram?", "answer": "Entity-Relationship diagram: a visual model of entities (tables), their attributes and relationships used in database design.", "topic": "Design", "importance": "medium"},
+    {"question": "What is denormalisation?", "answer": "Intentionally adding redundancy to a normalised database to speed up read queries at the cost of more complex writes.", "topic": "Normalisation", "importance": "medium"},
+    {"question": "What does the EXPLAIN command do in SQL?", "answer": "Shows the execution plan (query plan) the database engine will use — which indexes it uses, join methods, estimated rows.", "topic": "Indexes", "importance": "medium"},
+    {"question": "What is a trigger in SQL?", "answer": "A stored procedure that automatically executes in response to an INSERT, UPDATE or DELETE event on a table.", "topic": "SQL", "importance": "medium"},
+    {"question": "What is the CAP theorem?", "answer": "A distributed database can guarantee at most two of: Consistency, Availability, Partition tolerance — not all three simultaneously.", "topic": "Design", "importance": "high"}
+  ]
+}
