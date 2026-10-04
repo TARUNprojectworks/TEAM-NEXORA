@@ -1,6 +1,7 @@
 """Load the ready decks from seed/ready_decks/*.json into the database.
 
 Run it with:  python seed.py
+On demo day:  python seed.py --reset-demo   (re-creates only the demo students, dated from today)
 
 Safe to run again. A ready deck that is already in the database keeps its
 cards (so nobody's progress is lost); only cards from the JSON whose question
@@ -28,7 +29,7 @@ import sys
 from datetime import timedelta
 from pathlib import Path
 
-from sqlalchemy import inspect
+from sqlalchemy import delete, inspect
 
 from app import create_app, engine
 from app.models import (
@@ -239,6 +240,18 @@ def demo_summary(user):
             f"{learned} cards on shelf 5, streak {user.streak}, {user.xp} XP")
 
 
+def delete_demo_users():
+    """Remove the demo students, so they can be made again with dates relative to today.
+
+    A plain SQL delete: the database's ON DELETE CASCADE then removes their own decks,
+    cards, progress, reviews and feedback. Nobody else's data is touched.
+    """
+    emails = [profile["email"] for profile in DEMO_USERS]
+    deleted = db.session.execute(delete(User).where(User.email.in_(emails))).rowcount
+    db.session.commit()
+    return deleted
+
+
 def create_demo_users(today):
     """Create every demo student that isn't there yet. Returns the new users."""
     created = [create_demo_user(profile, today) for profile in DEMO_USERS]
@@ -270,6 +283,8 @@ def main():
     app = create_app()
     with app.app_context():
         prepare_database()
+        if "--reset-demo" in sys.argv[1:]:
+            print(f"Removed {delete_demo_users()} demo students; making them again for today.")
         added, updated = load_ready_decks(decks)
         demo_lines = [demo_summary(user) for user in create_demo_users(today_local())]
 

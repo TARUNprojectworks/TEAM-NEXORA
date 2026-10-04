@@ -183,3 +183,22 @@ def test_private_cards_do_not_block_a_json_card(app, make_user):
         next(d for d in decks if d["title"] == "Cell Biology")["cards"].append(
             {"question": "What is a vacuole?", "answer": "A storage sac.", "topic": "T", "importance": "low"})
         assert load_ready_decks(decks)[1] == [("Cell Biology", 1)]
+
+
+def test_reset_demo_remakes_only_the_demo_students_dated_from_today(app, seeded, make_user):
+    from seed import delete_demo_users
+    other_id = make_user(name="Meera", email="meera@example.com")
+    later = today_local() + timedelta(days=2)  # e.g. seeded on Saturday, reset on Monday
+    with app.app_context():
+        demo_ids = [user.id for user in db.session.query(User).filter(User.email.like("%@example.com"),
+                                                                       User.email != "meera@example.com")]
+        assert db.session.query(Review).filter(Review.user_id.in_(demo_ids)).count() > 0
+        assert delete_demo_users() == 2
+        assert db.session.query(Review).filter(Review.user_id.in_(demo_ids)).count() == 0
+        assert db.session.query(Deck).filter(Deck.owner_id.in_(demo_ids)).count() == 0
+        create_demo_users(later)
+        riya = db.session.query(User).filter_by(email="riya@example.com").one()
+        biology = db.session.query(UserDeck).join(Deck).filter(
+            UserDeck.user_id == riya.id, Deck.title == "Cell Biology").one()
+        assert biology.exam_date == later + timedelta(days=5)
+        assert db.session.get(User, other_id) is not None  # other students are untouched
