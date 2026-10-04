@@ -352,3 +352,12 @@ def test_new_cards_studied_today_use_up_the_plans_allowance(app, riya_client, ri
                                     wrong_count=0, misconception_count=0, last_seen=utc_now()))
         db.session.commit()
     assert plan_in_session(riya_client)["card_ids"] == []
+
+
+def test_home_shows_three_plan_groups_then_more(app, riya_client, riya):
+    for title in ["Biology", "Physics", "Chemistry", "History", "Maths"]:
+        add_deck(app, riya, cards=2, title=title)
+    page = riya_client.get("/home").get_data(as_text=True)
+    first_list = page.split('<ul class="plan-list">')[1].split("</ul>")[0]
+    assert first_list.count("<li>") == 3
+    assert "<summary>+2 more</summary>" in page

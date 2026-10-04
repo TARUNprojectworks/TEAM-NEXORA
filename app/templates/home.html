@@ -37,14 +37,22 @@
         {{ plan.card_ids | length }} cards · about {{ total_minutes }} min
         {% if cards_done %} · {{ cards_done }} done{% endif %}
       </p>
-      <ul class="plan-list">
-        {% for group in groups %}
+      {% macro plan_rows(rows) %}
+        {% for group in rows %}
           <li>
             <span class="plan-topic">{{ group.deck }} · {{ group.topic }}</span>
             <span class="plan-count">{{ group.cards }} {{ "card" if group.cards == 1 else "cards" }} · {{ group.minutes }} min</span>
           </li>
         {% endfor %}
-      </ul>
+      {% endmacro %}
+      {# The first 3 groups; the rest open from "+N more" (a plain <details>, no JavaScript). #}
+      <ul class="plan-list">{{ plan_rows(groups[:3]) }}</ul>
+      {% if groups | length > 3 %}
+        <details class="plan-more">
+          <summary>+{{ groups | length - 3 }} more</summary>
+          <ul class="plan-list">{{ plan_rows(groups[3:]) }}</ul>
+        </details>
+      {% endif %}
       {% if plan.moved %}
         <p class="plan-moved">{{ plan.moved }} {{ "card" if plan.moved == 1 else "cards" }} moved to tomorrow.</p>
       {% endif %}
