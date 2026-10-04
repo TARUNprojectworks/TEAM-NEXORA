@@ -99,18 +99,6 @@ def misconception_cards(user_id):
     return cards[:MISCONCEPTIONS_SHOWN]
 
 
-def group_misconceptions(rows):
-    """Misconception cards grouped by deck, then topic. Groups with open cards come first,
-    and inside a group open cards come first (misconception_cards already sorts them so)."""
-    groups = {}
-    for row in rows:
-        key = (row["deck"], row["card"].topic)
-        group = groups.setdefault(key, {"deck": row["deck"], "topic": row["card"].topic, "open": 0, "rows": []})
-        group["rows"].append(row)
-        group["open"] += row["open"]
-    return sorted(groups.values(), key=lambda g: (g["open"] == 0, g["deck"].lower(), g["topic"].lower()))
-
-
 def deck_progress(user_id):
     """Cards per shelf for each deck in the student's list, plus cards not studied yet."""
     decks = db.session.query(Deck).join(
@@ -174,7 +162,7 @@ def tracking_page():
         "tracking.html",
         data=data,
         weak_spots=weak_spot_rows(current_user.id),
-        misconception_groups=group_misconceptions(misconception_cards(current_user.id)),
+        misconceptions=misconception_cards(current_user.id),
         calendar=streak_calendar(current_user.id, today),
         streak=streak_to_show(current_user, today),
         resolved_shelf=engine.RESOLVED_SHELF,
@@ -193,22 +181,36 @@ def tracking_json():
 @bp.get("/weak-points")
 @login_required
 def weak_points():
-    """Weak Points: who you are at a glance, your weak topics, and topics you've improved.
-    The misconception list lives on My Progress; this page only links to it."""
+    """Dedicated Weak Points / learning profile page."""
     today = today_local()
-    user_id = current_user.id
-    total_seen = db.session.query(Progress).filter_by(user_id=user_id, hidden=False).count()
-    mastered = db.session.query(Progress).filter_by(user_id=user_id, hidden=False, shelf=5).count()
-    improved = [row for row in topic_mastery_rows(user_id) if row["mastery"] >= 60]
-    improved.sort(key=lambda row: -row["mastery"])
+    weak = weak_spot_rows(current_user.id)
+    misconceptions = misconception_cards(current_user.id)
+
+    # Overall mastery: cards on shelf 5 / all cards the student has seen
+    total_seen = db.session.query(Progress).filter_by(user_id=current_user.id, hidden=False).count()
+    mastered = db.session.query(Progress).filter_by(user_id=current_user.id, hidden=False, shelf=5).count()
+    overall_mastery = round(mastered / total_seen * 100) if total_seen else 0
+
+    # Cards studied count
+    cards_studied = db.session.query(Progress.card_id).filter(
+        Progress.user_id == current_user.id, Progress.last_seen.isnot(None)
+    ).count()
+
+    # Per-topic mastery for "recently improved" section
+    mastery_rows = topic_mastery_rows(current_user.id)
+    recently_improved = sorted(
+        [r for r in mastery_rows if r["mastery"] >= 60],
+        key=lambda r: -r["mastery"]
+    )[:5]
+
     from app.planner import streak_to_show
     return render_template(
         "weak_points.html",
-        weak=weak_spot_rows(user_id),
-        misconceptions=misconception_counts(user_id),
-        recently_improved=improved[:5],
-        overall_mastery=round(mastered * 100 / total_seen) if total_seen else 0,
-        cards_studied=db.session.query(Progress).filter(
-            Progress.user_id == user_id, Progress.last_seen.isnot(None)).count(),
+        weak=weak,
+        misconceptions=misconceptions,
+        recently_improved=recently_improved,
+        overall_mastery=overall_mastery,
+        cards_studied=cards_studied,
         streak=streak_to_show(current_user, today),
     )
+

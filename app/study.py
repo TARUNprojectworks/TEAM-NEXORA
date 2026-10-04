@@ -22,7 +22,7 @@ card in the deck in a shuffled order and never changes shelves.
 
 import logging
 import random
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
@@ -54,7 +54,6 @@ def start_session(style, deck_id=None, plan=False, card_ids=None, revise=False):
         "card_ids": card_ids,  # a fixed list of cards (Fixer practice), or None
         "style": style,
         "seed": random.randrange(1_000_000),  # Free Practice order; a new seed = a new shuffle
-        "started": utc_now().isoformat(),  # the summary lists this session's answers from here on
         "answered": [],    # card ids answered at least once this session
         "returns": [],     # [card_id, cards_still_to_wait] for "Review again" cards
         "current": None,   # the card on screen, so a double submit can't answer twice
@@ -474,29 +473,6 @@ def shuffle():
     return redirect(url_for("study.show_card"))
 
 
-def answer_kind(review):
-    """How a review shows in the summary list: right, missed, or a misconception (confident but wrong)."""
-    if review.knew_it:
-        return "right"
-    return "misconception" if review.confident else "missed"
-
-
-def session_cards(state):
-    """The cards answered in this session, in order, each with its last answer here."""
-    ids = state["answered"]
-    if not ids:
-        return []
-    cards = {card.id: card for card in db.session.query(Card).filter(Card.id.in_(ids), visible_to(current_user.id))}
-    last_answer = {}
-    if state.get("started"):  # sessions started before this field existed show no answers
-        reviews = db.session.query(Review).filter(
-            Review.user_id == current_user.id, Review.card_id.in_(ids),
-            Review.reviewed_at >= datetime.fromisoformat(state["started"]),
-        ).order_by(Review.reviewed_at)
-        last_answer = {review.card_id: answer_kind(review) for review in reviews}
-    return [{"card": cards[card_id], "result": last_answer.get(card_id)} for card_id in ids if card_id in cards]
-
-
 @bp.get("/summary")
 @login_required
 def summary():
@@ -515,5 +491,4 @@ def summary():
         look_for_weak_spot=bool(state["stats"]["studied"]) and not state.get("card_ids"),
         style=state["style"],
         stats=state["stats"],
-        cards=session_cards(state),
     )

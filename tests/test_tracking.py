@@ -103,8 +103,8 @@ def test_weak_spots_lists_open_topics_with_fix_it(app, riya_client, riya):
     for card_id in card_ids[3:]:
         set_progress(app, riya, card_id, shelf=5)
     section = weak_spots_section(riya_client)
-    assert '<mark class="stroke">Cells</mark>' in section and ">Open<" in section
-    assert "100% missed" in section and "3 cards seen" in section
+    assert "<mark>Cells</mark>" in section and ">Open<" in section
+    assert "100% of 3 seen on Learning or Getting there" in section
     assert f"/fixer/topic/{deck_id}?topic=Cells" in section
     assert "DNA" not in section
 
@@ -124,7 +124,7 @@ def test_weakest_topics_count_only_open_misconceptions(app, riya_client, riya):
     set_progress(app, riya, card_ids[2], shelf=4, misconceptions=3)   # resolved
     set_progress(app, riya, card_ids[3], shelf=5)
     page = riya_client.get("/tracking/").get_data(as_text=True)
-    assert "2 misconceptions</span>" in page
+    assert "2 open misconceptions" in page
 
 
 def test_topic_with_only_resolved_misconceptions_is_not_weak(app, riya_client, riya):

@@ -8,70 +8,39 @@
   {% endif %}
 {% endblock %}
 {% block content %}
-{% if is_revise %}{% set where = "Revising today's cards" %}
-{% elif is_practice %}{% set where = "Practice cards" %}
-{% elif is_plan %}{% set where = "Today's plan" %}
-{% elif deck %}{% set where = deck.title %}
-{% else %}{% set where = "" %}{% endif %}
 <section class="summary">
-  {# One index card: headline, four stats, a right-vs-missed bar, then the cards of this session. #}
-  <article class="index-card summary-card">
-    <p class="card-header">Session done{% if where %} · {{ where }}{% endif %}</p>
-    <h1 class="summary-headline">{{ stats.studied }} {{ "card" if stats.studied == 1 else "cards" }} · +{{ stats.xp }} XP</h1>
-    {% if deck and not is_revise %}<p class="deck-meta">{{ "Smart Study" if style == "smart" else "Quick Revise" }}</p>{% endif %}
-    {% if is_revise %}<p class="deck-meta">Quick Revise, no XP</p>{% endif %}
-    {% if stats.plan_finished %}
-      <p class="plan-done">You finished today's plan. That's 10 bonus XP, included above.</p>
-    {% endif %}
+  <h1>Session summary</h1>
+  {% if is_revise %}
+    <p class="deck-meta">Revising today's cards · Quick Revise, no XP</p>
+  {% elif is_practice %}
+    <p class="deck-meta">Practice cards</p>
+  {% elif is_plan %}
+    <p class="deck-meta">Today's plan</p>
+  {% elif deck %}
+    <p class="deck-meta">{{ deck.title }} · {{ "Smart Study" if style == "smart" else "Quick Revise" }}</p>
+  {% endif %}
+  {% if stats.plan_finished %}
+    <p class="plan-done">You finished today's plan. That's 10 bonus XP, included below.</p>
+  {% endif %}
 
-    {% if stats.studied == 0 %}
-      {% if style == "smart" and not is_plan %}
-        <p class="empty">Nothing is due in this deck right now. Try Quick Revise, or come back tomorrow.</p>
-      {% else %}
-        <p class="empty">You didn't answer any cards this time.</p>
-      {% endif %}
+  {% if stats.studied == 0 %}
+    {% if style == "smart" and not is_plan %}
+      <p class="empty">Nothing is due in this deck right now. Try Quick Revise, or come back tomorrow.</p>
     {% else %}
-      <dl class="session-stats">
-        <div><dt><span class="mark mark-right" aria-hidden="true"></span>Got it right</dt><dd>{{ stats.right or 0 }}</dd></div>
-        <div><dt><span class="mark mark-missed" aria-hidden="true"></span>Missed</dt><dd>{{ stats.missed or 0 }}</dd></div>
-        <div><dt><span class="mark mark-misconception" aria-hidden="true"></span>Misconceptions</dt><dd>{{ stats.misconceptions }}</dd></div>
-        <div><dt><span class="mark mark-xp" aria-hidden="true"></span>XP</dt><dd>+{{ stats.xp }}</dd></div>
-      </dl>
-      {% set right_percent = ((stats.right or 0) * 100 / stats.studied) | round | int %}
-      <div class="right-bar" role="img" aria-label="{{ right_percent }}% right, {{ 100 - right_percent }}% missed">
-        <span class="right-part" style="width: {{ right_percent }}%"></span>
-      </div>
-      {% if stats.misconceptions %}
-        <p class="field-hint">A misconception is a card you were confident about but got wrong. Those come back sooner.</p>
-      {% endif %}
-
-      {% if cards %}
-        <details class="session-cards">
-          <summary>Cards in this session ({{ cards | length }})</summary>
-          <ol>
-            {% for row in cards %}
-              <li>
-                {% if row.result %}<span class="mark mark-{{ row.result }}" title="{{ {'right': 'Got it right', 'missed': 'Missed', 'misconception': 'Misconception'}[row.result] }}"></span>{% endif %}
-                <span class="session-q">{{ row.card.question }}</span>
-                {% if row.result %}<span class="visually-hidden">{{ {'right': 'Got it right', 'missed': 'Missed', 'misconception': 'Misconception'}[row.result] }}</span>{% endif %}
-              </li>
-            {% endfor %}
-          </ol>
-        </details>
-      {% endif %}
+      <p class="empty">You didn't answer any cards this time.</p>
     {% endif %}
-
-    <div class="summary-actions">
-      {% if deck %}
-        <a class="button button-primary" href="{{ url_for('study.start', deck_id=deck.id, style=style) }}">Study again</a>
-        {% if style == "smart" %}<a href="{{ url_for('study.start', deck_id=deck.id, style='free') }}">Quick Revise</a>{% endif %}
-        <a href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">Back to deck</a>
-        <a href="{{ url_for('planner.home') }}">Home</a>
-      {% else %}
-        <a class="button button-primary" href="{{ url_for('planner.home') }}">Home</a>
-      {% endif %}
-    </div>
-  </article>
+  {% else %}
+    <dl class="summary-stats">
+      <div><dt>Cards studied</dt><dd>{{ stats.studied }}</dd></div>
+      <div><dt>Got it right</dt><dd>{{ stats.right or 0 }}</dd></div>
+      <div><dt>Missed</dt><dd>{{ stats.missed or 0 }}</dd></div>
+      <div class="{{ 'stat-highlight' if stats.misconceptions }}"><dt>Misconceptions</dt><dd>{{ stats.misconceptions }}</dd></div>
+      <div><dt>XP earned</dt><dd>{{ stats.xp }}</dd></div>
+    </dl>
+    {% if stats.misconceptions %}
+      <p class="field-hint">A misconception is a card you were confident about but got wrong. Those come back sooner.</p>
+    {% endif %}
+  {% endif %}
 
   {% if look_for_weak_spot %}
     {# Filled in by weakspot.js: the Fixer can take several seconds with Gemini. #}
@@ -80,6 +49,17 @@
       <p class="weak-spot-loading">Finding your weak spot…</p>
     </div>
   {% endif %}
+
+  <div class="actions">
+    {% if deck %}
+      <a class="button button-primary" href="{{ url_for('study.start', deck_id=deck.id, style=style) }}">Study again</a>
+      {% if style == "smart" %}
+        <a class="button" href="{{ url_for('study.start', deck_id=deck.id, style='free') }}">Quick Revise</a>
+      {% endif %}
+      <a class="button" href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">Back to deck</a>
+    {% endif %}
+    <a class="button{{ ' button-primary' if is_plan }}" href="{{ url_for('planner.home') }}">Home</a>
+  </div>
 </section>
 {% endblock %}
 {% block scripts %}
