@@ -1,0 +1,23 @@
+{# One weak topic as a row: icon, topic (highlighted while open), deck, a thin "missed" bar,
+   at most two badges, and Fix it. Needs `row` from tracking.weak_spot_rows(). #}
+{% from "_icons.html" import icon %}
+{% set is_open = row.status == "Open" %}
+<li class="weak-row">
+  <span class="topic-icon{{ ' is-open' if is_open }}" aria-hidden="true">{{ icon("target") }}</span>
+  <div class="weak-row-body">
+    <p class="weak-row-topic">{% if is_open %}<mark class="stroke">{{ row.topic }}</mark>{% else %}{{ row.topic }}{% endif %}</p>
+    <p class="deck-meta">{{ row.deck }} · {{ row.seen }} {{ "card" if row.seen == 1 else "cards" }} seen</p>
+    <div class="missed-bar">
+      <div class="missed-track" role="progressbar" aria-label="Often missed" aria-valuemin="0" aria-valuemax="100"
+           aria-valuenow="{{ row.weak_percent }}"><div class="missed-fill" style="width: {{ row.weak_percent }}%"></div></div>
+      <span class="missed-text">{{ row.weak_percent }}% missed</span>
+    </div>
+    <p class="weak-row-badges">
+      <span class="badge {{ 'badge-open' if is_open else 'badge-fixed' }}">{{ "Open" if is_open else "Fixed" }}</span>
+      {% if row.open_misconceptions %}
+        <span class="badge badge-open">{{ row.open_misconceptions }} {{ "misconception" if row.open_misconceptions == 1 else "misconceptions" }}</span>
+      {% endif %}
+    </p>
+  </div>
+  <a class="button button-small fix-button" href="{{ url_for('fixer.topic_page', deck_id=row.deck_id, topic=row.topic) }}">Fix it {{ icon("chevron") }}</a>
+</li>

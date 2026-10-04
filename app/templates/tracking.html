@@ -15,19 +15,8 @@
   <section class="track-section" aria-labelledby="weak-heading">
     <h2 id="weak-heading">Weak spots</h2>
     {% if weak_spots %}
-      <ul class="weak-list">
-        {% for row in weak_spots %}
-          <li>
-            <span class="status-pill status-{{ row.status | lower }}">{{ row.status }}</span>
-            <span class="weak-topic">{% if row.status == "Open" %}<mark>{{ row.topic }}</mark>{% else %}{{ row.topic }}{% endif %}</span>
-            <span class="deck-meta">{{ row.deck }}</span>
-            <span class="weak-detail">
-              {{ row.weak_percent }}% of {{ row.seen }} seen on Learning or Getting there
-              {% if row.open_misconceptions %} · {{ row.open_misconceptions }} open {{ "misconception" if row.open_misconceptions == 1 else "misconceptions" }}{% endif %}
-            </span>
-            <a class="button button-small" href="{{ url_for('fixer.topic_page', deck_id=row.deck_id, topic=row.topic) }}">Fix it</a>
-          </li>
-        {% endfor %}
+      <ul class="weak-rows">
+        {% for row in weak_spots %}{% include "_weak_row.html" %}{% endfor %}
       </ul>
       <p class="field-hint">Open: still weak. Fixed: you got practice cards for it and it's no longer weak.</p>
     {% else %}
@@ -105,36 +94,43 @@
 
   <section class="track-section" aria-labelledby="misconceptions-heading">
     <h2 id="misconceptions-heading">Misconceptions</h2>
-    <p class="field-hint">Cards you were confident about but missed. One counts as resolved once it's back on Good ({{ resolved_shelf }}) or higher.</p>
-    <dl class="summary-stats">
-      <div class="{{ 'stat-highlight' if data.misconceptions.open }}"><dt>Open</dt><dd>{{ data.misconceptions.open }}</dd></div>
-      <div><dt>Resolved</dt><dd>{{ data.misconceptions.resolved }}</dd></div>
-    </dl>
-    {% if misconceptions %}
-      {% set open_ids = misconceptions | selectattr("open") | map(attribute="card.id") | list %}
-      {% if open_ids %}
-        <p><a class="button" href="{{ url_for('study.start_cards', ids=open_ids | join(',')) }}">Practise all open ({{ open_ids | length }})</a></p>
-      {% endif %}
-      <ul class="misconception-list">
-        {% for row in misconceptions %}
-          <li>
-            <div class="misconception-card">
-              <span class="status-pill status-{{ 'open' if row.open else 'fixed' }}">{{ "Open" if row.open else "Resolved" }}</span>
-              <span class="deck-meta">{{ row.deck }} · {{ row.card.topic }}</span>
-              <p class="card-front">{{ row.card.question }}</p>
-              <p class="card-back">{{ row.card.answer }}</p>
-              <p class="explanation" aria-live="polite"></p>
+    <p class="field-hint">Cards you were confident about but got wrong. One counts as resolved once it's back on Good ({{ resolved_shelf }}) or higher.</p>
+    {% if misconception_groups %}
+      <p class="misconception-count"><strong>{{ data.misconceptions.open }} open</strong> · {{ data.misconceptions.resolved }} resolved</p>
+      {# Collapsed until asked for: the full list is long. #}
+      <details class="misconceptions-more">
+        <summary class="button">View misconceptions</summary>
+        {% for group in misconception_groups %}
+          <section class="misconception-group">
+            <div class="group-top">
+              <h3>{{ group.topic }} <span class="deck-meta">· {{ group.deck }}</span></h3>
+              <span class="badge {{ 'badge-open' if group.open else 'badge-fixed' }}">
+                {% if group.open %}{{ group.open }} open of {{ group.rows | length }}{% else %}{{ group.rows | length }} resolved{% endif %}
+              </span>
+              <a class="button button-small" href="{{ url_for('study.start_cards', ids=group.rows | map(attribute='card.id') | join(',')) }}">Practice this topic</a>
             </div>
-            <div class="card-actions">
-              <button type="button" class="button button-small explain-row"
-                      data-url="{{ url_for('study.explain', card_id=row.card.id) }}">Explain</button>
-              <a class="button button-small" href="{{ url_for('study.start_cards', ids=row.card.id) }}">Practice</a>
-            </div>
-          </li>
+            <ul class="misconception-list">
+              {% for row in group.rows %}
+                <li>
+                  <div class="misconception-card">
+                    <span class="badge {{ 'badge-open' if row.open else 'badge-fixed' }}">{{ "Open" if row.open else "Resolved" }}</span>
+                    <p class="card-front">{{ row.card.question }}</p>
+                    <p class="card-back">{{ row.card.answer }}</p>
+                    <p class="explanation" aria-live="polite"></p>
+                  </div>
+                  <div class="card-actions">
+                    <button type="button" class="button button-small explain-row"
+                            data-url="{{ url_for('study.explain', card_id=row.card.id) }}">Explain</button>
+                    <a class="button button-small" href="{{ url_for('study.start_cards', ids=row.card.id) }}">Practice</a>
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+          </section>
         {% endfor %}
-      </ul>
+      </details>
     {% else %}
-      <p class="empty">No misconceptions yet. They appear when you say I'm confident and then I missed it.</p>
+      <p class="empty">No misconceptions yet. They appear when you say Confident and then Got it wrong.</p>
     {% endif %}
   </section>
 </section>
