@@ -4,7 +4,7 @@
 //   3. flip the card              (Space)
 //   4. the answer pair for that choice (keys 1 / 2) -> sent as knew_it = 1 / 0
 //        Confident: "Got it right" / "Got it wrong"
-//        Not sure:  "I was close"  / "I didn't know it"
+//        Not sure:  "Recalled it"  / "I didn't get it"
 // The engine gets exactly what it got before (Sure/Unsure, Know it/Review again);
 // only the words on screen depend on the first choice.
 (function () {
@@ -32,7 +32,7 @@
   const TAGS = {
     moved: stepAnswer.dataset.canMoveUp === "true" ? "Moved up" : "Got it.",
     misconception: "You were confident about this one. Tap Explain.",
-    close: "Almost there. You'll see it again soon.",
+    recalled: "Good recall. You'll see it again soon to lock it in.",
     missed: "No problem. This one comes back soon.",
   };
 

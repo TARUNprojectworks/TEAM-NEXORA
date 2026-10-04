@@ -49,8 +49,9 @@ def test_tracking_needs_login(client):
 def test_tracking_page_has_every_section(riya_client):
     page = riya_client.get("/tracking/").get_data(as_text=True)
     assert "My Progress" in page
-    for heading in ["Weak spots", "Study calendar", "Mastery by topic", "Progress per deck", "Misconceptions"]:
+    for heading in ["Weak spots", "Study calendar", "Mastery by topic", "Progress per deck"]:
         assert heading in page
+    assert 'id="misconceptions-heading"' not in page  # misconceptions live on the Weak Points page
     assert "No study history yet" in page
 
 

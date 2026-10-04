@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Settings · {{ deck.title }} · Nexora Notebook{% endblock %}
+{% block back %}<a class="back-link" href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">← Back</a>{% endblock %}
+{% block content %}
+<section class="narrow deck-settings">
+  <h1>Settings</h1>
+  <p class="deck-meta">{{ deck.title }}</p>
+
+  {% if title_form %}
+    <section class="deck-section" aria-labelledby="name-heading">
+      <h2 id="name-heading" class="section-title"><span class="icon-dot">{{ icon("pencil") }}</span>Deck name</h2>
+      <form method="post" action="{{ url_for('decks.rename_deck', deck_id=deck.id) }}" class="rename-form" novalidate>
+        {{ title_form.hidden_tag() }}
+        <label for="title" class="visually-hidden">Deck name</label>
+        {{ title_form.title(maxlength=120, required=True) }}
+        <button type="submit" class="button">Save name</button>
+      </form>
+    </section>
+  {% endif %}
+
+  {% if user_deck %}
+    <section class="deck-section" id="exam" aria-labelledby="exam-heading">
+      <h2 id="exam-heading" class="section-title"><span class="icon-dot icon-exam">{{ icon("calendar") }}</span>Exam date</h2>
+      {% if badge and badge[1] == "passed" %}<p class="notice">{{ badge[0] }}</p>{% endif %}
+      <form method="post" action="{{ url_for('decks.update_exam', deck_id=deck.id) }}" novalidate class="exam-form">
+        {{ exam_form.hidden_tag() }}
+        {% with form = exam_form %}
+          {% include "decks/_exam_fields.html" %}
+        {% endwith %}
+        <button type="submit" class="button">Save exam setting</button>
+      </form>
+    </section>
+  {% endif %}
+
+  {% if (can_edit and not deck.is_weak_spot) or deck.is_ready %}
+    <section class="deck-section" aria-labelledby="danger-heading">
+      <h2 id="danger-heading">{{ "Delete deck" if can_edit else "Remove deck" }}</h2>
+      {% if can_edit %}
+        <p>Deletes the deck, its {{ card_count }} {{ "card" if card_count == 1 else "cards" }} and your progress on them.</p>
+        <form method="post" action="{{ url_for('decks.delete_deck', deck_id=deck.id) }}"
+              data-confirm="Delete this deck and all {{ card_count }} cards? This can't be undone.">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="button button-danger">{{ icon("trash") }} Delete deck</button>
+        </form>
+      {% else %}
+        <p>Takes the deck off your list. Your progress is kept if you add it again.</p>
+        <form method="post" action="{{ url_for('decks.remove_ready_deck', deck_id=deck.id) }}"
+              data-confirm="Remove this deck from your list? Your progress is kept if you add it again.">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="button">{{ icon("remove") }} Remove from my decks</button>
+        </form>
+      {% endif %}
+    </section>
+  {% endif %}
+</section>
+{% endblock %}

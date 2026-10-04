@@ -232,7 +232,7 @@ a { color: var(--ink); text-underline-offset: 2px; }
   margin: 16px 0 24px;
 }
 
-.choices { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 
 .choice {
   display: block;
@@ -1091,3 +1091,45 @@ dialog::backdrop { background: rgba(28, 42, 57, 0.4); }
 .plan-more summary { cursor: pointer; margin: 6px 0; color: var(--ink-soft); text-decoration: underline; }
 .library-deck .chip { background: #EEF2F5; }
 .weak-preview { margin-top: 24px; }
+
+/* My decks: badge, Study, ⋯ and Open stay on one row at every width; a long badge is cut short. */
+.library-actions { flex-wrap: nowrap; gap: 8px; }
+.library-actions .badge { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.library-actions .button-small { flex: none; }
+
+/* Deck page: "Edit cards" and "Settings", labelled buttons with an icon. */
+.deck-tools { display: flex; flex-wrap: wrap; gap: 8px; }
+.labelled-icon { display: inline-flex; align-items: center; gap: 6px; }
+.labelled-icon .icon, .button .icon { width: 18px; height: 18px; }
+.button-danger, .deck-settings .button { display: inline-flex; align-items: center; gap: 6px; }
+
+/* Edit cards: each card is a link to its own page. */
+.card-links li { border-bottom: 1px solid var(--line); }
+.card-link { display: grid; gap: 2px; padding: 12px 8px; text-decoration: none; color: var(--ink); }
+.card-link:hover { background: var(--paper); }
+.card-link .card-front { font-weight: 700; }
+.card-link .card-back { color: var(--ink-soft); }
+.card-link .card-meta { font-size: 0.875rem; color: var(--ink-soft); }
+.generate-more label { font-family: var(--font-ui); }
+.card-preview { margin: 12px 0; min-height: 0; }
+.card-page-danger { margin-top: 24px; }
+
+/* Today's plan: 10 / 20 / 30 / Custom. Custom opens a small number box under the buttons. */
+.segmented { overflow: visible; }
+.custom-size { position: relative; }
+.custom-size summary {
+  list-style: none; cursor: pointer;
+  padding: 6px 12px; border-left: 1px solid var(--ink);
+  background: var(--paper); font-size: 0.9375rem; white-space: nowrap;
+}
+.custom-size summary::-webkit-details-marker { display: none; }
+.custom-size summary[aria-pressed="true"] { background: var(--ink); color: var(--paper); font-weight: 700; }
+.custom-box {
+  position: absolute; right: -2px; top: calc(100% + 6px); z-index: 5;
+  display: flex; gap: 6px; padding: 8px;
+  background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--paper-shadow);
+}
+.custom-box input { width: 5.5em; }
+@media (max-width: 600px) {
+  .custom-size summary { padding: 6px 9px; }
+}

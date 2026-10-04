@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Edit cards · {{ deck.title }} · Nexora Notebook{% endblock %}
+{% block back %}<a class="back-link" href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">← Back</a>{% endblock %}
+{% block content %}
+<div class="page-top">
+  <div>
+    <h1>Edit cards</h1>
+    <p class="deck-meta">
+      {{ deck.title }} · {{ cards | length }} {{ "card" if cards | length == 1 else "cards" }}
+      {% if hidden_cards %} · {{ hidden_cards | length }} hidden{% endif %}
+    </p>
+  </div>
+</div>
+
+<section class="deck-section" aria-labelledby="cards-heading">
+  <div class="section-top">
+    <h2 id="cards-heading">View cards</h2>
+    {% if can_add_cards %}
+      <div class="actions-inline">
+        <a class="button button-primary" href="{{ url_for('decks.new_card', deck_id=deck.id) }}">Add card</a>
+        <a class="button" href="{{ url_for('decks.create_my_own', deck_id=deck.id) }}">Paste or upload notes</a>
+        {% if cards %}
+          <form method="post" action="{{ url_for('cardmaker.generate_more', deck_id=deck.id) }}" class="generate-more"
+                data-wait="Making new cards...">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <label for="more-count">Generate cards</label>
+            <select name="count" id="more-count">
+              <option value="5">5 cards</option>
+              <option value="10">10 cards</option>
+            </select>
+            <button type="submit" class="button">Generate</button>
+            <span class="wait-status" role="status" aria-live="polite"></span>
+          </form>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+  {% if deck.is_ready and can_add_cards %}
+    <p class="field-hint">Cards you add to a ready deck are private: only you see them.</p>
+  {% endif %}
+
+  {% if not cards %}
+    <p class="empty">
+      {% if can_add_cards %}No cards yet. Add one or paste your notes.{% else %}This deck has no cards yet.{% endif %}
+    </p>
+  {% else %}
+    <ul class="card-list card-links">
+      {% for card in cards %}
+        <li id="card-{{ card.id }}">
+          <a class="card-link" href="{{ url_for('cards.card_page', card_id=card.id) }}">
+            <span class="card-front">{{ card.question }}</span>
+            <span class="card-back">{{ card.answer | truncate(90, true, "…") }}</span>
+            <span class="card-meta">{{ card.topic }}{% if deck.is_ready and card.owner_id == current_user.id %} · Your card{% endif %}</span>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  {% if hidden_cards %}
+    {% if not show_hidden %}
+      <p class="hidden-link">
+        <a href="{{ url_for('decks.deck_cards', deck_id=deck.id, show_hidden=1) }}#hidden-cards">Show hidden cards ({{ hidden_cards | length }})</a>
+      </p>
+    {% else %}
+      <section class="hidden-cards" id="hidden-cards" aria-labelledby="hidden-heading">
+        <h3 id="hidden-heading">Hidden cards ({{ hidden_cards | length }})</h3>
+        <p class="field-hint">Only you have hidden these. They're left out of your study and plan.</p>
+        <ul class="card-list">
+          {% for card in hidden_cards %}
+            <li class="card-row card-row-hidden" id="card-{{ card.id }}">
+              <div class="card-sides">
+                <p class="card-front">{{ card.question }}</p>
+                <p class="card-meta">{{ card.topic }}</p>
+              </div>
+              <div class="card-actions">
+                <form method="post" action="{{ url_for('decks.unhide_card', deck_id=deck.id, card_id=card.id) }}" class="inline-form">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="icon-button" aria-label="Show this card again" title="Show this card again">{{ icon("eye") }}</button>
+                </form>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+        <p class="hidden-link"><a href="{{ url_for('decks.deck_cards', deck_id=deck.id) }}">Close hidden cards</a></p>
+      </section>
+    {% endif %}
+  {% endif %}
+</section>
+{% endblock %}

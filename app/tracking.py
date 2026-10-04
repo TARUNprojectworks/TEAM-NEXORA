@@ -162,10 +162,8 @@ def tracking_page():
         "tracking.html",
         data=data,
         weak_spots=weak_spot_rows(current_user.id),
-        misconceptions=misconception_cards(current_user.id),
         calendar=streak_calendar(current_user.id, today),
         streak=streak_to_show(current_user, today),
-        resolved_shelf=engine.RESOLVED_SHELF,
         shelf_names=SHELF_NAMES,
         has_reviews=db.session.query(Review.id).filter_by(user_id=current_user.id).count() > 0,
     )

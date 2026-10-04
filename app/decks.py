@@ -284,6 +284,17 @@ def ready_deck_descriptions():
     return descriptions
 
 
+def short_badge(user_deck, today):
+    """The mode badge in a few characters, so a deck card's buttons stay on one row: "Exam: 3 days"."""
+    text, kind = mode_badge(user_deck, today)
+    if kind == "exam":
+        days_left = (user_deck.exam_date - today).days
+        text = "Exam: today" if days_left == 0 else ("Exam: 1 day" if days_left == 1 else f"Exam: {days_left} days")
+    elif kind == "passed":
+        text = "Exam passed"
+    return text, kind
+
+
 def mastered_counts(user_id, deck_ids):
     """{deck_id: cards on the Mastered shelf (5)} for this student, hidden cards left out."""
     if not deck_ids:
@@ -418,7 +429,7 @@ def my_decks():
     mastered = mastered_counts(current_user.id, [deck.id for _, deck in rows])
     items = my_deck_cards([deck for _, deck in rows])
     for item, (user_deck, deck) in zip(items, rows):
-        item["badge"] = mode_badge(user_deck, today)
+        item["badge"] = short_badge(user_deck, today)
         item["hidden_count"] = hidden_counts.get(deck.id, 0)
         item["card_count"] -= item["hidden_count"]
         count = item["card_count"]
@@ -473,8 +484,23 @@ def deck_cards_split(deck):
     return cards, hidden_cards
 
 
-def edit_url(deck_id, anchor=""):
-    return url_for("decks.edit_deck", deck_id=deck_id) + anchor
+def cards_url(deck_id, anchor=""):
+    return url_for("decks.deck_cards", deck_id=deck_id) + anchor
+
+
+def settings_url(deck_id, anchor=""):
+    return url_for("decks.deck_settings", deck_id=deck_id) + anchor
+
+
+def managed_deck_or_redirect(deck_id):
+    """(deck, user_deck) for the Edit cards and Settings pages, or a redirect to the deck page
+    when a Library deck isn't in the student's list yet (add it first)."""
+    deck = viewable_deck_or_404(deck_id)
+    expire_past_exams(current_user.id, today_local())
+    user_deck = get_user_deck(deck.id)
+    if user_deck is None and deck.owner_id != current_user.id:
+        return deck, None, redirect(url_for("decks.deck_page", deck_id=deck.id))
+    return deck, user_deck, None
 
 
 @bp.get("/<int:deck_id>")
@@ -502,17 +528,21 @@ def deck_page(deck_id):
 @bp.get("/<int:deck_id>/edit")
 @login_required
 def edit_deck(deck_id):
-    """The edit view: rename, exam setting, delete or remove, add cards and the full card list."""
-    deck = viewable_deck_or_404(deck_id)
-    today = today_local()
-    expire_past_exams(current_user.id, today)
-    user_deck = get_user_deck(deck.id)
-    if user_deck is None and deck.owner_id != current_user.id:
-        return redirect(url_for("decks.deck_page", deck_id=deck.id))  # add the ready deck first
+    """The old edit view; it is now split into Edit cards and Settings."""
+    return redirect(cards_url(deck_id))
+
+
+@bp.get("/<int:deck_id>/cards")
+@login_required
+def deck_cards(deck_id):
+    """Edit cards: add, paste or upload notes, generate more, and the full card list."""
+    deck, user_deck, leave = managed_deck_or_redirect(deck_id)
+    if leave:
+        return leave
     cards, hidden_cards = deck_cards_split(deck)
     can_edit = deck.owner_id == current_user.id
     return render_template(
-        "decks/deck_edit.html",
+        "decks/cards.html",
         deck=deck,
         cards=cards,
         hidden_cards=hidden_cards,
@@ -520,6 +550,24 @@ def edit_deck(deck_id):
         user_deck=user_deck,
         can_edit=can_edit,
         can_add_cards=can_edit or deck.is_ready,
+    )
+
+
+@bp.get("/<int:deck_id>/settings")
+@login_required
+def deck_settings(deck_id):
+    """Settings: rename (own decks), exam date, and delete or remove the deck."""
+    deck, user_deck, leave = managed_deck_or_redirect(deck_id)
+    if leave:
+        return leave
+    can_edit = deck.owner_id == current_user.id
+    today = today_local()
+    return render_template(
+        "decks/settings.html",
+        deck=deck,
+        user_deck=user_deck,
+        can_edit=can_edit,
+        card_count=len(deck_cards_split(deck)[0]),
         title_form=DeckTitleForm(obj=deck) if can_edit and not deck.is_weak_spot else None,
         badge=mode_badge(user_deck, today) if user_deck else None,
         exam_form=exam_form_for(user_deck) if user_deck else None,
@@ -541,7 +589,7 @@ def update_exam(deck_id):
         flash("Exam setting saved.", "info")
     else:
         flash(first_error(form), "error")
-    return redirect(edit_url(deck.id, "#exam"))
+    return redirect(settings_url(deck.id, "#exam"))
 
 
 @bp.post("/<int:deck_id>/rename")
@@ -557,7 +605,7 @@ def rename_deck(deck_id):
         flash("Deck renamed.", "info")
     else:
         flash(first_error(form), "error")
-    return redirect(edit_url(deck.id))
+    return redirect(settings_url(deck.id))
 
 
 @bp.post("/<int:deck_id>/delete")
@@ -590,7 +638,7 @@ def new_card(deck_id):
             flash("Card saved. Add the next one.", "info")
             return redirect(url_for("decks.new_card", deck_id=deck.id, back=request.args.get("back")))
         flash("Card saved.", "info")
-        return redirect(edit_url(deck.id))
+        return redirect(cards_url(deck.id))
     return render_template(
         "decks/card_form.html", deck=deck, form=form, card=None, topics=deck_topics(deck.id, current_user.id),
         long_front=LONG_FRONT_CHARS, long_back=LONG_BACK_CHARS,
@@ -601,13 +649,15 @@ def new_card(deck_id):
 @login_required
 def edit_card(deck_id, card_id):
     deck, card = editable_card_or_error(deck_id, card_id)
+    if request.method == "GET":
+        return redirect(url_for("cards.card_page", card_id=card.id))  # each card has its own page now
     form = CardForm(obj=card)
     if form.validate_on_submit():
         fill_card_from_form(card, form, deck)
         card.explanation = None  # the cached Explain text no longer matches
         db.session.commit()
         flash("Card updated.", "info")
-        return redirect(edit_url(deck.id, f"#card-{card.id}"))
+        return redirect(cards_url(deck.id, f"#card-{card.id}"))
     return render_template(
         "decks/card_form.html", deck=deck, form=form, card=card, topics=deck_topics(deck.id, current_user.id),
         long_front=LONG_FRONT_CHARS, long_back=LONG_BACK_CHARS,
@@ -640,7 +690,7 @@ def hide_card(deck_id, card_id):
     progress.hidden = True
     db.session.commit()
     flash("Card hidden. You won't see it when you study this deck.", "info")
-    return redirect(edit_url(deck.id))
+    return redirect(cards_url(deck.id))
 
 
 @bp.post("/<int:deck_id>/cards/<int:card_id>/unhide")
@@ -657,7 +707,7 @@ def unhide_card(deck_id, card_id):
             progress.hidden = False
         db.session.commit()
     flash("Card is back in your study.", "info")
-    return redirect(url_for("decks.edit_deck", deck_id=deck.id, show_hidden=1))
+    return redirect(url_for("decks.deck_cards", deck_id=deck.id, show_hidden=1))
 
 
 @bp.post("/<int:deck_id>/cards/<int:card_id>/delete")
@@ -667,4 +717,37 @@ def delete_card(deck_id, card_id):
     db.session.delete(card)
     db.session.commit()
     flash("Card deleted.", "info")
-    return redirect(edit_url(deck.id))
+    return redirect(cards_url(deck.id))
+
+
+# ---------- One card's own page: /cards/<id> ----------
+
+cards_bp = Blueprint("cards", __name__, url_prefix="/cards")
+
+
+@cards_bp.route("/<int:card_id>", methods=["GET", "POST"])
+@login_required
+def card_page(card_id):
+    """One card: edit fields with Save and Delete when the student may change it,
+    or read-only with Hide for a shared Library card."""
+    card = db.session.get(Card, card_id)
+    if card is None:
+        abort(404)
+    deck = viewable_deck_or_404(card.deck_id)
+    card = deck_card_or_404(deck, card.id)
+    user_deck = get_user_deck(deck.id)
+    if user_deck is None and deck.owner_id != current_user.id:
+        abort(404)
+    can_change = deck.owner_id == current_user.id or card.owner_id == current_user.id
+    form = CardForm(obj=card) if can_change else None
+    if can_change and form.validate_on_submit():
+        fill_card_from_form(card, form, deck)
+        card.explanation = None  # the cached Explain text no longer matches
+        db.session.commit()
+        flash("Card saved.", "info")
+        return redirect(url_for("cards.card_page", card_id=card.id))
+    return render_template(
+        "decks/card_page.html", deck=deck, card=card, form=form, can_change=can_change,
+        hidden=card.id in hidden_card_ids(current_user.id, deck.id),
+        topics=deck_topics(deck.id, current_user.id), long_front=LONG_FRONT_CHARS, long_back=LONG_BACK_CHARS,
+    )

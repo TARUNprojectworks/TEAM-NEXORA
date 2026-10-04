@@ -269,12 +269,11 @@ def test_every_ready_deck_has_a_description():
 
 # ---------- 12 and 13. Misconceptions and weak spots on My Progress ----------
 
-def test_misconception_list_with_explain_and_practice(app, riya_client, riya):
+def test_misconceptions_are_on_weak_points_not_my_progress(app, riya_client, riya):
     deck_id, card_ids = make_deck(app, riya)
     make_weak(app, riya, card_ids)
-    page = text(riya_client, "/tracking/")
-    assert "Which organelle makes ATP?" in page and "Practise all open (2)" in page
-    assert f"/study/explain/{card_ids[0]}" in page and f"/study/cards?ids={card_ids[0]}" in page
+    assert "Which organelle makes ATP?" not in text(riya_client, "/tracking/")
+    assert "Which organelle makes ATP?" in text(riya_client, "/tracking/weak-points")
 
 
 def test_practice_chosen_cards_only_allows_my_cards(app, riya_client, riya, make_user):

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Card · {{ deck.title }} · Nexora Notebook{% endblock %}
+{% block back %}<a class="back-link" href="{{ url_for('decks.deck_cards', deck_id=deck.id) }}#card-{{ card.id }}">← Back to the list</a>{% endblock %}
+{% block content %}
+{# One card. Editable cards show the form with Save and Delete; a shared Library card is read-only and can be hidden. #}
+<section class="narrow card-form-page">
+  <p class="deck-meta">{{ deck.title }} · {{ card.topic }}</p>
+  {% if can_change %}
+    <h1>Edit card</h1>
+    <form method="post" novalidate id="card-form" data-unsaved="You have unsaved changes. Leave anyway?"
+          data-long-front="{{ long_front }}" data-long-back="{{ long_back }}">
+      {{ form.hidden_tag() }}
+      {% for field in [form.question, form.answer] %}
+        {% include "_form_field.html" %}
+      {% endfor %}
+      <p class="long-warning" id="long-warning" role="status" hidden>This card looks long. Split it into two?</p>
+      <div class="field">
+        {{ form.topic.label }}
+        <p class="field-hint" id="topic-hint">{{ form.topic.description }}</p>
+        {{ form.topic(list="topic-list", autocomplete="off", **{"aria-describedby": "topic-hint"}) }}
+        <datalist id="topic-list">
+          {% for topic in topics %}<option value="{{ topic }}">{% endfor %}
+        </datalist>
+        {% if form.topic.errors %}<p class="field-error">{{ form.topic.errors | join(" ") }}</p>{% endif %}
+      </div>
+      {% for field in [form.importance] %}
+        {% include "_form_field.html" %}
+      {% endfor %}
+      <div class="actions">
+        <button type="submit" class="button button-primary">Save</button>
+      </div>
+    </form>
+    <form method="post" action="{{ url_for('decks.delete_card', deck_id=deck.id, card_id=card.id) }}" class="card-page-danger"
+          data-confirm="Delete this card? This can't be undone.">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="button button-danger">{{ icon("trash") }} Delete card</button>
+    </form>
+  {% else %}
+    <h1>Card</h1>
+    <div class="index-card card-preview">
+      <p class="card-header">Front</p>
+      <p class="card-text">{{ card.question }}</p>
+    </div>
+    <div class="index-card card-preview">
+      <p class="card-header">Back</p>
+      <p class="card-text">{{ card.answer }}</p>
+    </div>
+    <p class="field-hint">This card is from the Deck Library, so it can't be edited. You can hide it from your study.</p>
+    {% if hidden %}
+      <form method="post" action="{{ url_for('decks.unhide_card', deck_id=deck.id, card_id=card.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="button">{{ icon("eye") }} Show this card again</button>
+      </form>
+    {% else %}
+      <form method="post" action="{{ url_for('decks.hide_card', deck_id=deck.id, card_id=card.id) }}"
+            data-confirm="Hide this card? You can show it again from the card list.">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="button">{{ icon("eye-off") }} Hide this card</button>
+      </form>
+    {% endif %}
+  {% endif %}
+</section>
+{% endblock %}
+{% block scripts %}
+{% if can_change %}<script src="{{ url_for('static', filename='js/cardform.js') }}"></script>{% endif %}
+{% endblock %}

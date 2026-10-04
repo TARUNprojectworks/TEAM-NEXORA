@@ -201,3 +201,10 @@ def test_landing_offers_sign_up_and_log_in(client):
     html = page(client, "/")
     assert ">Sign up</a>" in html or "Sign up\n" in html
     assert "Log in" in html and "Get Started" not in html
+
+
+def test_home_has_a_weak_points_box(riya_client):
+    html = page(riya_client, "/home")
+    choices = html.split('<div class="choices">')[1]
+    assert choices.count('class="choice"') == 3
+    assert 'href="/tracking/weak-points"' in choices and "No open weak topics right now." in choices
