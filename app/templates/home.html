@@ -22,12 +22,21 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <span class="plan-length-label" id="plan-length-label">Cards</span>
         <div class="segmented" role="group" aria-labelledby="plan-length-label">
-          {% for value, size in choices.items() %}
-            <button type="submit" name="size" value="{{ value }}"
-                    aria-pressed="{{ 'true' if plan.size == size else 'false' }}">
-              {{ "All" if size is none else size }}
-            </button>
+          {% for size in sizes %}
+            <button type="submit" name="size" value="{{ size }}"
+                    aria-pressed="{{ 'true' if plan.size == size else 'false' }}">{{ size }}</button>
           {% endfor %}
+          {% set is_custom = plan.size not in sizes %}
+          {# Custom opens a small number box (a plain <details>, so it works without JavaScript). #}
+          <details class="custom-size">
+            <summary aria-pressed="{{ 'true' if is_custom else 'false' }}">Custom{% if is_custom and plan.size %} ({{ plan.size }}){% endif %}</summary>
+            <div class="custom-box">
+              <label for="custom-size" class="visually-hidden">Number of cards ({{ custom_min }} to {{ custom_max }})</label>
+              <input type="number" id="custom-size" name="custom_size" min="{{ custom_min }}" max="{{ custom_max }}"
+                     value="{{ plan.size if is_custom and plan.size else 40 }}" inputmode="numeric">
+              <button type="submit" name="size" value="custom" class="button button-small">Set</button>
+            </div>
+          </details>
         </div>
       </form>
     </div>
@@ -109,6 +118,10 @@
     <a class="choice" href="{{ url_for('decks.create_my_own') }}">
       <span class="choice-title">Create My Own</span>
       <span class="choice-text">Type cards, paste notes or upload a photo of your notes.</span>
+    </a>
+    <a class="choice" href="{{ url_for('tracking.weak_points') }}">
+      <span class="choice-title">Weak Points</span>
+      <span class="choice-text">{% if weak_open_count %}<mark>{{ weak_open_count }} open weak {{ "topic" if weak_open_count == 1 else "topics" }}</mark>{% else %}No open weak topics right now.{% endif %}</span>
     </a>
   </div>
 </section>

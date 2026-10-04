@@ -13,7 +13,7 @@ import math
 from collections import namedtuple
 from datetime import timedelta
 
-from flask import Blueprint, redirect, render_template, request, session, url_for
+from flask import Blueprint, current_app, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 
 from app import engine
@@ -25,13 +25,16 @@ from app.models import (
 
 bp = Blueprint("planner", __name__)
 
-# Plan sizes the student can pick, in cards, by form value. None = all due cards.
-SESSION_CHOICES = {"20": 20, "50": 50, "all": None}
-DEFAULT_SIZE = 50
-SECONDS_PER_CARD = 30  # only for the "about N min" estimate on Home
-# "All" still needs a ceiling: the plan lives in the session cookie (4 KB).
-# Anything above 150 cards moves to tomorrow.
+# Plan sizes in cards: three quick choices, or Custom (5 to 150).
+PLAN_SIZES = (10, 20, 30)
+DEFAULT_SIZE = 20
+CUSTOM_MIN = 5
+# The plan lives in the session cookie (4 KB), so 150 cards is the most a plan can hold.
 NO_LIMIT_CARD_CAP = 150
+CUSTOM_MAX = NO_LIMIT_CARD_CAP
+SIZE_COOKIE = "plan_size"  # remembers the last choice, even after logging out
+SIZE_COOKIE_DAYS = 365
+SECONDS_PER_CARD = 30  # only for the "about N min" estimate on Home
 PLAN_XP = 10
 LONG_BREAK_DAYS = 3  # away this many days or more: show "Welcome back"
 
@@ -142,9 +145,18 @@ def build_plan(user_id, size, today):
     }
 
 
+def valid_size(value):
+    """The plan size as a whole number from 5 to 150, or None if it isn't one."""
+    try:
+        size = int(value)
+    except (TypeError, ValueError):
+        return None
+    return size if CUSTOM_MIN <= size <= CUSTOM_MAX else None
+
+
 def chosen_size():
-    size = session.get("plan_size", DEFAULT_SIZE)
-    return size if size in SESSION_CHOICES.values() else DEFAULT_SIZE
+    """The student's last choice (kept in a cookie), or 20 cards."""
+    return valid_size(request.cookies.get(SIZE_COOKIE)) or DEFAULT_SIZE
 
 
 def todays_plan(user_id, today):
@@ -256,7 +268,8 @@ def home():
 
     # Top 3 weak topics for the home page preview
     from app.tracking import weak_spot_rows
-    weak_preview = weak_spot_rows(current_user.id)[:3]
+    weak_rows = weak_spot_rows(current_user.id)
+    weak_preview = weak_rows[:3]
 
     return render_template(
         "home.html",
@@ -269,9 +282,12 @@ def home():
         plan_finished=session.get("plan_xp_date") == today.isoformat(),
         streak=streak_to_show(current_user, today),
         welcome_back=welcome_back_count(current_user, today),
-        choices=SESSION_CHOICES,
+        sizes=PLAN_SIZES,
+        custom_min=CUSTOM_MIN,
+        custom_max=CUSTOM_MAX,
         weak_spot=open_weak_spot(current_user.id, today),
         weak_preview=weak_preview,
+        weak_open_count=sum(row["status"] == "Open" for row in weak_rows),
     )
 
 
@@ -287,9 +303,14 @@ def refresh_plan():
 @bp.post("/plan/length")
 @login_required
 def change_plan_length():
-    """Pick 20 / 50 / All cards. Rebuilds today's plan."""
+    """Pick 10 / 20 / 30 cards or a custom number (5 to 150). Rebuilds today's plan and remembers the choice."""
     choice = request.form.get("size")
-    if choice in SESSION_CHOICES:
-        session["plan_size"] = SESSION_CHOICES[choice]
-        session["plan"] = build_plan(current_user.id, SESSION_CHOICES[choice], today_local())
-    return redirect(url_for("planner.home"))
+    size = valid_size(request.form.get("custom_size") if choice == "custom" else choice)
+    response = redirect(url_for("planner.home"))
+    if size is None:
+        flash(f"Pick a number of cards from {CUSTOM_MIN} to {CUSTOM_MAX}.", "error")
+        return response
+    session["plan"] = build_plan(current_user.id, size, today_local())
+    response.set_cookie(SIZE_COOKIE, str(size), max_age=SIZE_COOKIE_DAYS * 24 * 3600,
+                        httponly=True, samesite="Lax", secure=current_app.config.get("SESSION_COOKIE_SECURE", False))
+    return response

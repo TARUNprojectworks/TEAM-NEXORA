@@ -218,29 +218,51 @@ def test_changing_the_length_rebuilds_the_plan(app, riya_client, riya):
     card_ids = add_deck(app, riya, cards=40)
     for card_id in card_ids:
         set_progress(app, riya, card_id)
-    assert len(plan_in_session(riya_client)["card_ids"]) == 40
+    assert len(plan_in_session(riya_client)["card_ids"]) == 20  # 20 cards by default
 
-    riya_client.post("/plan/length", data={"size": "20"})
+    riya_client.post("/plan/length", data={"size": "10"})
     plan = plan_in_session(riya_client)
-    assert (plan["size"], len(plan["card_ids"]), plan["moved"]) == (20, 20, 20)
-    assert "20 cards moved to tomorrow." in riya_client.get("/home").get_data(as_text=True)
-
-    riya_client.post("/plan/length", data={"size": "all"})
-    assert plan_in_session(riya_client)["size"] is None
+    assert (plan["size"], len(plan["card_ids"]), plan["moved"]) == (10, 10, 30)
+    assert "30 cards moved to tomorrow." in riya_client.get("/home").get_data(as_text=True)
 
 
-def test_home_offers_20_50_and_all_cards(riya_client):
+def test_custom_size_from_5_to_150(app, riya_client, riya):
+    card_ids = add_deck(app, riya, cards=40)
+    for card_id in card_ids:
+        set_progress(app, riya, card_id)
+    riya_client.post("/plan/length", data={"size": "custom", "custom_size": "35"})
+    plan = plan_in_session(riya_client)
+    assert (plan["size"], len(plan["card_ids"])) == (35, 35)
+    page = riya_client.get("/home").get_data(as_text=True)
+    assert '<details class="custom-size">' in page and "Custom (35)" in page
+    for bad in ["4", "151", "abc", ""]:
+        riya_client.post("/plan/length", data={"size": "custom", "custom_size": bad})
+        assert plan_in_session(riya_client)["size"] == 35  # a bad number changes nothing
+
+
+def test_last_choice_is_remembered_after_logging_out(app, client, riya):
+    add_deck(app, riya, cards=3)
+    client.post("/login", data={"email": "riya@example.com", "password": "password123"})
+    response = client.post("/plan/length", data={"size": "30"})
+    assert "plan_size=30" in response.headers["Set-Cookie"]
+    client.post("/logout")
+    client.post("/login", data={"email": "riya@example.com", "password": "password123"})
+    assert plan_in_session(client)["size"] == 30
+
+
+def test_home_offers_10_20_30_and_custom(riya_client):
     page = page_text(riya_client)
-    for button in ['name="size" value="20"', 'name="size" value="50"', 'name="size" value="all"']:
+    for button in ['name="size" value="10"', 'name="size" value="20"', 'name="size" value="30"',
+                   'name="size" value="custom"', 'name="custom_size" min="5" max="150"']:
         assert button in page
-    assert " min</button>" not in page and "No limit" not in page
+    assert "No limit" not in page and 'value="all"' not in page
 
 
 def test_an_old_minutes_plan_is_rebuilt(app, riya_client, riya):
     add_deck(app, riya, cards=3)
     with riya_client.session_transaction() as state:
         state["plan"] = {"date": today_local().isoformat(), "minutes": 25, "card_ids": [999], "moved": 0}
-    assert plan_in_session(riya_client)["size"] == 50
+    assert plan_in_session(riya_client)["size"] == 20
 
 
 def test_hidden_cards_are_left_out_of_the_plan(app, riya_client, riya):
