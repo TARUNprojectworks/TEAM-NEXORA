@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ "Edit card" if card else "Add a card" }} · Nexora Notebook{% endblock %}
-{% block back %}{% if not card and request.args.get("back") == "options" %}<a class="back-link" href="{{ url_for('decks.create_my_own', deck_id=deck.id) }}">← Back</a>{% else %}<a class="back-link" href="{{ url_for('decks.edit_deck', deck_id=deck.id) }}">← Back to {{ deck.title }}</a>{% endif %}{% endblock %}
+{% block back %}{% if not card and request.args.get("back") == "options" %}<a class="back-link" href="{{ url_for('decks.create_my_own', deck_id=deck.id) }}">← Back</a>{% else %}<a class="back-link" href="{{ url_for('decks.deck_cards', deck_id=deck.id) }}">← Back to {{ deck.title }}</a>{% endif %}{% endblock %}
 {% block content %}
 <section class="narrow card-form-page">
   <h1>{{ "Edit card" if card else "Add a card" }}</h1>
@@ -35,7 +35,7 @@
         <button type="submit" name="save_next" value="1" class="button button-primary">Save &amp; add next</button>
         <button type="submit" class="button">Save</button>
       {% endif %}
-      <a class="button" href="{{ url_for('decks.edit_deck', deck_id=deck.id) }}">{{ "Cancel" if card else "Done" }}</a>
+      <a class="button" href="{{ url_for('decks.deck_cards', deck_id=deck.id) }}">{{ "Cancel" if card else "Done" }}</a>
     </div>
   </form>
 </section>

@@ -58,14 +58,16 @@ def studied_cards(client, deck_id, style):
 
 # ---------- Own decks: edit and delete ----------
 
-def test_every_own_card_row_has_edit_and_delete_with_confirm(app, riya_client, riya):
+def test_every_own_card_opens_its_page_with_save_and_delete(app, riya_client, riya):
     deck_id, card_ids = make_deck(app, riya, is_ready=False)
-    page = riya_client.get(f"/decks/{deck_id}/edit").get_data(as_text=True)
+    page = riya_client.get(f"/decks/{deck_id}/cards").get_data(as_text=True)
     for card_id in card_ids:
-        assert f"/decks/{deck_id}/cards/{card_id}/edit" in page
-        assert f"/decks/{deck_id}/cards/{card_id}/delete" in page
-    assert page.count('data-confirm="Delete this card?') == len(card_ids)
-    assert "Hide this card" not in page
+        assert f'href="/cards/{card_id}"' in page
+    card_page = riya_client.get(f"/cards/{card_ids[0]}").get_data(as_text=True)
+    assert ">Save</button>" in card_page
+    assert f'action="/decks/{deck_id}/cards/{card_ids[0]}/delete"' in card_page
+    assert 'data-confirm="Delete this card?' in card_page
+    assert "Hide this card" not in card_page
 
 
 def test_my_decks_buttons_depend_on_the_kind_of_deck(app, riya_client, riya):
@@ -94,11 +96,10 @@ def test_delete_deck_from_my_decks_returns_to_my_decks(app, riya_client, riya):
 
 def test_ready_card_rows_offer_hide_not_delete(app, riya_client, riya):
     deck_id, card_ids = make_deck(app, riya, is_ready=True)
-    page = riya_client.get(f"/decks/{deck_id}/edit").get_data(as_text=True)
-    assert page.count('aria-label="Hide this card"') == len(card_ids)
     for card_id in card_ids:
-        assert f"/cards/{card_id}/edit" not in page
-        assert f"/cards/{card_id}/delete" not in page
+        page = riya_client.get(f"/cards/{card_id}").get_data(as_text=True)
+        assert "Hide this card" in page and f"/cards/{card_id}/hide" in page
+        assert f"/cards/{card_id}/delete" not in page and ">Save</button>" not in page
 
 
 def test_hiding_a_never_seen_card_creates_a_hidden_progress_row(app, riya_client, riya):
@@ -113,12 +114,12 @@ def test_hidden_card_moves_out_of_the_list(app, riya_client, riya):
     deck_id, card_ids = make_deck(app, riya, is_ready=True)
     hide(riya_client, deck_id, card_ids[0])
 
-    page = riya_client.get(f"/decks/{deck_id}/edit").get_data(as_text=True)
+    page = riya_client.get(f"/decks/{deck_id}/cards").get_data(as_text=True)
     assert "Show hidden cards (1)" in page
     assert '<p class="card-front">Q0</p>' not in page  # not "Q0": it can turn up inside the CSRF token
     assert "2 cards · 1 hidden" in " ".join(page.split())
 
-    page = riya_client.get(f"/decks/{deck_id}/edit?show_hidden=1").get_data(as_text=True)
+    page = riya_client.get(f"/decks/{deck_id}/cards?show_hidden=1").get_data(as_text=True)
     assert "Hidden cards (1)" in page
     assert '<p class="card-front">Q0</p>' in page
     assert "Show this card again" in page

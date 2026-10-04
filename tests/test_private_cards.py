@@ -64,7 +64,7 @@ def test_student_can_add_a_private_card_to_a_ready_deck(app, riya_client, riya, 
         card = db.session.query(Card).filter_by(question="Riya's own Q").one()
         assert card.owner_id == riya
         assert card.deck_id == deck_id
-    page = riya_client.get(f"/decks/{deck_id}/edit").get_data(as_text=True)
+    page = riya_client.get(f"/decks/{deck_id}/cards").get_data(as_text=True)
     assert "Riya&#39;s own Q" in page
     assert "Your card" in page
 
@@ -100,6 +100,7 @@ def test_other_students_cannot_open_edit_or_delete_a_private_card(app, riya_clie
     card_id = riya_private_card_id(app, riya)
     data = {"question": "Changed", "answer": "A", "importance": "medium"}
     assert arjun_client.get(f"/decks/{deck_id}/cards/{card_id}/edit").status_code == 404
+    assert arjun_client.get(f"/cards/{card_id}").status_code == 404
     assert arjun_client.post(f"/decks/{deck_id}/cards/{card_id}/edit", data=data).status_code == 404
     assert arjun_client.post(f"/decks/{deck_id}/cards/{card_id}/delete").status_code == 404
     assert arjun_client.post(f"/study/explain/{card_id}").status_code == 404

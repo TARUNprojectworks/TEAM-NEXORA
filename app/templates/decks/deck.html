@@ -3,7 +3,7 @@
 {% block title %}{{ deck.title }} · Nexora Notebook{% endblock %}
 {% block back %}<a class="back-link" href="{{ url_for('decks.my_decks') if user_deck else url_for('decks.ready_decks', folder=deck.folder) }}">← Back</a>{% endblock %}
 {% block content %}
-{# The study view: only what a student needs to start studying. Changes live in the edit view. #}
+{# The study view: only what a student needs to start studying. Changes live in Edit cards and Settings. #}
 <section class="deck-study">
   <div class="page-top">
     <div>
@@ -13,7 +13,7 @@
         {% if badge %}
           {% set text, kind = badge %}
           {% if kind == "passed" %}
-            · <a class="badge badge-passed" href="{{ url_for('decks.edit_deck', deck_id=deck.id) }}#exam">{{ text }}</a>
+            · <a class="badge badge-passed" href="{{ url_for('decks.deck_settings', deck_id=deck.id) }}#exam">{{ text }}</a>
           {% else %}
             · <span class="badge badge-{{ kind }}">{{ text }}</span>
           {% endif %}
@@ -21,8 +21,10 @@
       </p>
     </div>
     {% if user_deck or deck.owner_id == current_user.id %}
-      <a class="icon-button icon-edit" href="{{ url_for('decks.edit_deck', deck_id=deck.id) }}"
-         aria-label="Edit deck" title="Edit deck">{{ icon("pencil") }}</a>
+      <div class="deck-tools">
+        <a class="button button-small labelled-icon" href="{{ url_for('decks.deck_cards', deck_id=deck.id) }}">{{ icon("pencil") }} Edit cards</a>
+        <a class="button button-small labelled-icon" href="{{ url_for('decks.deck_settings', deck_id=deck.id) }}">{{ icon("settings") }} Settings</a>
+      </div>
     {% endif %}
   </div>
 
@@ -34,7 +36,7 @@
     <p>This deck is in the Deck Library. Add it to study it and track your progress.</p>
     <a class="button button-primary button-big" href="{{ url_for('decks.add_ready_deck', deck_id=deck.id) }}">Add to my decks</a>
   {% elif not card_count %}
-    <p class="empty">No cards yet. <a href="{{ url_for('decks.edit_deck', deck_id=deck.id) }}">Add one or paste your notes.</a></p>
+    <p class="empty">No cards yet. <a href="{{ url_for('decks.deck_cards', deck_id=deck.id) }}">Add one or paste your notes.</a></p>
   {% else %}
     <div class="study-buttons study-buttons-big">
       <a class="button button-primary button-big" href="{{ url_for('study.start', deck_id=deck.id, style='smart') }}">Smart Study</a>
@@ -63,8 +65,8 @@
     <details class="how-it-works">
       <summary>How this works</summary>
       <p>Every card sits on one of five shelves, from Learning to Mastered. Say <strong>Confident</strong> and then
-        <strong>Got it right</strong> in Smart Study and it moves up one shelf. <strong>I was close</strong> keeps it
-        where it is. <strong>Got it wrong</strong> or <strong>I didn't know it</strong> sends it back to Learning.
+        <strong>Got it right</strong> in Smart Study and it moves up one shelf. <strong>Recalled it</strong> keeps it
+        where it is. <strong>Got it wrong</strong> or <strong>I didn't get it</strong> sends it back to Learning.
         Cards come back after 0, 1, 3, 7 and 14 days. In Exam mode, every card is reviewed before your exam date.
         Quick Revise never moves cards.</p>
     </details>

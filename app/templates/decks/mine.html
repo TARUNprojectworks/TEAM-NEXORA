@@ -18,7 +18,7 @@
     {% call deck_card(item, folders) %}
       {% set text, kind = item.badge %}
       {% if kind == "passed" %}
-        <a class="badge badge-passed" href="{{ url_for('decks.edit_deck', deck_id=deck.id) }}#exam">{{ text }}</a>
+        <a class="badge badge-passed" href="{{ url_for('decks.deck_settings', deck_id=deck.id) }}#exam">{{ text }}</a>
       {% else %}
         <span class="badge badge-{{ kind }}">{{ text }}</span>
       {% endif %}
@@ -31,7 +31,8 @@
         <summary class="icon-button" aria-label="More for {{ deck.title }}" title="More">{{ icon("more") }}</summary>
         <div class="more-list">
           <a href="{{ url_for('decks.deck_page', deck_id=deck.id) }}">{{ icon("open") }} Open</a>
-          <a href="{{ url_for('decks.edit_deck', deck_id=deck.id) }}">{{ icon("pencil") }} Edit</a>
+          <a href="{{ url_for('decks.deck_cards', deck_id=deck.id) }}">{{ icon("pencil") }} Edit cards</a>
+          <a href="{{ url_for('decks.deck_settings', deck_id=deck.id) }}">{{ icon("settings") }} Settings</a>
           {% if deck.is_ready %}
             <form method="post" action="{{ url_for('decks.remove_ready_deck', deck_id=deck.id) }}"
                   data-confirm="Remove {{ deck.title }} from your decks? Your progress is kept if you add it again.">
@@ -47,6 +48,8 @@
           {% endif %}
         </div>
       </details>
+      <a class="icon-button" href="{{ url_for('decks.deck_page', deck_id=deck.id) }}"
+         aria-label="Open {{ deck.title }}" title="Open deck">{{ icon("chevron") }}</a>
     {% endcall %}
   {% endfor %}
 </ul>

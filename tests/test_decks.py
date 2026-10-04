@@ -154,22 +154,26 @@ def test_my_decks_shows_weak_spot_deck_and_badges(app, riya_client, ready_deck, 
 
     page = riya_client.get("/decks/mine").get_data(as_text=True)
     assert "Weak spot practice" in page
-    assert "Exam in 5 days" in page
+    assert "Exam: 5 days" in page  # short, so the card's buttons stay on one row
     assert "Normal" in page
+    assert "Exam in 5 days" in riya_client.get(f"/decks/{deck_id}").get_data(as_text=True)
 
 
-@pytest.mark.parametrize("days, text", [(0, "Exam today"), (1, "Exam tomorrow"), (30, "Exam in 30 days")])
-def test_exam_badge_wording(app, riya_client, ready_deck, riya, days, text):
+@pytest.mark.parametrize("days, text, short", [(0, "Exam today", "Exam: today"), (1, "Exam tomorrow", "Exam: 1 day"),
+                                               (30, "Exam in 30 days", "Exam: 30 days")])
+def test_exam_badge_wording(app, riya_client, ready_deck, riya, days, text, short):
     deck_id, _ = ready_deck
     add_to_list(app, riya, deck_id, mode="exam", exam_date=today_local() + timedelta(days=days))
-    assert text in riya_client.get("/decks/mine").get_data(as_text=True)
+    assert text in riya_client.get(f"/decks/{deck_id}").get_data(as_text=True)
+    assert short in riya_client.get("/decks/mine").get_data(as_text=True)
 
 
 def test_past_exam_switches_deck_to_normal(app, riya_client, ready_deck, riya):
     deck_id, _ = ready_deck
     add_to_list(app, riya, deck_id, mode="exam", exam_date=today_local() - timedelta(days=2))
 
-    page = riya_client.get("/decks/mine").get_data(as_text=True)
+    assert "Exam passed" in riya_client.get("/decks/mine").get_data(as_text=True)
+    page = riya_client.get(f"/decks/{deck_id}").get_data(as_text=True)
     assert "Exam passed. Set a new date?" in page
     assert user_deck(app, riya, deck_id).mode == "normal"
 
@@ -215,17 +219,18 @@ def test_ready_deck_page_is_read_only(riya_client, ready_deck):
     page = riya_client.get(f"/decks/{deck_id}").get_data(as_text=True)
     assert "Add to my decks" in page
     assert "Add card" not in page
-    assert "/edit" not in page
-    # Not in the student's list yet: the edit view sends them back to the study view.
-    response = riya_client.get(f"/decks/{deck_id}/edit")
-    assert response.status_code == 302 and response.headers["Location"].endswith(f"/decks/{deck_id}")
+    assert f"/decks/{deck_id}/settings" not in page and f"/decks/{deck_id}/cards" not in page
+    # Not in the student's list yet: Edit cards and Settings send them back to the deck page.
+    for url in [f"/decks/{deck_id}/cards", f"/decks/{deck_id}/settings"]:
+        response = riya_client.get(url)
+        assert response.status_code == 302 and response.headers["Location"].endswith(f"/decks/{deck_id}")
 
 
 def test_own_deck_page_has_card_controls(riya_client, riya_deck):
     deck_id, card_ids = riya_deck
-    page = riya_client.get(f"/decks/{deck_id}/edit").get_data(as_text=True)
+    page = riya_client.get(f"/decks/{deck_id}/cards").get_data(as_text=True)
     assert "Add card" in page
-    assert f"/cards/{card_ids[0]}/edit" in page
+    assert f'href="/cards/{card_ids[0]}"' in page
 
 
 def test_deck_page_shows_shelf_counts(app, riya_client, riya_deck, riya):
@@ -274,7 +279,7 @@ def test_add_card_with_empty_topic_uses_the_deck_name(app, riya_client, riya_dec
     response = riya_client.post(f"/decks/{deck_id}/cards/new", data={
         "question": "What is ATP?", "answer": "The cell's energy currency.", "topic": "", "importance": "high",
     })
-    assert response.headers["Location"].endswith(f"/decks/{deck_id}/edit")
+    assert response.headers["Location"].endswith(f"/decks/{deck_id}/cards")
     with app.app_context():
         card = db.session.query(Card).filter_by(question="What is ATP?").one()
         assert card.topic == "My Notes"
@@ -431,36 +436,54 @@ def test_study_view_is_calm(app, riya_client, riya_deck, riya):
         db.session.commit()
     page = riya_client.get(f"/decks/{deck_id}").get_data(as_text=True)
     for text in ["Smart Study", "Quick Revise", 'class="shelf-bar"', 'title="Mastered: 1 card"',
-                 f'href="/decks/{deck_id}/edit"', 'aria-label="Edit deck"', "3 cards"]:
+                 f'href="/decks/{deck_id}/cards"', f'href="/decks/{deck_id}/settings"', "Edit cards", "Settings", "3 cards"]:
         assert text in page
     # Nothing that changes the deck is on the study view.
-    for text in ["Add card", "Exam setting", f"/cards/{card_ids[0]}/edit", "/delete", 'class="card-list"']:
+    for text in ["Add card", "Exam date", f"/cards/{card_ids[0]}", "/delete", 'class="card-list']:
         assert text not in page
 
 
-def test_edit_view_has_everything_to_change_the_deck(riya_client, riya_deck):
+def test_old_edit_url_goes_to_edit_cards(riya_client, riya_deck):
+    deck_id, _ = riya_deck
+    assert riya_client.get(f"/decks/{deck_id}/edit").headers["Location"].endswith(f"/decks/{deck_id}/cards")
+
+
+def test_edit_cards_page(riya_client, riya_deck):
     deck_id, card_ids = riya_deck
-    page = riya_client.get(f"/decks/{deck_id}/edit").get_data(as_text=True)
-    for text in ["Deck name", f'action="/decks/{deck_id}/rename"', "Exam setting", f'action="/decks/{deck_id}/delete"',
-                 "Add card", "Paste or upload notes", "Generate more cards", f"/cards/{card_ids[0]}/edit",
-                 f"/cards/{card_ids[0]}/delete", ">Done</a>"]:
+    page = riya_client.get(f"/decks/{deck_id}/cards").get_data(as_text=True)
+    for text in ["View cards", "Add card", "Paste or upload notes", "Generate cards", '<option value="5">',
+                 '<option value="10">', ">Generate</button>", f'href="/cards/{card_ids[0]}"', f'href="/decks/{deck_id}"']:
         assert text in page
+    for text in ["Deck name", "/rename", f'action="/decks/{deck_id}/delete"']:
+        assert text not in page
+
+
+def test_settings_page_of_an_own_deck(riya_client, riya_deck):
+    deck_id, _ = riya_deck
+    page = riya_client.get(f"/decks/{deck_id}/settings").get_data(as_text=True)
+    for text in ["Deck name", f'action="/decks/{deck_id}/rename"', "Exam date", f'action="/decks/{deck_id}/delete"',
+                 f'href="/decks/{deck_id}"']:
+        assert text in page
+    assert "Remove from my decks" not in page
 
 
 def test_edit_view_of_a_ready_deck_offers_only_exam_private_cards_hide_and_remove(app, riya_client, ready_deck, riya):
     deck_id, card_ids = ready_deck
     add_to_list(app, riya, deck_id)
-    page = riya_client.get(f"/decks/{deck_id}/edit").get_data(as_text=True)
-    for text in ["Exam setting", "Add card", 'aria-label="Hide this card"', 'aria-label="Remove from my decks"']:
-        assert text in page
-    for text in ["Deck name", "/rename", f'action="/decks/{deck_id}/delete"', f"/cards/{card_ids[0]}/edit"]:
-        assert text not in page
+    settings = riya_client.get(f"/decks/{deck_id}/settings").get_data(as_text=True)
+    assert "Exam date" in settings and "Remove from my decks" in settings
+    for text in ["Deck name", "/rename", f'action="/decks/{deck_id}/delete"']:
+        assert text not in settings
+    cards = riya_client.get(f"/decks/{deck_id}/cards").get_data(as_text=True)
+    assert "Add card" in cards and f'href="/cards/{card_ids[0]}"' in cards
+    card_page = riya_client.get(f"/cards/{card_ids[0]}").get_data(as_text=True)
+    assert "Hide this card" in card_page and ">Save</button>" not in card_page
 
 
 def test_rename_with_an_empty_name_keeps_the_old_one(app, riya_client, riya_deck):
     deck_id, _ = riya_deck
     response = riya_client.post(f"/decks/{deck_id}/rename", data={"title": "  "})
-    assert response.headers["Location"].endswith(f"/decks/{deck_id}/edit")
+    assert response.headers["Location"].endswith(f"/decks/{deck_id}/settings")
     with app.app_context():
         assert db.session.get(Deck, deck_id).title == "My Notes"
 
@@ -480,3 +503,26 @@ def test_my_decks_card_has_study_button_mastery_and_more_menu(app, riya_client, 
     assert "Preview" not in page and 'class="library-topics"' not in page
     library = riya_client.get("/decks/ready").get_data(as_text=True)
     assert "Preview 3 cards" in library and 'class="library-topics"' in library
+
+
+def test_my_decks_card_has_an_open_deck_chevron(riya_client, riya_deck):
+    deck_id, _ = riya_deck
+    page = riya_client.get("/decks/mine").get_data(as_text=True)
+    assert f'href="/decks/{deck_id}"\n         aria-label="Open My Notes" title="Open deck"' in page
+
+
+def test_card_page_saves_changes_and_goes_back_to_the_list(app, riya_client, riya_deck):
+    deck_id, card_ids = riya_deck
+    page = riya_client.get(f"/cards/{card_ids[0]}").get_data(as_text=True)
+    assert f'href="/decks/{deck_id}/cards#card-{card_ids[0]}"' in page  # Back to the list
+    response = riya_client.post(f"/cards/{card_ids[0]}", data={
+        "question": "New Q", "answer": "New A", "topic": "Cells", "importance": "low"})
+    assert response.headers["Location"].endswith(f"/cards/{card_ids[0]}")
+    with app.app_context():
+        card = db.session.get(Card, card_ids[0])
+        assert (card.question, card.answer, card.importance) == ("New Q", "New A", "low")
+
+
+def test_card_page_of_another_students_card_is_not_found(arjun_client, riya_deck):
+    _, card_ids = riya_deck
+    assert arjun_client.get(f"/cards/{card_ids[0]}").status_code == 404
