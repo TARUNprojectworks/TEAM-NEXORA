@@ -90,7 +90,7 @@ def test_card_starts_locked_with_the_confidence_question(app, riya_client, riya)
     page = riya_client.get("/study/card").get_data(as_text=True)
     assert 'data-locked="true"' in page
     assert page.index('id="confident-button"') < page.index('id="flip-button"') < page.index('id="step-answer"')
-    for text in [">Confident<", ">Not sure<", ">Got it right<", ">Got it wrong<", ">I was close<", ">I didn't know it<"]:
+    for text in [">Confident<", ">Not sure<", ">Got it right<", ">Got it wrong<", ">Recalled it<", ">I didn't get it<"]:
         assert text in page
 
 
@@ -105,8 +105,8 @@ def answer_one(client, confident, knew_it):
 @pytest.mark.parametrize("confident, knew_it, shelf, misconceptions", [
     ("sure", "1", 2, 0),    # Confident + Got it right: up a shelf
     ("sure", "0", 1, 1),    # Confident + Got it wrong: shelf 1 and a misconception
-    ("unsure", "1", 1, 0),  # Not sure + I was close: stays
-    ("unsure", "0", 1, 0),  # Not sure + I didn't know it: shelf 1
+    ("unsure", "1", 1, 0),  # Not sure + Recalled it: stays
+    ("unsure", "0", 1, 0),  # Not sure + I didn't get it: shelf 1
 ])
 def test_each_answer_pair_reaches_the_engine_unchanged(app, riya_client, riya, confident, knew_it, shelf, misconceptions):
     riya_client.get(f"/study/{own_deck(app, riya)}")
@@ -169,3 +169,8 @@ def test_plan_session_has_no_time_bar(app, riya_client, riya):
     riya_client.get("/study/plan")
     page = riya_client.get("/study/card").get_data(as_text=True)
     assert "plan-timer" not in page and "plantimer.js" not in page
+
+
+def test_not_sure_pair_says_recalled_it_and_i_didnt_get_it(app, riya_client):
+    script = riya_client.get("/static/js/study.js").get_data(as_text=True)
+    assert "Good recall. You'll see it again soon to lock it in." in script

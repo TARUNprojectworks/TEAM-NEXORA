@@ -102,7 +102,7 @@ def test_study_page_has_flip_confidence_and_progress(app, riya_client, riya):
     riya_client.get(f"/study/{deck_id}")
     page = riya_client.get("/study/card").get_data(as_text=True)
     for text in ["Think of your answer first.", ">Confident<", "Not sure", "Flip card", "Got it right",
-                 "Got it wrong", "I was close", "I didn't know it", "End session", "progressbar", "3 cards left"]:
+                 "Got it wrong", "Recalled it", "I didn't get it", "End session", "progressbar", "3 cards left"]:
         assert text in page
 
 

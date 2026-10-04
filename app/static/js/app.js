@@ -119,16 +119,27 @@ document.querySelectorAll("[data-theme-picker]").forEach(function (picker) {
   });
 });
 
-// ----- The ⋯ menu on deck cards (<details>): only one open at a time; a click outside or Esc closes it -----
+// ----- Small pop-up <details> (the ⋯ menu on deck cards, the Custom plan size): a click outside or Esc closes them -----
 document.addEventListener("click", function (event) {
-  document.querySelectorAll("details.more-menu[open]").forEach(function (menu) {
+  document.querySelectorAll("details.more-menu[open], details.custom-size[open]").forEach(function (menu) {
     if (!menu.contains(event.target)) menu.removeAttribute("open");
   });
 });
 document.addEventListener("keydown", function (event) {
   if (event.key !== "Escape") return;
-  document.querySelectorAll("details.more-menu[open]").forEach(function (menu) {
+  document.querySelectorAll("details.more-menu[open], details.custom-size[open]").forEach(function (menu) {
     menu.removeAttribute("open");
     menu.querySelector("summary").focus();
   });
 });
+
+// ----- Today's plan: Enter in the Custom number box presses "Set", not the first size button -----
+(function () {
+  const input = document.getElementById("custom-size");
+  if (!input) return;
+  input.addEventListener("keydown", function (event) {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    input.form.requestSubmit(input.form.querySelector('button[value="custom"]'));
+  });
+})();

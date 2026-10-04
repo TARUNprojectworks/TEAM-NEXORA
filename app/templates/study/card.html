@@ -97,7 +97,7 @@
     {# Step 2, after the flip. The pair depends on step 1, but the engine still gets
        confident = sure/unsure and knew_it = 1/0:
          Confident: Got it right (shelf up) / Got it wrong (shelf 1, misconception)
-         Not sure:  I was close (stays)     / I didn't know it (shelf 1) #}
+         Not sure:  Recalled it (stays)     / I didn't get it (shelf 1) #}
     <div class="study-step" id="step-answer" role="group" aria-label="How did it go?" hidden
          data-can-move-up="{{ 'true' if can_move_up else 'false' }}">
       <div class="answer-buttons" data-pair="sure" hidden>
@@ -112,11 +112,11 @@
       </div>
       <div class="answer-buttons" data-pair="unsure" hidden>
         <div class="choice-col">
-          <button type="submit" name="knew_it" value="1" class="button button-know" data-tag="close">I was close</button>
+          <button type="submit" name="knew_it" value="1" class="button button-know" data-tag="recalled">Recalled it</button>
           <span class="key-hint">1</span>
         </div>
         <div class="choice-col">
-          <button type="submit" name="knew_it" value="0" class="button" data-tag="missed">I didn't know it</button>
+          <button type="submit" name="knew_it" value="0" class="button" data-tag="missed">I didn't get it</button>
           <span class="key-hint">2</span>
         </div>
       </div>
