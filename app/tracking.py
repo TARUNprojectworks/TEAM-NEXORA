@@ -179,7 +179,7 @@ def tracking_json():
 @bp.get("/weak-points")
 @login_required
 def weak_points():
-    """Dedicated Weak Points / learning profile page."""
+    """Weak Points: profile strip, weak topics, misconceptions and recently improved topics."""
     today = today_local()
     weak = weak_spot_rows(current_user.id)
     misconceptions = misconception_cards(current_user.id)
